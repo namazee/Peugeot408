@@ -22,6 +22,9 @@ Fresh session? Read `docs/SPEC.md`, then this file, then continue from **Current
 - CarKit is a static framework: nothing to embed or sign separately.
 - Spec has a single accent colour in Swift for now; the shared theme JSON for Remotion comes in Phase 8.
 
+### Fixes
+- First TestFlight upload was rejected (error 90474, iPad multitasking orientations): XcodeGen's target defaults made the app iPhone + iPad. `TARGETED_DEVICE_FAMILY: "1"` is now set on each target. Signing with match worked on the first try.
+
 ### Left over / open
 - [ ] You: complete `SETUP.md` steps 2–6, run the workflow, install via TestFlight, add Car Slot 1–5 in CarPlay, confirm a slot change shows on the head unit.
 - [ ] Onboarding screenshots: deferred to Phase 8 (Remotion onboarding clip), since there are no device screenshots yet.

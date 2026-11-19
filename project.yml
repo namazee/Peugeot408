@@ -36,6 +36,7 @@ targets:
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: $(BUNDLE_PREFIX).peugeot408.carkit
+        TARGETED_DEVICE_FAMILY: "1"
         MACH_O_TYPE: staticlib            # linked into app + widgets, nothing to embed or sign
         GENERATE_INFOPLIST_FILE: YES
         APPLICATION_EXTENSION_API_ONLY: YES
@@ -74,6 +75,7 @@ targets:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: $(BUNDLE_PREFIX).peugeot408
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        TARGETED_DEVICE_FAMILY: "1"       # iPhone only (XcodeGen's target default is 1,2)
 
   Peugeot408Widgets:
     type: app-extension
@@ -99,6 +101,7 @@ targets:
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: $(BUNDLE_PREFIX).peugeot408.widgets
+        TARGETED_DEVICE_FAMILY: "1"
         SKIP_INSTALL: YES
 
   CarKitTests:
