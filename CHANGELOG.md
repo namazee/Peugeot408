@@ -26,6 +26,7 @@ Fresh session? Read `docs/SPEC.md`, then this file, then continue from **Current
 - First TestFlight upload was rejected (error 90474, iPad multitasking orientations): XcodeGen's target defaults made the app iPhone + iPad. `TARGETED_DEVICE_FAMILY: "1"` is now set on each target. Signing with match worked on the first try.
 
 ### Left over / open
-- [ ] You: complete `SETUP.md` steps 2–6, run the workflow, install via TestFlight, add Car Slot 1–5 in CarPlay, confirm a slot change shows on the head unit.
+- [x] Setup done; build 4 (0.1.0) uploaded to TestFlight on 2026-11-19.
+- [ ] You: install via TestFlight, add Car Slot 1–5 in CarPlay, confirm a slot change shows on the head unit.
 - [ ] Onboarding screenshots: deferred to Phase 8 (Remotion onboarding clip), since there are no device screenshots yet.
 - [ ] Slot rotation (up to 3 designs per slot) and assigning data widgets/templates: Phases 2 and 5 once those designs exist.
