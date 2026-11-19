@@ -18,7 +18,7 @@ settings:
     BUNDLE_PREFIX: com.namazee88          # App ID = $(BUNDLE_PREFIX).peugeot408
     DEVELOPMENT_TEAM: YCS7MW628Y          # CI can override with the TEAM_ID secret
     APP_GROUP_ID: group.$(BUNDLE_PREFIX).peugeot408
-    MARKETING_VERSION: "0.1.0"
+    MARKETING_VERSION: "1.1"
     CURRENT_PROJECT_VERSION: "1"          # CI sets this from the GitHub run number
     # ----------------------------------------------------------------------
     SWIFT_VERSION: "6.0"

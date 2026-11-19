@@ -24,11 +24,11 @@ Fresh session? Read `docs/SPEC.md`, then this file, then continue from **Current
 
 ### Fixes
 - First TestFlight upload was rejected (error 90474, iPad multitasking orientations): XcodeGen's target defaults made the app iPhone + iPad. `TARGETED_DEVICE_FAMILY: "1"` is now set on each target. Signing with match worked on the first try.
-- Version and build number were stuck at 1.0 (1): XcodeGen writes its own defaults into the generated Info.plist. Both Info.plists now use `$(MARKETING_VERSION)` and `$(CURRENT_PROJECT_VERSION)`, so uploads get 0.1.0 and the run number (spec: build number from the GitHub run number).
+- Version and build number were stuck at 1.0 (1): XcodeGen writes its own defaults into the generated Info.plist. Both Info.plists now use `$(MARKETING_VERSION)` and `$(CURRENT_PROJECT_VERSION)`, so uploads get the marketing version (now 1.1) and the run number (spec: build number from the GitHub run number).
 - Open: on device, Car Slot widgets don't appear in the iPhone widget gallery or in CarPlay. The IPA checks out: the extension is embedded, signed and has the App Group, and the binary contains CarSlot1–5. Waiting on a restart test and the iPhone's Analytics Data crash logs for `Peugeot408Widgets`.
 
 ### Left over / open
-- [x] Setup done; build 4 (0.1.0) uploaded to TestFlight on 2026-11-19.
+- [x] Setup done; first upload (went up as 1.0 (1)) on 2026-11-19. Build 5 was 0.1.0; from build 6 the version is 1.1.
 - [ ] You: install via TestFlight, add Car Slot 1–5 in CarPlay, confirm a slot change shows on the head unit.
 - [ ] Onboarding screenshots: deferred to Phase 8 (Remotion onboarding clip), since there are no device screenshots yet.
 - [ ] Slot rotation (up to 3 designs per slot) and assigning data widgets/templates: Phases 2 and 5 once those designs exist.
