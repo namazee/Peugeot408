@@ -1,0 +1,4 @@
+// Shared build settings for every target.
+// Real secrets (API keys) go in Secrets.xcconfig, which is gitignored.
+// Copy Secrets.xcconfig.template to Secrets.xcconfig locally; CI writes it from GitHub secrets.
+#include? "Secrets.xcconfig"

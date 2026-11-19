@@ -1,0 +1,22 @@
+name: PR checks
+
+on:
+  pull_request:
+
+concurrency:
+  group: pr-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Test (CarKitTests + simulator build)
+    runs-on: macos-26
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - name: Select Xcode 26
+        run: bash ci/select-xcode.sh
+      - name: Install XcodeGen, generate project, resolve packages
+        run: bash ci/generate.sh
+      - name: Run CarKitTests and build for simulator
+        run: bash ci/test.sh

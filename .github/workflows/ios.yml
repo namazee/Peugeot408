@@ -1,0 +1,93 @@
+name: iOS
+
+on:
+  push:
+    branches: [main]
+    paths-ignore: ["**.md", "remotion/**"]
+  workflow_dispatch:
+    inputs:
+      regenerate_profiles:
+        description: "Regenerate provisioning profiles (after adding a capability to an App ID)"
+        type: boolean
+        default: false
+
+concurrency:
+  group: ios-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Test (CarKitTests + simulator build)
+    runs-on: macos-26
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - name: Select Xcode 26
+        run: bash ci/select-xcode.sh
+      - name: Install XcodeGen, generate project, resolve packages
+        run: bash ci/generate.sh
+      - name: Run CarKitTests and build for simulator
+        run: bash ci/test.sh
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: CarKitTests.xcresult
+          path: build/CarKitTests.xcresult
+          if-no-files-found: ignore
+
+  testflight:
+    name: Archive and upload to TestFlight
+    needs: test
+    runs-on: macos-26
+    timeout-minutes: 60
+    env:
+      ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+      ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+      ASC_KEY_P8: ${{ secrets.ASC_KEY_P8 }}
+      MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
+      MATCH_GIT_URL: ${{ secrets.MATCH_GIT_URL }}
+      MATCH_GIT_BASIC_AUTHORIZATION: ${{ secrets.MATCH_GIT_BASIC_AUTHORIZATION }}
+      AQI_API_KEY: ${{ secrets.AQI_API_KEY }}
+      TEAM_ID_SECRET: ${{ secrets.TEAM_ID }}
+      BUILD_NUMBER: ${{ github.run_number }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check signing secrets
+        id: secrets
+        run: |
+          missing=""
+          for name in ASC_KEY_ID ASC_ISSUER_ID ASC_KEY_P8 MATCH_PASSWORD MATCH_GIT_URL MATCH_GIT_BASIC_AUTHORIZATION; do
+            [ -z "${!name}" ] && missing="$missing $name"
+          done
+          if [ -n "$missing" ]; then
+            echo "::warning::TestFlight upload skipped. Missing secrets:$missing (see SETUP.md)."
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          fi
+          # Bundle prefix and team come from project.yml (the one place to change them).
+          echo "BUNDLE_PREFIX=$(awk '/^ *BUNDLE_PREFIX:/ {print $2; exit}' project.yml)" >> "$GITHUB_ENV"
+          team="${TEAM_ID_SECRET:-$(awk '/^ *DEVELOPMENT_TEAM:/ {print $2; exit}' project.yml)}"
+          echo "TEAM_ID=$team" >> "$GITHUB_ENV"
+
+      - name: Select Xcode 26
+        if: steps.secrets.outputs.ready == 'true'
+        run: bash ci/select-xcode.sh
+
+      - name: Install XcodeGen, generate project, resolve packages
+        if: steps.secrets.outputs.ready == 'true'
+        run: bash ci/generate.sh
+
+      - name: Sign, archive, export and upload (fastlane)
+        if: steps.secrets.outputs.ready == 'true'
+        run: fastlane ios beta regenerate:${{ inputs.regenerate_profiles || false }}
+
+      - name: Upload IPA
+        if: steps.secrets.outputs.ready == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: Peugeot408-${{ github.run_number }}.ipa
+          path: build/Peugeot408.ipa
+          if-no-files-found: warn

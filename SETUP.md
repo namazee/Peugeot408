@@ -1,0 +1,141 @@
+# SETUP — everything you do by hand
+
+Everything here works from Windows in a browser plus PowerShell. You never need a Mac or Xcode.
+Do the steps in order. Values used by this project:
+
+| Thing | Value |
+|---|---|
+| Team ID | `YCS7MW628Y` |
+| Bundle ID prefix | `com.namazee88` (change in `project.yml` → `BUNDLE_PREFIX`) |
+| App ID (app) | `com.namazee88.peugeot408` |
+| App ID (widgets) | `com.namazee88.peugeot408.widgets` |
+| App Group | `group.com.namazee88.peugeot408` |
+| GitHub repo | `namazee/Peugeot408` (public) |
+| Certificates repo | `namazee/Peugeot408-certs` (**private**) |
+
+---
+
+## 1. Apple Developer Program
+
+- [x] Enrolled (Team ID `YCS7MW628Y`). Membership must be active for TestFlight.
+
+## 2. Identifiers (developer.apple.com → Certificates, IDs & Profiles → Identifiers)
+
+1. **App Group**: `+` → App Groups → Description `Peugeot408`, Identifier `group.com.namazee88.peugeot408`.
+2. **App ID for the app**: `+` → App IDs → App → Description `Peugeot408`, Bundle ID *Explicit* `com.namazee88.peugeot408`.
+   - Capabilities tab: tick **App Groups**. Save, then *Edit/Configure* next to App Groups and tick `group.com.namazee88.peugeot408`.
+   - Also tick now so later phases don't need new profiles: **WeatherKit** (Capabilities tab *and* App Services tab), **MusicKit** (App Services tab).
+3. **App ID for the widgets**: same steps with Bundle ID `com.namazee88.peugeot408.widgets`, App Groups → the same group, plus **WeatherKit**.
+
+> If you add a capability to an App ID later, run the iOS workflow manually with **Regenerate provisioning profiles** ticked (Actions → iOS → Run workflow).
+
+## 3. App record (appstoreconnect.apple.com → Apps → `+` → New App)
+
+- Platform iOS, Name `Peugeot408` (store names must be unique; if it's taken use e.g. `Peugeot408 Garage` — the home-screen name stays Peugeot408), Primary language English, Bundle ID `com.namazee88.peugeot408`, SKU `peugeot408`, User access Full.
+- Internal TestFlight builds are not reviewed by Apple, so you don't need screenshots or a description.
+
+## 4. App Store Connect API key
+
+1. App Store Connect → Users and Access → Integrations → App Store Connect API → Team Keys → `+`.
+2. Name `GitHub CI`, Access **Admin** (needed to create the distribution certificate and profiles).
+3. Download `AuthKey_XXXXXXXXXX.p8` (only downloadable once; keep it somewhere safe, never in the repo).
+4. Note the **Key ID** and the **Issuer ID** (shown above the keys list).
+
+## 5. Private certificates repo for fastlane match
+
+Signing uses **fastlane match** with the API key. Why this and not `-allowProvisioningUpdates`:
+automatic signing on a fresh CI machine needs a development certificate and at least one registered device,
+and makes a new certificate on every run. match creates **one** distribution certificate and App Store
+profiles on the first run, stores them encrypted in a private repo, and reuses them every time. No Mac, no device.
+
+1. Create an empty **private** repo `namazee/Peugeot408-certs` on GitHub (no README).
+2. Create a fine-grained token: GitHub → Settings → Developer settings → Fine-grained tokens → Generate.
+   Repository access: only `Peugeot408-certs`; Permissions → Contents: **Read and write**. Copy the token.
+3. Pick a long random **match password** and save it in your password manager. It encrypts the certificates.
+
+## 6. GitHub secrets
+
+In PowerShell, from the folder with your `.p8` file (replace the placeholders):
+
+```powershell
+$p8 = [Convert]::ToBase64String([IO.File]::ReadAllBytes("AuthKey_XXXXXXXXXX.p8"))
+```
+
+```powershell
+$basic = [Convert]::ToBase64String([Text.Encoding]::UTF8.GetBytes("namazee:YOUR_FINE_GRAINED_TOKEN"))
+```
+
+Then set the secrets (each `gh secret set` prompts for nothing when you pass `--body`):
+
+```powershell
+gh secret set ASC_KEY_ID --repo namazee/Peugeot408 --body "XXXXXXXXXX"
+```
+
+```powershell
+gh secret set ASC_ISSUER_ID --repo namazee/Peugeot408 --body "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+```
+
+```powershell
+gh secret set ASC_KEY_P8 --repo namazee/Peugeot408 --body $p8
+```
+
+```powershell
+gh secret set MATCH_GIT_URL --repo namazee/Peugeot408 --body "https://github.com/namazee/Peugeot408-certs.git"
+```
+
+```powershell
+gh secret set MATCH_GIT_BASIC_AUTHORIZATION --repo namazee/Peugeot408 --body $basic
+```
+
+```powershell
+gh secret set MATCH_PASSWORD --repo namazee/Peugeot408
+```
+
+| Secret | Required | What it is |
+|---|---|---|
+| `ASC_KEY_ID` | yes | API key ID (step 4) |
+| `ASC_ISSUER_ID` | yes | Issuer ID (step 4) |
+| `ASC_KEY_P8` | yes | The `.p8` file, base64 |
+| `MATCH_GIT_URL` | yes | HTTPS URL of the private certs repo |
+| `MATCH_GIT_BASIC_AUTHORIZATION` | yes | base64 of `namazee:<token>` |
+| `MATCH_PASSWORD` | yes | Encrypts the certs repo |
+| `TEAM_ID` | no | Overrides `DEVELOPMENT_TEAM` in `project.yml` |
+| `AQI_API_KEY` | Phase 3 | Air-quality token (WAQI) |
+
+Until the required secrets exist, CI still runs the tests and skips the upload with a warning.
+
+## 7. First TestFlight build
+
+1. GitHub → Actions → **iOS** → Run workflow (or push to `main`). The first run creates the certificate and profiles in the certs repo.
+2. When it's green, App Store Connect → your app → TestFlight. The build appears after Apple processes it (usually 5–30 min).
+3. TestFlight → Internal Testing → `+` group `Me`, add yourself, turn on automatic distribution.
+4. Export compliance is pre-answered (`ITSAppUsesNonExemptEncryption = NO`).
+
+## 8. Install on the iPhone
+
+1. Install **TestFlight** from the App Store.
+2. Accept the email invite (or open TestFlight; it shows up there) and install Peugeot408.
+3. Open the app once so it creates its shared data.
+
+## 9. Add the widgets to CarPlay (one time)
+
+1. Connect the iPhone to the car.
+2. iPhone Settings → General → CarPlay → your car → **Widgets**.
+3. Add **Car Slot 1, 2, 3, 4, 5** (up to 5 widgets per stack). Turn Smart Rotate off if you want a stack to stay put.
+4. In the app: Slots → **Test: flash all slots**. Each slot shows "Slot N ✓" for 10 minutes.
+5. Change a slot in the app and check the head unit updates (Phase 1 sign-off).
+
+---
+
+## Troubleshooting
+
+- **"Missing secrets" warning** — step 6.
+- **match: "Could not find App ID"** — step 2; both App IDs must exist.
+- **Widgets show starter text, Settings → Diagnostics says App Group "Not available"** — the App Group isn't assigned to both App IDs (step 2), then rerun with *Regenerate provisioning profiles*.
+- **"Maximum number of certificates"** — delete an unused *Apple Distribution* certificate in the portal and rerun with *Regenerate provisioning profiles*.
+- **Upload says the app record doesn't exist** — step 3; the bundle ID must match exactly.
+
+## Platform limits (for later phases)
+
+- Spotify's now-playing info isn't available to third-party widgets; the Music widget uses Apple Music via MusicKit (Phase 4).
+- iOS can't run app code automatically on CarPlay connect/disconnect; Phase 6 adds Shortcuts automations for the connect sound and auto-saving parking.

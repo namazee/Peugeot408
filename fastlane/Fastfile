@@ -1,0 +1,71 @@
+default_platform(:ios)
+
+# Signing: fastlane match (appstore type) with an App Store Connect API key.
+# Why: no Mac and no registered device are needed, the one distribution certificate is
+# created once and reused (Apple caps distribution certs), and profiles live encrypted
+# in a private git repo. See SETUP.md.
+
+platform :ios do
+  desc "Sign with match, archive, export the IPA and upload it to TestFlight"
+  lane :beta do |options|
+    prefix = ENV.fetch("BUNDLE_PREFIX")
+    team_id = ENV.fetch("TEAM_ID")
+    build_number = ENV.fetch("BUILD_NUMBER")
+    app_id = "#{prefix}.peugeot408"
+    widget_id = "#{app_id}.widgets"
+    targets = { "Peugeot408" => app_id, "Peugeot408Widgets" => widget_id }
+
+    setup_ci
+
+    api_key = app_store_connect_api_key(
+      key_id: ENV.fetch("ASC_KEY_ID"),
+      issuer_id: ENV.fetch("ASC_ISSUER_ID"),
+      key_content: ENV.fetch("ASC_KEY_P8"),
+      is_key_content_base64: true
+    )
+
+    match(
+      type: "appstore",
+      app_identifier: targets.values,
+      team_id: team_id,
+      api_key: api_key,
+      storage_mode: "git",
+      git_url: ENV.fetch("MATCH_GIT_URL"),
+      git_basic_authorization: ENV["MATCH_GIT_BASIC_AUTHORIZATION"],
+      readonly: false,
+      force: options[:regenerate].to_s == "true"
+    )
+
+    targets.each do |target, bundle_id|
+      update_code_signing_settings(
+        path: "Peugeot408.xcodeproj",
+        use_automatic_signing: false,
+        targets: [target],
+        build_configurations: ["Release"],
+        team_id: team_id,
+        code_sign_identity: "Apple Distribution",
+        profile_name: "match AppStore #{bundle_id}"
+      )
+    end
+
+    gym(
+      project: "Peugeot408.xcodeproj",
+      scheme: "Peugeot408",
+      configuration: "Release",
+      clean: true,
+      output_directory: "build",
+      output_name: "Peugeot408.ipa",
+      export_method: "app-store",
+      xcargs: "CURRENT_PROJECT_VERSION=#{build_number} DEVELOPMENT_TEAM=#{team_id}",
+      export_options: {
+        provisioningProfiles: targets.values.to_h { |id| [id, "match AppStore #{id}"] }
+      }
+    )
+
+    upload_to_testflight(
+      api_key: api_key,
+      ipa: "build/Peugeot408.ipa",
+      skip_waiting_for_build_processing: true
+    )
+  end
+end
