@@ -63,11 +63,16 @@ struct SlotWidgetView: View {
 @MainActor
 enum CarSlotConfiguration {
     static func make(slot: Int) -> some WidgetConfiguration {
-        StaticConfiguration(kind: SlotKind.kind(for: slot), provider: SlotProvider(slot: slot)) { entry in
+        // Plain Strings on purpose: an interpolated literal here becomes a LocalizedStringKey,
+        // and WidgetKit on iOS 27 hits an assertion on it, crashing the extension at launch
+        // so no Car Slot shows in the widget gallery or CarPlay.
+        let name: String = "Car Slot \(slot)"
+        let details: String = "Shows whatever you assign to slot \(slot) in the Peugeot408 app."
+        return StaticConfiguration(kind: SlotKind.kind(for: slot), provider: SlotProvider(slot: slot)) { entry in
             SlotWidgetView(entry: entry)
         }
-        .configurationDisplayName("Car Slot \(slot)")
-        .description("Shows whatever you assign to slot \(slot) in the Peugeot408 app.")
+        .configurationDisplayName(name)
+        .description(details)
         .supportedFamilies([.systemSmall, .systemMedium])
     }
 }

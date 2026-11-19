@@ -25,7 +25,7 @@ Fresh session? Read `docs/SPEC.md`, then this file, then continue from **Current
 ### Fixes
 - First TestFlight upload was rejected (error 90474, iPad multitasking orientations): XcodeGen's target defaults made the app iPhone + iPad. `TARGETED_DEVICE_FAMILY: "1"` is now set on each target. Signing with match worked on the first try.
 - Version and build number were stuck at 1.0 (1): XcodeGen writes its own defaults into the generated Info.plist. Both Info.plists now use `$(MARKETING_VERSION)` and `$(CURRENT_PROJECT_VERSION)`, so uploads get the marketing version (now 1.1) and the run number (spec: build number from the GitHub run number).
-- Open: on device, Car Slot widgets don't appear in the iPhone widget gallery or in CarPlay. The IPA checks out: the extension is embedded, signed and has the App Group, and the binary contains CarSlot1–5. Waiting on a restart test and the iPhone's Analytics Data crash logs for `Peugeot408Widgets`.
+- Car Slot widgets missing from the iPhone widget gallery and CarPlay: the widget extension crashed at launch on iOS 27.2.1 (`_assertionFailure` in WidgetKit while reading the widget body; `_LocalizationInfo` in registers). The cause is the interpolated `configurationDisplayName`/`description` literals, which become `LocalizedStringKey`s. They are now plain `String`s. Found via the device crash log (build 1.1 (6)).
 
 ### Left over / open
 - [x] Setup done; first upload (went up as 1.0 (1)) on 2026-11-19. Build 5 was 0.1.0; from build 6 the version is 1.1.
