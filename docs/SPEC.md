@@ -134,6 +134,7 @@ CarPlay widgets can't play audio or run navigation (those need Apple CarPlay ent
 
 10. Map Snapshot: `MKMapSnapshotter` image rendered in the timeline provider. Show the parked-car location when a parking spot is saved, otherwise the route/area to the next commute destination. Dark map style, with a pin in the accent colour.
 11. Music: an Apple Music card via MusicKit (ask for authorisation in the app): a featured playlist or recently played item with artwork and title. Add interactive App Intent buttons (play/pause/next for the system music player) only if they work; it must still look complete without them. Note in `SETUP.md` that Spotify's now-playing info isn't available to third-party widgets.
+12. Photo Frame: pick photos in the app (PhotosPicker, e.g. family photos), downsample them into the App Group, and have the widget rotate through them every 30–60 minutes using timeline entries. Allow a configurable album/selection via an App Intent widget configuration.
 13. Synced lyrics (Phase 13):
    * A Lyrics widget, a Lyrics card for slots, and a Live Activity version.
    * It shows the current song's lines: 1, 3 or 5 at once, with the active line big and bright, the previous line faded, and the next line dimmer.
@@ -144,7 +145,6 @@ CarPlay widgets can't play audio or run navigation (those need Apple CarPlay ent
    * Spotify isn't supported: other apps can't read its now-playing data. Say so in the app and in `SETUP.md`.
    * When a song has no synced lyrics, show the title and artist instead (or plain lyrics if that's all there is).
    * Personal use; lyrics are fetched on demand and never bundled.
-12. Photo Frame: pick photos in the app (PhotosPicker, e.g. family photos), downsample them into the App Group, and have the widget rotate through them every 30–60 minutes using timeline entries. Allow a configurable album/selection via an App Intent widget configuration.
 
 ## 4b. Customisation studio (design it in the app → the head unit updates by itself)
 
