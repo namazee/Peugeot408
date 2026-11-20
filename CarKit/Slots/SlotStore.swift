@@ -161,7 +161,8 @@ public enum SlotTimeline {
     public static func sources(slot: Int, state: SlotsState, studio: StudioState) -> Set<DataSource> {
         let design = state.design(for: slot)
         var result = Set<DataSource>()
-        let choices = [design.primaryChoice] + (design.rotations ?? []).map { $0.choice } + design.layoutCards.map(\.primaryChoice)
+        let cards = design.effectiveLayout == .single ? [] : design.layoutCards.map(\.primaryChoice)
+        let choices = [design.primaryChoice] + (design.rotations ?? []).map { $0.choice } + cards
         for choice in choices {
             if let source = choice.source { result.insert(source) }
             if let studioDesign = studio.design(choice.studioDesignID) { result.formUnion(studioDesign.sources) }
