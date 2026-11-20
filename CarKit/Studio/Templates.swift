@@ -121,6 +121,7 @@ public struct TemplateBinding: Sendable {
         case .photos: TemplateBinding(primary: .date, secondary: .clock, label: "Today", symbol: "photo")
         case .music: TemplateBinding(primary: .musicTitle, secondary: nil, label: "Music", symbol: "music.note")
         case .obd: TemplateBinding(primary: .boost, secondary: .coolantTemp, label: "Boost", symbol: "gauge.with.dots.needle.67percent")
+        case .lyrics: TemplateBinding(primary: .musicTitle, secondary: nil, label: "Now playing", symbol: "quote.bubble.fill")
         }
     }
 }

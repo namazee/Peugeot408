@@ -191,6 +191,12 @@ struct MusicWidget: Widget {
     }
 }
 
+struct LyricsWidget: Widget {
+    var body: some WidgetConfiguration {
+        DataWidgetConfiguration.make(source: .lyrics, description: "Synced lyrics of the Apple Music song that's playing; the current line is highlighted.")
+    }
+}
+
 struct MapSnapshotWidget: Widget {
     var body: some WidgetConfiguration {
         DataWidgetConfiguration.make(source: .map, description: "Map of your parked car, or of your next commute.", lockScreen: false)

@@ -67,7 +67,7 @@ struct StudioView: View {
                 }
 
                 Section("Data sources") {
-                    ForEach([DataSource.map, .photos, .music]) { source in
+                    ForEach([DataSource.map, .photos, .music, .lyrics]) { source in
                         NavigationLink(value: source) {
                             Label(source.displayName, systemImage: source.symbol)
                         }

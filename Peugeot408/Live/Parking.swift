@@ -108,6 +108,12 @@ struct Peugeot408Shortcuts: AppShortcutsProvider {
             shortTitle: "Play Connect Sound",
             systemImageName: "speaker.wave.2.fill"
         )
+        AppShortcut(
+            intent: SyncLyricsIntent(),
+            phrases: ["Sync lyrics in \(.applicationName)"],
+            shortTitle: "Sync Lyrics",
+            systemImageName: "quote.bubble.fill"
+        )
     }
 }
 

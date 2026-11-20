@@ -14,6 +14,7 @@ public enum DataSource: String, Codable, Sendable, CaseIterable, Identifiable {
     case photos
     case music
     case obd
+    case lyrics
 
     public var id: String { rawValue }
 
@@ -31,6 +32,7 @@ public enum DataSource: String, Codable, Sendable, CaseIterable, Identifiable {
         case .photos: "Photo Frame"
         case .music: "Music"
         case .obd: "Live OBD2"
+        case .lyrics: "Lyrics"
         }
     }
 
@@ -48,6 +50,7 @@ public enum DataSource: String, Codable, Sendable, CaseIterable, Identifiable {
         case .photos: "photo.on.rectangle.angled"
         case .music: "music.note"
         case .obd: "gauge.with.dots.needle.67percent"
+        case .lyrics: "quote.bubble.fill"
         }
     }
 
@@ -66,6 +69,7 @@ public enum DataSource: String, Codable, Sendable, CaseIterable, Identifiable {
         case .photos: "PhotoFrame"
         case .music: "Music"
         case .obd: "LiveOBD2"
+        case .lyrics: "Lyrics"
         }
     }
 
@@ -133,6 +137,7 @@ public struct CarData: Sendable, Equatable {
     public var music: MusicCache
     // Phase 7
     public var obd: OBDState
+    public var lyrics: LyricsState
     /// Folder the map PNGs, photos and artwork live in.
     public var directory: URL?
 
@@ -152,6 +157,7 @@ public struct CarData: Sendable, Equatable {
         photos: PhotoLibraryState = .empty,
         music: MusicCache = .empty,
         obd: OBDState = .empty,
+        lyrics: LyricsState = .empty,
         directory: URL? = nil
     ) {
         self.service = service
@@ -169,6 +175,7 @@ public struct CarData: Sendable, Equatable {
         self.photos = photos
         self.music = music
         self.obd = obd
+        self.lyrics = lyrics
         self.directory = directory
     }
 
@@ -192,6 +199,7 @@ public struct CarData: Sendable, Equatable {
             photos: MediaStores.photos(in: directory).load(),
             music: MediaStores.music(in: directory).load(),
             obd: OBDStores.state(in: directory).load(),
+            lyrics: LyricsStores.state(in: directory).load(),
             directory: directory
         )
     }
@@ -257,6 +265,9 @@ public struct CarData: Sendable, Equatable {
 
         case .obd:
             return .obd(OBDSummary(reading: obd.last, isDemo: obd.lastWasDemo, sessionActive: obd.sessionActive, unsupported: obd.unsupported))
+
+        case .lyrics:
+            return .lyrics(LyricsSummary.make(state: lyrics, at: date))
         }
     }
 }
@@ -393,6 +404,7 @@ public enum DataCard: Sendable, Equatable {
     case map(MapSummary)
     case photos(PhotoSummary)
     case music(MusicSummary)
+    case lyrics(LyricsSummary)
     case obd(OBDSummary)
 
     public var source: DataSource {
@@ -409,6 +421,7 @@ public enum DataCard: Sendable, Equatable {
         case .photos: .photos
         case .music: .music
         case .obd: .obd
+        case .lyrics: .lyrics
         }
     }
 
@@ -421,7 +434,7 @@ public enum DataCard: Sendable, Equatable {
         case .tng(let summary): summary.isLow ? .dueSoon : .ok
         case .weather(let summary): summary.air?.band.urgency ?? .ok
         case .obd(let summary): summary.urgency
-        case .parking, .prayer, .commute, .map, .photos, .music: .ok
+        case .parking, .prayer, .commute, .map, .photos, .music, .lyrics: .ok
         }
     }
 }
@@ -467,6 +480,10 @@ public enum DataTimeline {
 
         case .map, .music, .obd:
             return [start]
+
+        case .lyrics:
+            // One entry per line of the song that's playing (no de-duplication limit of 40).
+            return LyricsTimeline.dates(nowPlaying: data.lyrics.nowPlaying, lyrics: data.lyrics.current, from: start)
 
         case .photos:
             guard !data.photos.photos.isEmpty else { return [start] }

@@ -159,6 +159,19 @@ iOS doesn't let an app play a sound by itself when CarPlay connects, so a Shortc
 
 Optional, when you leave the car: the same steps with **Disconnects**, adding **Play Connect Sound** (Sound: Goodbye) and then **Save Parking**. This is the same automation as §10 step 4, with a goodbye sound.
 
+## 14. Phase 13: synced lyrics
+
+1. In the app: Studio → Data sources → **Lyrics**, then allow Apple Music if asked.
+2. Add the **Lyrics** widget to a CarPlay stack, or pick "Lyrics" for a slot or card.
+3. Recommended: Shortcuts → Automation → **CarPlay → Connects → Run Immediately**, then add the **Sync Lyrics** action (Peugeot408). You can put it in the same automation as Play Connect Sound. It tells the widget which song is playing and when it started, so you don't have to open the app.
+4. Optional: a second automation, **App → Music → Is Opened → Sync Lyrics**.
+
+Limits:
+- **Apple Music only.** Spotify doesn't share what's playing with other apps on iOS.
+- **Sync is approximate.** After a pause or a seek, the lines drift until the next sync. Opening the app, skipping with the widget's Next button, or the automation re-syncs.
+- **Lyrics come from LRCLIB** (lrclib.net, free, community-made). They're fetched only for songs you play, and some songs have none.
+- **The Live Activity** only changes lines while Peugeot408 is open.
+
 ## 13. App icon (no Mac)
 
 The icon comes from your artwork in `remotion/assets/icon/` (spec §3 App icon). To change it on Windows:

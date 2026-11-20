@@ -20,6 +20,8 @@ struct Peugeot408WidgetsBundle: WidgetBundle {
         MapSnapshotWidget()
         PhotoFrameWidget()
         MusicWidget()
+        LyricsWidget()
+        LyricsLiveActivity()
         LiveOBDWidget()
         DriveLiveActivity()
     }

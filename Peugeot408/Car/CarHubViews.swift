@@ -76,6 +76,7 @@ struct DataSourceScreen: View {
         case .photos: PhotoFrameView()
         case .music: MusicView()
         case .obd: OBDView()
+        case .lyrics: LyricsView()
         }
     }
 }
@@ -136,6 +137,12 @@ struct DataSourceRow: View {
             return summary.photoCount == 0 ? "No photos yet" : "\(summary.photoCount) photos"
         case .music(let summary):
             return summary.title ?? "Not set up"
+        case .lyrics(let summary):
+            switch summary.mode {
+            case .synced(let window): return window.current ?? (summary.title ?? "Playing")
+            case .songOnly(let note): return "\(summary.title ?? "") · \(note)"
+            case .idle: return "Nothing playing"
+            }
         case .obd(let summary):
             guard let reading = summary.reading else { return "No drive session yet" }
             return "\(reading.text(.boost)) · \(reading.text(.coolant))\(summary.sessionActive ? " · live" : "")"

@@ -2,7 +2,30 @@
 
 Fresh session? Read `docs/SPEC.md`, then this file, then continue from **Current phase**.
 
-## Current phase: 12 (Sound packs) — built. Next: "Continue with Phase 13" (Lyrics), then 14 (Panorama hero). Phase 8 split cards still waiting for your car test.
+## Current phase: 13 (Synced lyrics) — built. Next: the single-slot extras (centre picture, text alignment, per-line size; spec already updated), then "Continue with Phase 14" (Panorama hero). Phase 8 split cards still waiting for your car test.
+
+## Phase 13 — Synced lyrics
+### Done
+- **New data source "Lyrics":**
+  - a Lyrics widget (small, medium and Lock Screen);
+  - a Lyrics card for any slot or Split/Quad card;
+  - a Lyrics Live Activity.
+- **Display:**
+  - The active line is big and bright: white in Bold, glowing pink in Neon, or your own colour.
+  - The previous line is faded and the next one(s) are dimmer.
+  - Choose 1, 3 or 5 lines, and text size small, normal or large.
+  - Without synced lyrics it shows the song and why ("No synced lyrics", "Instrumental", "No lyrics found").
+- **How it syncs (`LyricsSync`):**
+  - The app reads the Apple Music system player: song, artist, album, length, position, playing or paused.
+  - It saves when the song started, then fetches time-coded lyrics from **LRCLIB**, trying an exact match and then a search, with no key. Lyrics are cached in `lyrics.json` for your last 30 songs.
+  - The widget timeline has **one entry per line** until the song ends, so lines change without the app running.
+  - It re-syncs when the app opens, while it's open (song and play/pause changes), after the widget's Next button, and from the new **Sync Lyrics** shortcut action. That action is meant for a "CarPlay connects" automation; see SETUP.md §14.
+- **LRC parser:** handles several time tags on one line, `[mm:ss:xx]` stamps, `[offset:]`, and empty lines (instrumental gaps).
+- **Live Activity:** turned on in the Lyrics screen. It changes lines only while the app is running, because iOS doesn't let Live Activities change text on their own.
+- **Translations:** LRCLIB has none, so there's no translation line; the spec only asks for one when the source provides it.
+- **Spotify** isn't supported. The app and SETUP.md say why.
+- Tests: `LyricsTests` (parser, windows, timeline dates, summary modes, cache limit, LRCLIB mapping).
+
 
 ## Phase 12 — Sound packs
 ### Done

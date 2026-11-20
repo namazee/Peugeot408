@@ -54,6 +54,10 @@ struct RootView: View {
                 await cars.refresh(.prayer)
                 await cars.refresh(.commute)
                 await cars.refreshMusic()
+                // Re-anchor the lyrics timing and keep listening while the app runs.
+                LyricsSync.shared.startObserving()
+                await LyricsSync.shared.sync()
+                cars.reload()
             }
         }
     }
@@ -80,7 +84,7 @@ struct RootView: View {
             case .tng, .prayer, .commute, .weather:
                 tab = .daily
                 dailyPath = [source]
-            case .map, .photos, .music:
+            case .map, .photos, .music, .lyrics:
                 tab = .studio
                 studioPath = [source]
             case .service, .fuel, .renewals, .parking, .obd:

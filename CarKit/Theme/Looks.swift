@@ -267,7 +267,7 @@ public extension DataCard {
                             rows: [CardFace.Row("Coolant", reading.text(.coolant)), CardFace.Row("Battery", reading.text(.voltage)),
                                    CardFace.Row("RPM", reading.text(.rpm))])
 
-        case .map, .photos, .music:
+        case .map, .photos, .music, .lyrics:
             return nil
         }
     }

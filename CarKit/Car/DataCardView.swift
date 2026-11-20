@@ -94,6 +94,7 @@ public struct DataCardView: View {
                 case .photos(let summary): PhotoCard(summary: summary, size: size)
                 case .music(let summary): MusicCardView(summary: summary, size: size)
                 case .obd(let summary): OBDCard(summary: summary, size: size)
+                case .lyrics(let summary): LyricsCardView(summary: summary, size: size)
                 }
                 }
             }
@@ -166,6 +167,12 @@ public struct DataCardView: View {
         case .music(let summary):
             guard let title = summary.title else { return ["Open Music in the app"] }
             return [title, summary.subtitle ?? summary.kindLabel]
+        case .lyrics(let summary):
+            switch summary.mode {
+            case .synced(let window): return [window.current ?? "♪", summary.title ?? ""]
+            case .songOnly(let note): return [summary.title ?? "Lyrics", note]
+            case .idle: return ["Play something in Apple Music"]
+            }
         case .obd(let summary):
             guard let reading = summary.reading else { return ["No drive session yet"] }
             return ["\(reading.text(.boost)) · \(reading.text(.coolant))", "\(reading.text(.voltage)) · \(reading.date.formatted(date: .omitted, time: .shortened))"]

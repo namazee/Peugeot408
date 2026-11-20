@@ -71,6 +71,12 @@ public extension DataCard {
             return CompactCard(symbol: "photo.fill", label: s.albumName ?? "Photos", value: .text(""), imagePath: s.imagePath)
         case .music(let s):
             return CompactCard(symbol: "music.note", label: s.title ?? "Music", value: .text(s.subtitle ?? ""), imagePath: s.artworkPath)
+        case .lyrics(let s):
+            switch s.mode {
+            case .synced(let window): return CompactCard(symbol: "quote.bubble.fill", label: s.title ?? "Lyrics", value: .text(window.current ?? "♪"))
+            case .songOnly(let note): return CompactCard(symbol: "music.note", label: note, value: .text(s.title ?? "--"))
+            case .idle: return CompactCard(symbol: "quote.bubble.fill", label: "Lyrics", value: .text("Nothing playing"))
+            }
         case .obd(let s):
             return CompactCard(symbol: "gauge.with.dots.needle.67percent", label: "Boost", value: .text(s.reading?.text(.boost) ?? "--"), urgency: s.urgency)
         }
