@@ -280,14 +280,20 @@ struct DataSlotTests {
         let directory = FileManager.default.temporaryDirectory.appending(path: UUID().uuidString, directoryHint: .isDirectory)
         defer { try? FileManager.default.removeItem(at: directory) }
 
-        #expect(CarData.load(from: directory) == .empty)
+        var empty = CarData.empty
+        empty.directory = directory
+        #expect(CarData.load(from: directory) == empty)
 
         let sample = SampleData.carData(now: day(2026, 1, 1), calendar: calendar)
         try CarStores.service(in: directory).save(sample.service)
         try CarStores.fuel(in: directory).save(sample.fuel)
         try CarStores.renewals(in: directory).save(sample.renewals)
         try CarStores.tng(in: directory).save(sample.tng)
-        #expect(CarData.load(from: directory) == sample)
+        let loaded = CarData.load(from: directory)
+        #expect(loaded.service == sample.service)
+        #expect(loaded.fuel == sample.fuel)
+        #expect(loaded.renewals == sample.renewals)
+        #expect(loaded.tng == sample.tng)
 
         try Data("not json".utf8).write(to: CarStores.tng(in: directory).fileURL)
         #expect(CarData.load(from: directory).tng == .empty)
