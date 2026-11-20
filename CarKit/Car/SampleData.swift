@@ -82,14 +82,18 @@ public enum SampleData {
             CachedEvent(title: "Team stand-up", start: now.addingTimeInterval(80 * 60), end: now.addingTimeInterval(110 * 60), location: "Block B"),
         ], updatedAt: now)
 
-        let hours = (0..<12).map { hour in
-            HourForecast(
-                date: now.addingTimeInterval(Double(hour) * 3600),
-                temperatureC: 31 - Double(hour) * 0.4,
-                precipitationChance: hour == 3 ? 0.6 : 0.1,
-                symbol: hour == 3 ? "cloud.rain.fill" : "cloud.sun.fill",
-                isRain: hour == 3
-            )
+        var hours: [HourForecast] = []
+        for hour in 0..<12 {
+            let offset = Double(hour)
+            let rainy = hour == 3
+            let temperature: Double = 31.0 - offset * 0.4
+            hours.append(HourForecast(
+                date: now.addingTimeInterval(offset * 3600),
+                temperatureC: temperature,
+                precipitationChance: rainy ? 0.6 : 0.1,
+                symbol: rainy ? "cloud.rain.fill" : "cloud.sun.fill",
+                isRain: rainy
+            ))
         }
         let weather = WeatherCache(
             weather: WeatherSnapshot(observedAt: now, temperatureC: 31, symbol: "cloud.sun.fill", condition: "Partly Cloudy", isRainingNow: false, hours: hours),
