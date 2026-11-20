@@ -40,6 +40,7 @@ Fresh session? Read `docs/SPEC.md`, then this file, then continue from **Current
 - The onboarding welcome page plays `IconReveal.mp4` once (falls back to the old slot tile if the clip is missing).
 - Alpha check `remotion/scripts/check-icon-alpha.mjs` runs in `npm run icon`, the new `remotion.yml` workflow (which uploads the outputs as artifacts) and `ci/test.sh` (iOS builds fail on an alpha icon).
 - SETUP.md §12: how to re-render on Windows; the Icon Composer `.icon` needs a Mac.
+- GTCP wordmark (spec §3 App icon, layer 5): Michroma, white with a cyan glow (white on tinted), below the car; car moved up 20 px. Fades in at the end of IconReveal. IconPreview.png approved 2026-11-20.
 
 ## Phase 3 — Parking + Map Snapshot, Prayer Times, Commute, Weather & Haze
 

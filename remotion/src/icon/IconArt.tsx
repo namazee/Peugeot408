@@ -1,6 +1,11 @@
 import React, {useId} from 'react';
 import {AbsoluteFill, Img, staticFile} from 'remotion';
 import {getStaticFiles} from '@remotion/studio';
+import {loadFont} from '@remotion/google-fonts/Michroma';
+
+// Wordmark font: Michroma (SIL Open Font License), loaded from Google Fonts at render time.
+const {fontFamily: WORDMARK_FONT} = loadFont('normal', {weights: ['400'], subsets: ['latin']});
+const WORDMARK = 'GTCP';
 
 export type IconVariant = 'default' | 'dark' | 'tinted';
 
@@ -31,9 +36,10 @@ const GLOW_TINT = '#7FD4FF';
 
 // Source art placement: scale + shift so the headlights, light strips and grille sit inside the
 // central 80% safe area (x/y 102…922). In the 1024 source the light strips span x≈115…910 and
-// y≈470…700; after this transform they span x≈131…894, y≈448…668.
+// y≈470…700; after this transform they span x≈131…894, y≈428…648. The car sits a little high to
+// leave room for the GTCP wordmark below it (layer 5).
 const ART_SCALE = 0.96;
-const ART_SHIFT_Y = -24;
+const ART_SHIFT_Y = -44;
 
 const sourceFor = (variant: IconVariant): {src: string; provided: boolean} => {
 	if (variant !== 'default') {
@@ -172,6 +178,31 @@ export const IconArt: React.FC<{variant: IconVariant; reveal?: RevealState}> = (
 						'radial-gradient(ellipse 70% 14% at 50% 0%, rgba(255,255,255,0.13) 0%, rgba(255,255,255,0) 100%), linear-gradient(180deg, rgba(255,255,255,0.07) 0%, rgba(255,255,255,0) 9%)',
 				}}
 			/>
+
+			{/* Layer 5: GTCP wordmark below the car, inside the safe area. */}
+			<div
+				style={{
+					position: 'absolute',
+					left: 0,
+					right: 0,
+					top: 818,
+					height: 110,
+					display: 'flex',
+					alignItems: 'center',
+					justifyContent: 'center',
+					opacity: reveal.finish,
+					fontFamily: WORDMARK_FONT,
+					fontSize: 96,
+					letterSpacing: '0.3em',
+					paddingLeft: '0.3em', // balance the trailing letter-spacing
+					color: '#F4F8FF',
+					textShadow: isTinted
+						? '0 0 16px rgba(255,255,255,0.55), 0 0 40px rgba(255,255,255,0.3)'
+						: '0 0 16px rgba(127,212,255,0.75), 0 0 40px rgba(127,212,255,0.45)',
+				}}
+			>
+				{WORDMARK}
+			</div>
 		</AbsoluteFill>
 	);
 };
