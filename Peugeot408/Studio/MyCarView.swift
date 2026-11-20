@@ -74,8 +74,9 @@ enum CarCutout {
         }
         guard maxX >= minX, maxY >= minY else { return nil }
         let sx = imageSize.width / Double(width), sy = imageSize.height / Double(height)
-        // CGContext rows start at the bottom; flip to top-left origin.
-        let rect = CGRect(x: Double(minX) * sx, y: Double(height - 1 - maxY) * sy, width: Double(maxX - minX + 1) * sx, height: Double(maxY - minY + 1) * sy)
+        // Drawing an image into a bitmap context keeps it upright, so memory row 0 is the
+        // image's top row: the rows are already in top-left order (no flip).
+        let rect = CGRect(x: Double(minX) * sx, y: Double(minY) * sy, width: Double(maxX - minX + 1) * sx, height: Double(maxY - minY + 1) * sy)
         return rect.insetBy(dx: -8, dy: -8).intersection(CGRect(origin: .zero, size: imageSize))
     }
 

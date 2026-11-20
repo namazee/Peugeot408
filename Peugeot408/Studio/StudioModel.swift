@@ -22,8 +22,16 @@ final class StudioModel {
         // Spec: the side view is used until a photo is chosen.
         if state.carPhotoFile == nil {
             useBuiltInCarPhoto(BuiltInCarPhoto.defaultID)
+        } else if let id = state.builtInCarPhoto,
+                  UserDefaults.standard.integer(forKey: Self.cutoutVersionKey) < Self.cutoutVersion {
+            // Builds before 1.1 (29) cropped cut-outs wrongly; redo the built-in one once.
+            UserDefaults.standard.set(Self.cutoutVersion, forKey: Self.cutoutVersionKey)
+            useBuiltInCarPhoto(id)
         }
     }
+
+    private static let cutoutVersion = 2
+    private static let cutoutVersionKey = "builtInCutoutVersion"
 
     /// Renders a bundled photo (with the chosen paint colour and plate) into the App Group as the My Car photo.
     /// Studio renders are cut out on the device first (the Vision mask is cached in the App Group).
