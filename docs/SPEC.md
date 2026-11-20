@@ -51,12 +51,13 @@ Work in phases (below). At the end of each phase: commit, push, make sure the CI
 
 ### App icon
 
-* Source art: my own icon artwork (generated from a photo of my car), stored in `remotion/assets/icon/` as `icon-default.jpg` (plus `icon-dark.jpg` and `icon-tinted.jpg` if I provide them). This is the master art: don't redraw the car. No text, no logos.
+* Source art: my own icon artwork (generated from a photo of my car), stored in `remotion/assets/icon/` as `icon-default.jpg` (plus `icon-dark.jpg` and `icon-tinted.jpg` if I provide them). This is the master art: don't redraw the car. No logos; the only text is the "GTCP" wordmark (layer 5).
 * Remotion composition `AppIcon` (1024×1024), prop `variant: "default" | "dark" | "tinted"`, built in layers:
    1. Background `#05070D` with a soft radial blue glow (`#1F4FD8` at ~25% opacity) behind the car.
    2. The source image, scaled/cropped so the headlights, light strips and grille sit inside the central 80% safe area.
    3. Glow boost: duplicate the brightest areas (luminance threshold), blur, tint `#7FD4FF`, screen-blend at ~40%, so the lights pop at small sizes.
    4. A subtle vignette and a faint Liquid Glass highlight along the top edge.
+   5. Wordmark "GTCP" centred below the car, inside the safe area: wide-tracked, wide sans-serif (open-licence font, recorded in `ASSETS-LICENSES.md`), white with a soft `#7FD4FF` glow (white glow on tinted), sized to be readable at 180 and 120 px. The car moves up slightly to make room; the lights stay inside the safe area. In `IconReveal` the wordmark fades in as the icon settles.
    * If the dark/tinted source images aren't provided, generate them: dark = pure-black background and the car at −15% brightness, lights unchanged; tinted = grayscale with strong contrast, lights brightest.
 * `IconPreview` (1920×1080): each variant at 1024, 180, 120, 60 and 40 px on a mock iPhone home screen (light and dark wallpaper) and on a CarPlay-style dark dashboard mock, to judge it at real sizes.
 * `IconReveal` (3.5 s; 1080×1080 and 1080×1920): starts black, the light strips draw on top to bottom, the headlights flash on with a bloom, a glow sweeps across, then it settles on the final icon. Used on the app's first-run screen and for sharing.
