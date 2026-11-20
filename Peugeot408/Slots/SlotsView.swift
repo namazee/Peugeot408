@@ -154,6 +154,7 @@ struct SlotRow: View {
         }
         .contentShape(Rectangle())
     }
+
     private var subtitle: String {
         var text = "Car Slot \(number)"
         if design.studioDesignID != nil { text += " · Studio" }
@@ -163,7 +164,6 @@ struct SlotRow: View {
         if rotations > 0 { text += " · +\(rotations) by time" }
         return text
     }
-}
 }
 
 struct FlashControls: View {
