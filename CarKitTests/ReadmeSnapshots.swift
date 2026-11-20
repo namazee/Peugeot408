@@ -18,26 +18,67 @@ struct ReadmeSnapshots {
         let now = Date()
         let card: (DataSource) -> SlotContent = { .data(SampleData.card(for: $0, now: now)) }
 
-        // The head unit's three visible columns with the default Split setup.
-        let columns: [SlotContent] = [
-            .cards(.split, [card(.prayer), card(.renewals)]),
-            .cards(.split, [card(.service), card(.fuel)]),
-            .cards(.split, [card(.weather), card(.parking)]),
-        ]
-        save(carPlayScreen(columns), "carplay-split.png", in: directory)
+        for look in CardLook.allCases {
+            let suffix = look == .bold ? "" : "-neon"
+            // The head unit's three visible columns with the default Split setup.
+            let columns: [SlotContent] = [
+                .cards(.split, [card(.prayer), card(.renewals)]),
+                .cards(.split, [card(.service), card(.fuel)]),
+                .cards(.split, [card(.weather), card(.parking)]),
+            ]
+            save(carPlayScreen(columns).environment(\.cardLook, look), "carplay-split\(suffix).png", in: directory)
 
-        let quad: [SlotContent] = [
-            .cards(.quad, [card(.prayer), card(.service), card(.fuel), card(.tng)]),
-            .cards(.split, [card(.weather), card(.renewals)]),
-            .design(SlotDesign(value: "408 GT", title: "Drive safe", symbol: "car.side.fill", style: .accent)),
-        ]
-        save(carPlayScreen(quad), "carplay-mixed.png", in: directory)
+            let mixed: [SlotContent] = [
+                .cards(.quad, [card(.prayer), card(.service), card(.fuel), card(.tng)]),
+                .data(SampleData.card(for: .service, now: now)),
+                .design(SlotDesign(value: "408 GT", title: "Drive safe", symbol: "car.side.fill")),
+            ]
+            save(carPlayScreen(mixed).environment(\.cardLook, look), "carplay-mixed\(suffix).png", in: directory)
 
-        for source in [DataSource.service, .fuel, .renewals, .tng, .prayer, .weather, .commute, .parking, .obd] {
+            for source in [DataSource.service, .fuel, .renewals, .tng, .prayer, .weather, .commute, .parking, .obd] {
+                save(
+                    DataCardTile(card: SampleData.card(for: source, now: now))
+                        .frame(width: 170, height: 170)
+                        .environment(\.cardLook, look),
+                    "widget-\(source.rawValue)\(suffix).png",
+                    in: directory
+                )
+            }
             save(
-                DataCardTile(card: SampleData.card(for: source, now: now))
-                    .frame(width: 170, height: 170),
-                "widget-\(source.rawValue).png",
+                VStack(spacing: 12) {
+                    ForEach([DataSource.service, .prayer, .fuel], id: \.self) { source in
+                        DataCardTile(card: SampleData.card(for: source, now: now), size: .medium)
+                            .frame(width: 364, height: 170)
+                    }
+                }
+                .padding(12)
+                .background(Color(hex: 0x000000))
+                .environment(\.cardLook, look),
+                "widgets-medium\(suffix).png",
+                in: directory
+            )
+        }
+
+        // The Studio template gallery, small size, with sample data.
+        let data = SampleData.carData(now: now)
+        for group in TemplateGroup.allCases {
+            let designs = group.styles.map { Templates.make($0, source: .service, canvas: .small, eventDate: now.addingTimeInterval(-86_400 * 3_500)) }
+            let rows = stride(from: 0, to: designs.count, by: 4).map { Array(designs[$0..<min($0 + 4, designs.count)]) }
+            save(
+                VStack(alignment: .leading, spacing: 12) {
+                    ForEach(Array(rows.enumerated()), id: \.offset) { _, row in
+                        HStack(spacing: 12) {
+                            ForEach(row) { design in
+                                DesignView(card: DesignResolver.card(for: design, data: data, studio: .empty, at: now))
+                                    .frame(width: 150, height: 150)
+                                    .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+                            }
+                        }
+                    }
+                }
+                .padding(14)
+                .background(Color(hex: 0x000000)),
+                "templates-\(group.rawValue).png",
                 in: directory
             )
         }

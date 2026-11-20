@@ -337,6 +337,8 @@ struct DesignBuilderView: View {
                 Button("My Car photo", systemImage: "car.side") { add(.carPhoto) }
                 Button("Number plate", systemImage: "rectangle.and.text.magnifyingglass") { add(.plate("")) }
                 Button("Gauge", systemImage: "gauge.with.dots.needle.67percent") { add(.gauge(.kmToService)) }
+                Button("Progress ring", systemImage: "circle.dashed") { add(.ring(.kmToService)) }
+                Button("Progress bar", systemImage: "chart.bar.fill") { add(.progressBar(.yearProgress)) }
                 Button("Analogue clock", systemImage: "clock") { add(.analogClock) }
             } label: {
                 Image(systemName: "plus")
@@ -367,6 +369,8 @@ struct DesignBuilderView: View {
         case .carPhoto: "My Car photo"
         case .data(let field): "Data: \(field.displayName)"
         case .gauge(let field): "Gauge: \(field?.displayName ?? "decorative")"
+        case .ring(let field): "Ring: \(field?.displayName ?? "decorative")"
+        case .progressBar(let field): "Bar: \(field?.displayName ?? "decorative")"
         case .analogClock: "Analogue clock"
         case .plate(let text): "Plate \(text)"
         case .seasonalArt(let occasion): "Art: \(occasion.displayName)"
@@ -416,6 +420,7 @@ private struct LayerInspector: View {
             LabeledSlider(title: "Width", value: $layer.width, range: 0.05...1.5, format: "%.0f%%", scale: 100)
             LabeledSlider(title: "Height", value: $layer.height, range: 0.05...1.5, format: "%.0f%%", scale: 100)
             Toggle("Shadow", isOn: $layer.shadow)
+            Toggle("Neon glow", isOn: Binding(get: { layer.glow == true }, set: { layer.glow = $0 ? true : nil }))
             Toggle("Lock", isOn: $layer.locked)
         }
         Section {
@@ -439,12 +444,11 @@ private struct LayerInspector: View {
             }
             TextField("Small label (optional)", text: Binding(get: { layer.caption ?? "" }, set: { layer.caption = $0.isEmpty ? nil : $0 }))
         case .gauge(let field):
-            Picker("Fills with", selection: Binding(get: { field }, set: { layer.content = .gauge($0) })) {
-                Text("Nothing (decorative)").tag(DataField?.none)
-                ForEach([DataField.kmToService, .kmPerLitre, .tngBalance, .daysToRoadTax, .airQuality], id: \.self) {
-                    Text($0.displayName).tag(DataField?.some($0))
-                }
-            }
+            progressPicker(field) { layer.content = .gauge($0) }
+        case .ring(let field):
+            progressPicker(field) { layer.content = .ring($0) }
+        case .progressBar(let field):
+            progressPicker(field) { layer.content = .progressBar($0) }
         case .symbol(let name):
             Picker("Icon", selection: Binding(get: { name }, set: { layer.content = .symbol($0) })) {
                 ForEach(SlotDesign.symbolChoices, id: \.self) { Label($0, systemImage: $0).tag($0) }
@@ -460,6 +464,16 @@ private struct LayerInspector: View {
         case .seasonalArt(let occasion):
             Picker("Artwork", selection: Binding(get: { occasion }, set: { layer.content = .seasonalArt($0) })) {
                 ForEach(SeasonalOccasion.allCases) { Text($0.displayName).tag($0) }
+            }
+        }
+    }
+
+    /// Fields that have a 0…1 progress, for gauges, rings and bars.
+    private func progressPicker(_ field: DataField?, set: @escaping (DataField?) -> Void) -> some View {
+        Picker("Fills with", selection: Binding(get: { field }, set: set)) {
+            Text("Nothing (decorative)").tag(DataField?.none)
+            ForEach([DataField.kmToService, .kmPerLitre, .tngBalance, .daysToRoadTax, .airQuality, .yearProgress, .boost, .engineRPM], id: \.self) {
+                Text($0.displayName).tag(DataField?.some($0))
             }
         }
     }
@@ -491,14 +505,17 @@ private struct BackgroundEditor: View {
     @Binding var background: DesignBackground
     let photos: [PhotoItem]
 
-    private enum Kind: String, CaseIterable { case solid, gradient, texture, photo }
+    private enum Kind: String, CaseIterable { case solid, gradient, aurora, glow, texture, photo, state }
 
     private var kind: Kind {
         switch background {
         case .solid: .solid
         case .gradient: .gradient
+        case .aurora: .aurora
+        case .spotlight: .glow
         case .texture: .texture
         case .photo: .photo
+        case .stateColor: .state
         }
     }
 
@@ -507,7 +524,7 @@ private struct BackgroundEditor: View {
             Picker("Type", selection: Binding(get: { kind }, set: { setKind($0) })) {
                 ForEach(Kind.allCases, id: \.self) { Text($0.rawValue.capitalized).tag($0) }
             }
-            .pickerStyle(.segmented)
+            .pickerStyle(.menu)
             switch background {
             case .solid(let hex):
                 ColorPicker("Colour", selection: Binding(get: { Color(hex: hex) }, set: { background = .solid($0.hexValue) }), supportsOpacity: false)
@@ -519,6 +536,18 @@ private struct BackgroundEditor: View {
                     ForEach(DesignTexture.allCases, id: \.self) { Text($0.displayName).tag($0) }
                 }
                 ColorPicker("Base colour", selection: Binding(get: { Color(hex: hex) }, set: { background = .texture(texture, $0.hexValue) }), supportsOpacity: false)
+            case .aurora(let a, let b, let c):
+                ColorPicker("Colour 1", selection: Binding(get: { Color(hex: a) }, set: { background = .aurora($0.hexValue, b, c) }), supportsOpacity: false)
+                ColorPicker("Colour 2", selection: Binding(get: { Color(hex: b) }, set: { background = .aurora(a, $0.hexValue, c) }), supportsOpacity: false)
+                ColorPicker("Colour 3", selection: Binding(get: { Color(hex: c) }, set: { background = .aurora(a, b, $0.hexValue) }), supportsOpacity: false)
+            case .spotlight(let centre, let edge):
+                ColorPicker("Centre", selection: Binding(get: { Color(hex: centre) }, set: { background = .spotlight($0.hexValue, edge) }), supportsOpacity: false)
+                ColorPicker("Edge", selection: Binding(get: { Color(hex: edge) }, set: { background = .spotlight(centre, $0.hexValue) }), supportsOpacity: false)
+            case .stateColor(let hex):
+                ColorPicker("Colour when all is fine", selection: Binding(get: { Color(hex: hex) }, set: { background = .stateColor($0.hexValue) }), supportsOpacity: false)
+                Text("Turns amber when due soon, red when overdue, and the haze band colour for air quality.")
+                    .font(.footnote)
+                    .foregroundStyle(Theme.secondaryText)
             case .photo(let file):
                 if photos.isEmpty {
                     Text("Add photos in Studio → Photo Frame first.").foregroundStyle(Theme.secondaryText)
@@ -535,6 +564,9 @@ private struct BackgroundEditor: View {
         switch kind {
         case .solid: background = .solid(Theme.Hex.background)
         case .gradient: background = .gradient(Theme.Hex.accent, Theme.Hex.background)
+        case .aurora: background = .aurora(0x6D28D9, 0x0EA5E9, 0xEC4899)
+        case .glow: background = .spotlight(0x2B4C9E, 0x05070D)
+        case .state: background = .stateColor(0x1F4FD8)
         case .texture: background = .texture(.carbon, 0x111318)
         case .photo: background = .photo(photos.first?.fileName ?? "")
         }

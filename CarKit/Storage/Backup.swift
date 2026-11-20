@@ -31,6 +31,7 @@ public enum Backup {
         Entry(PrayerService.settingsFile, "Prayer zone", as: PrayerSettings.self),
         Entry("slots.json", "Car Slots", as: SlotsState.self),
         Entry("studio.json", "Studio", as: StudioState.self),
+        Entry(AppearanceStore.fileName, "Appearance", as: AppearanceSettings.self),
         Entry("connect-sound.json", "Connect sound", as: ConnectSoundSettings.self),
         Entry("obd.json", "OBD2", as: OBDState.self),
     ]

@@ -14,16 +14,24 @@ public struct ResolvedField: Sendable, Equatable, Hashable {
     public var style: Style
     /// 0…1 for gauge layers (e.g. how much of the service interval is used).
     public var progress: Double?
+    /// State colour for `.stateColor` backgrounds (amber / red / AQI band); nil when all is well.
+    public var stateHex: UInt32?
 
-    public init(text: String, style: Style = .plain, progress: Double? = nil) {
+    public init(text: String, style: Style = .plain, progress: Double? = nil, stateHex: UInt32? = nil) {
         self.text = text
         self.style = style
         self.progress = progress
+        self.stateHex = stateHex
     }
 }
 
 /// A design with its data resolved for one timeline entry: everything `DesignView` needs.
 public struct StudioCard: Sendable, Equatable {
+    /// The state colour of the first data field that has one (for `.stateColor` backgrounds).
+    public var stateHex: UInt32? {
+        design.dataFields.lazy.compactMap { values[$0]?.stateHex }.first
+    }
+
     public var design: CardDesign
     public var date: Date
     public var values: [DataField: ResolvedField]
@@ -98,10 +106,11 @@ public enum DesignResolver {
         case .serviceItem, .kmToService, .daysToService:
             guard case .service(let s) = card(.service), let line = s.lines.first else { return ResolvedField(text: "--") }
             let progress = serviceProgress(data: data, at: date, calendar: calendar)
+            let state = stateHex(line.urgency)
             switch field {
-            case .serviceItem: return ResolvedField(text: line.name, progress: progress)
-            case .kmToService: return ResolvedField(text: line.kmLeft.map { CarFormat.km($0) } ?? "--", progress: progress)
-            default: return ResolvedField(text: line.daysLeft.map { CarFormat.days($0) } ?? "--", progress: progress)
+            case .serviceItem: return ResolvedField(text: line.name, progress: progress, stateHex: state)
+            case .kmToService: return ResolvedField(text: line.kmLeft.map { CarFormat.km($0) } ?? "--", progress: progress, stateHex: state)
+            default: return ResolvedField(text: line.daysLeft.map { CarFormat.days($0) } ?? "--", progress: progress, stateHex: state)
             }
 
         case .kmPerLitre, .fuelSpendMonth, .lastFuelPrice:
@@ -116,17 +125,17 @@ public enum DesignResolver {
 
         case .tngBalance:
             guard case .tng(let s) = card(.tng), let balance = s.balance else { return ResolvedField(text: "--") }
-            return ResolvedField(text: CarFormat.rm(balance), progress: min(balance / max(s.threshold * 5, 1), 1))
+            return ResolvedField(text: CarFormat.rm(balance), progress: min(balance / max(s.threshold * 5, 1), 1), stateHex: s.isLow ? Theme.Hex.dueSoon : nil)
 
         case .daysToRoadTax:
             let roadTax = data.renewals.items.filter { $0.kind == .roadTax }.min { $0.expiry < $1.expiry }
             guard let roadTax else { return ResolvedField(text: "--") }
             let days = RenewalRules.daysLeft(until: roadTax.expiry, from: date, calendar: calendar)
-            return ResolvedField(text: CarFormat.days(days), progress: 1 - min(max(Double(days) / 365, 0), 1))
+            return ResolvedField(text: CarFormat.days(days), progress: 1 - min(max(Double(days) / 365, 0), 1), stateHex: stateHex(RenewalRules.urgency(daysLeft: days)))
 
         case .nearestRenewal:
             guard case .renewals(let s) = card(.renewals), let line = s.lines.first else { return ResolvedField(text: "--") }
-            return ResolvedField(text: "\(line.name) \(line.countText) \(line.unitText)")
+            return ResolvedField(text: "\(line.name) \(line.countText) \(line.unitText)", stateHex: stateHex(line.urgency))
 
         case .parkingPlace:
             guard let spot = data.parking.spot else { return ResolvedField(text: "Not parked") }
@@ -142,7 +151,7 @@ public enum DesignResolver {
             switch field {
             case .temperature: return ResolvedField(text: s.temperatureText)
             case .rainToday: return ResolvedField(text: s.rainText ?? "--")
-            default: return ResolvedField(text: s.air.map { "API \($0.value)" } ?? "--", progress: s.air.map { min(Double($0.value) / 300, 1) })
+            default: return ResolvedField(text: s.air.map { "API \($0.value)" } ?? "--", progress: s.air.map { min(Double($0.value) / 300, 1) }, stateHex: s.air?.band.hex)
             }
 
         case .commuteTime:
@@ -163,6 +172,19 @@ public enum DesignResolver {
         case .dayCounter:
             guard let event = design.eventDate else { return ResolvedField(text: "Set a date") }
             return ResolvedField(text: anniversaryText(from: event, to: date, calendar: calendar))
+
+        case .weekday:
+            return ResolvedField(text: date.formatted(.dateTime.weekday(.wide)).uppercased())
+
+        case .dayOfMonth:
+            return ResolvedField(text: "\(calendar.component(.day, from: date))")
+
+        case .monthName:
+            return ResolvedField(text: date.formatted(.dateTime.month(.wide).year()).uppercased())
+
+        case .yearProgress:
+            let fraction = yearFraction(at: date, calendar: calendar)
+            return ResolvedField(text: "\(Int((fraction * 100).rounded(.down)))%", progress: fraction)
 
         case .countdownDays:
             guard let event = design.eventDate else { return ResolvedField(text: "Set a date") }
@@ -201,6 +223,21 @@ public enum DesignResolver {
         case (_, 0): return years == 1 ? "1 year" : "\(years) years"
         default: return "\(years == 1 ? "1 year" : "\(years) years"), \(CarFormat.days(days))"
         }
+    }
+
+    /// Amber / red for due soon / overdue, nil when fine.
+    static func stateHex(_ urgency: Urgency) -> UInt32? {
+        switch urgency {
+        case .ok: nil
+        case .dueSoon: Theme.Hex.dueSoon
+        case .urgent: Theme.Hex.overdue
+        }
+    }
+
+    /// How much of this calendar year has passed (0…1).
+    public static func yearFraction(at date: Date, calendar: Calendar = .current) -> Double {
+        guard let year = calendar.dateInterval(of: .year, for: date) else { return 0 }
+        return min(max(date.timeIntervalSince(year.start) / year.duration, 0), 1)
     }
 
     /// Share of the most urgent service interval used (km-based when known).

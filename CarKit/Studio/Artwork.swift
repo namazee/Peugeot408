@@ -32,10 +32,13 @@ public struct ArtworkView: View {
                 case .heart: Image(systemName: "heart.fill").resizable().scaledToFit().foregroundStyle(color)
                 case .star: Image(systemName: "sparkles").resizable().scaledToFit().foregroundStyle(color)
                 case .flag: Image(systemName: "flag.checkered").resizable().scaledToFit().foregroundStyle(color)
+                case .sun: SettingSun(color: color)
+                case .road: OpenRoad(color: color)
+                case .starfield: Starfield(color: color)
                 }
             }
-            .frame(width: kind == .stripes || kind == .speedLines || kind == .gaugeArc ? geo.size.width : size,
-                   height: kind == .stripes || kind == .speedLines || kind == .gaugeArc ? geo.size.height : size)
+            .frame(width: kind.fillsFrame ? geo.size.width : size,
+                   height: kind.fillsFrame ? geo.size.height : size)
             .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
         .accessibilityHidden(true)
@@ -229,6 +232,87 @@ private struct Fireworks: View {
                     ray.addLine(to: CGPoint(x: c.x + cos(angle) * r, y: c.y + sin(angle) * r))
                     context.stroke(ray, with: .color(i.isMultiple(of: 2) ? color : Color(hex: 0xF5C542)), style: StrokeStyle(lineWidth: 2.5, lineCap: .round))
                 }
+            }
+        }
+    }
+}
+
+extension ArtworkKind {
+    /// Artwork stretched to the layer's frame rather than kept square.
+    var fillsFrame: Bool {
+        switch self {
+        case .stripes, .speedLines, .gaugeArc, .road, .starfield: true
+        default: false
+        }
+    }
+}
+
+/// A sun sinking behind the horizon, with horizontal bands cut through it.
+private struct SettingSun: View {
+    let color: Color
+
+    var body: some View {
+        Canvas { context, size in
+            let s = min(size.width, size.height)
+            let rect = CGRect(x: (size.width - s) / 2, y: (size.height - s) / 2, width: s, height: s)
+            context.fill(Path(ellipseIn: rect.insetBy(dx: s * 0.06, dy: s * 0.06)),
+                         with: .linearGradient(Gradient(colors: [Color(hex: 0xFFE27A), color]), startPoint: CGPoint(x: rect.midX, y: rect.minY), endPoint: CGPoint(x: rect.midX, y: rect.maxY)))
+            for i in 0..<4 {
+                let h = s * (0.025 + Double(i) * 0.012)
+                let y = rect.midY + s * 0.06 + Double(i) * s * 0.1
+                context.blendMode = .destinationOut
+                context.fill(Path(CGRect(x: rect.minX, y: y, width: s, height: h)), with: .color(.black))
+            }
+        }
+        .compositingGroup()
+    }
+}
+
+/// A road running to the horizon with dashed centre lines.
+private struct OpenRoad: View {
+    let color: Color
+
+    var body: some View {
+        Canvas { context, size in
+            let w = size.width, h = size.height
+            var road = Path()
+            road.move(to: CGPoint(x: w * 0.47, y: 0))
+            road.addLine(to: CGPoint(x: w * 0.53, y: 0))
+            road.addLine(to: CGPoint(x: w * 0.95, y: h))
+            road.addLine(to: CGPoint(x: w * 0.05, y: h))
+            road.closeSubpath()
+            context.fill(road, with: .color(.black.opacity(0.55)))
+            for i in 0..<5 {
+                let t0 = Double(i) / 5 + 0.04, t1 = t0 + 0.09
+                let y0 = h * t0 * t0, y1 = h * t1 * t1
+                var dash = Path()
+                let half0 = 0.004 + 0.012 * t0, half1 = 0.004 + 0.012 * t1
+                dash.move(to: CGPoint(x: w * (0.5 - half0), y: y0))
+                dash.addLine(to: CGPoint(x: w * (0.5 + half0), y: y0))
+                dash.addLine(to: CGPoint(x: w * (0.5 + half1), y: y1))
+                dash.addLine(to: CGPoint(x: w * (0.5 - half1), y: y1))
+                dash.closeSubpath()
+                context.fill(dash, with: .color(color))
+            }
+        }
+    }
+}
+
+/// Scattered stars of a few sizes (fixed positions, so it never flickers between refreshes).
+private struct Starfield: View {
+    let color: Color
+
+    var body: some View {
+        Canvas { context, size in
+            var seed: UInt64 = 0x408
+            func next() -> Double {
+                seed = seed &* 6364136223846793005 &+ 1442695040888963407
+                return Double(seed >> 33) / Double(UInt64(1) << 31)
+            }
+            for i in 0..<60 {
+                let x = next() * size.width, y = next() * size.height
+                let r = i % 9 == 0 ? 1.8 : (i % 3 == 0 ? 1.1 : 0.7)
+                context.fill(Path(ellipseIn: CGRect(x: x - r, y: y - r, width: r * 2, height: r * 2)), with: .color(color.opacity(0.35 + next() * 0.6)))
             }
         }
     }

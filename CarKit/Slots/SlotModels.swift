@@ -78,8 +78,10 @@ public struct SlotDesign: Codable, Sendable, Equatable, Hashable {
     /// A picture shown instead of the icon (path in the App Group, e.g. "slot-images/x.png", or
     /// "mycar.png" for the live My Car photo). Nil in older files.
     public var imageFile: String?
+    /// This slot's own look (Bold / Neon); nil = the app-wide look from Settings → Appearance.
+    public var look: CardLook?
 
-    public init(value: String, title: String, symbol: String, style: SlotStyle = .dark, source: DataSource? = nil, studioDesignID: UUID? = nil, rotations: [SlotRotation]? = nil, layout: SlotLayout? = nil, cards: [SlotDesign]? = nil, imageFile: String? = nil) {
+    public init(value: String, title: String, symbol: String, style: SlotStyle = .dark, source: DataSource? = nil, studioDesignID: UUID? = nil, rotations: [SlotRotation]? = nil, layout: SlotLayout? = nil, cards: [SlotDesign]? = nil, imageFile: String? = nil, look: CardLook? = nil) {
         self.value = value
         self.title = title
         self.symbol = symbol
@@ -90,6 +92,7 @@ public struct SlotDesign: Codable, Sendable, Equatable, Hashable {
         self.layout = layout
         self.cards = cards
         self.imageFile = imageFile
+        self.look = look
     }
 
     /// The picture's file, if one is set.

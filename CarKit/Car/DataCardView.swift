@@ -78,6 +78,9 @@ public struct DataCardView: View {
             switch size {
             case .accessory: accessory
             case .small, .medium:
+                if let face = card.face {
+                    FaceView(face: face, paint: card.paint, isMedium: size == .medium)
+                } else {
                 switch card {
                 case .service(let summary): ServiceCard(summary: summary, size: size)
                 case .fuel(let summary): FuelCard(summary: summary, size: size)
@@ -91,6 +94,7 @@ public struct DataCardView: View {
                 case .photos(let summary): PhotoCard(summary: summary, size: size)
                 case .music(let summary): MusicCardView(summary: summary, size: size)
                 case .obd(let summary): OBDCard(summary: summary, size: size)
+                }
                 }
             }
         }
@@ -229,12 +233,13 @@ struct SmallLine: View {
 }
 
 struct EmptyCard: View {
+    @Environment(\.cardLook) private var look
     let source: DataSource
     let hint: String
 
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
-            CardHeader(symbol: source.symbol, title: source.displayName, color: Theme.accent)
+            CardHeader(symbol: source.symbol, title: source.displayName, color: look == .neon ? CardPaint(source: source).color(.neon) : Theme.primaryText)
             Spacer(minLength: 0)
             Text(hint)
                 .font(.system(size: 17, weight: .semibold, design: .rounded))
@@ -431,7 +436,7 @@ public struct DataCardTile: View {
     public var body: some View {
         DataCardView(card: card, size: size)
             .padding(14)
-            .background(WidgetCardBackground(style: .standard, tint: card.tint))
+            .background(WidgetCardBackground(style: .standard, paint: card.paint))
             .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
     }
 }

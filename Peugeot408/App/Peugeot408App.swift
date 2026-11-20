@@ -7,6 +7,7 @@ struct Peugeot408App: App {
     @State private var cars = CarDataModel()
     @State private var studio = StudioModel()
     @State private var drive = DriveSession()
+    @State private var appearance = AppearanceModel()
 
     var body: some Scene {
         WindowGroup {
@@ -15,7 +16,9 @@ struct Peugeot408App: App {
                 .environment(cars)
                 .environment(studio)
                 .environment(drive)
-                .tint(Theme.accent)
+                .environment(appearance)
+                .environment(\.cardLook, appearance.look)
+                .tint(appearance.look.appTint)
                 .preferredColorScheme(.dark)
         }
     }

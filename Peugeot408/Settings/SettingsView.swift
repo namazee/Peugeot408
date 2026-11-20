@@ -12,6 +12,11 @@ struct SettingsView: View {
             Form {
                 Section("CarPlay") {
                     NavigationLink {
+                        AppearanceView()
+                    } label: {
+                        Label("Appearance", systemImage: "paintbrush")
+                    }
+                    NavigationLink {
                         HowToCarPlayView()
                     } label: {
                         Label("How to add to CarPlay", systemImage: "car.side")
@@ -94,6 +99,7 @@ struct BackupSection: View {
     @Environment(SlotsModel.self) private var slots
     @Environment(CarDataModel.self) private var cars
     @Environment(StudioModel.self) private var studio
+    @Environment(AppearanceModel.self) private var appearance
     @State private var exportURL: URL?
     @State private var importing = false
     @State private var pendingImport: URL?
@@ -125,7 +131,7 @@ struct BackupSection: View {
         } header: {
             Text("Backup")
         } footer: {
-            Text("One JSON file with your service, fuel, renewals, TnG, parking, Home and Work, prayer zone, slots, Studio designs, connect sound and OBD2 settings. Photos, pictures and imported sounds aren't included.")
+            Text("One JSON file with your service, fuel, renewals, TnG, parking, Home and Work, prayer zone, slots, Studio designs, appearance, connect sound and OBD2 settings. Photos, pictures and imported sounds aren't included.")
         }
         .fileImporter(isPresented: $importing, allowedContentTypes: [.json]) { result in
             if case .success(let url) = result { pendingImport = url }
@@ -164,6 +170,7 @@ struct BackupSection: View {
             cars.reload()
             slots.reload()
             studio.reload()
+            appearance.reload()
             slots.reloadAllWidgets()
             exportURL = nil
             let when = result.createdAt.map { " from \($0.formatted(date: .abbreviated, time: .shortened))" } ?? ""

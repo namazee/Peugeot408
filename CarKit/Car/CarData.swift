@@ -214,7 +214,8 @@ public struct CarData: Sendable, Equatable {
                     symbol: $0.item.symbol,
                     kmLeft: $0.kmLeft,
                     daysLeft: $0.daysLeft,
-                    urgency: $0.urgency
+                    urgency: $0.urgency,
+                    intervalKm: $0.item.intervalKm
                 )
             }
             return .service(ServiceSummary(lines: Array(lines), estimatedKm: estimatedKm(at: date)))
@@ -225,7 +226,8 @@ public struct CarData: Sendable, Equatable {
                 lastPricePerLitre: FuelMath.lastPricePerLitre(fuel.fillUps),
                 averageKmPerLitre: FuelMath.averageKmPerLitre(segments),
                 spentThisMonth: FuelMath.spentInMonth(of: date, fills: fuel.fillUps, calendar: calendar),
-                hasFills: !fuel.fillUps.isEmpty
+                hasFills: !fuel.fillUps.isEmpty,
+                bestKmPerLitre: segments.map(\.kmPerLitre).max()
             ))
 
         case .renewals:
@@ -267,13 +269,16 @@ public struct ServiceLine: Sendable, Equatable {
     public let kmLeft: Int?
     public let daysLeft: Int?
     public let urgency: Urgency
+    /// The item's km interval, for the "how much is left" ring.
+    public let intervalKm: Int?
 
-    public init(name: String, symbol: String, kmLeft: Int?, daysLeft: Int?, urgency: Urgency) {
+    public init(name: String, symbol: String, kmLeft: Int?, daysLeft: Int?, urgency: Urgency, intervalKm: Int? = nil) {
         self.name = name
         self.symbol = symbol
         self.kmLeft = kmLeft
         self.daysLeft = daysLeft
         self.urgency = urgency
+        self.intervalKm = intervalKm
     }
 
     public var isOverdue: Bool {
@@ -318,12 +323,15 @@ public struct FuelSummary: Sendable, Equatable {
     public let averageKmPerLitre: Double?
     public let spentThisMonth: Double
     public let hasFills: Bool
+    /// Best full-to-full tank so far (the Neon gauge's full scale).
+    public let bestKmPerLitre: Double?
 
-    public init(lastPricePerLitre: Double?, averageKmPerLitre: Double?, spentThisMonth: Double, hasFills: Bool) {
+    public init(lastPricePerLitre: Double?, averageKmPerLitre: Double?, spentThisMonth: Double, hasFills: Bool, bestKmPerLitre: Double? = nil) {
         self.lastPricePerLitre = lastPricePerLitre
         self.averageKmPerLitre = averageKmPerLitre
         self.spentThisMonth = spentThisMonth
         self.hasFills = hasFills
+        self.bestKmPerLitre = bestKmPerLitre
     }
 }
 

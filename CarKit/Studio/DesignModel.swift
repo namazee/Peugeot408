@@ -74,6 +74,10 @@ public enum DataField: String, Codable, Sendable, CaseIterable, Identifiable {
     case date
     case dayCounter
     case countdownDays
+    case weekday
+    case dayOfMonth
+    case monthName
+    case yearProgress
     case musicTitle
     case boost
     case coolantTemp
@@ -108,6 +112,10 @@ public enum DataField: String, Codable, Sendable, CaseIterable, Identifiable {
         case .date: "Date"
         case .dayCounter: "Days since (anniversary)"
         case .countdownDays: "Days until (event)"
+        case .weekday: "Weekday"
+        case .dayOfMonth: "Day of month"
+        case .monthName: "Month"
+        case .yearProgress: "Year progress"
         case .musicTitle: "Music title"
         case .boost: "Boost (OBD2)"
         case .coolantTemp: "Coolant (OBD2)"
@@ -129,7 +137,7 @@ public enum DataField: String, Codable, Sendable, CaseIterable, Identifiable {
         case .commuteTime, .nextEvent: .commute
         case .musicTitle: .music
         case .boost, .coolantTemp, .batteryVoltage, .engineRPM: .obd
-        case .clock, .date, .dayCounter, .countdownDays: nil
+        case .clock, .date, .dayCounter, .countdownDays, .weekday, .dayOfMonth, .monthName, .yearProgress: nil
         }
     }
 }
@@ -149,6 +157,9 @@ public enum ArtworkKind: String, Codable, Sendable, CaseIterable {
     case heart
     case star
     case flag
+    case sun
+    case road
+    case starfield
 
     public var displayName: String {
         switch self {
@@ -165,11 +176,14 @@ public enum ArtworkKind: String, Codable, Sendable, CaseIterable {
         case .heart: "Heart"
         case .star: "Sparkle"
         case .flag: "Chequered flag"
+        case .sun: "Setting sun"
+        case .road: "Open road"
+        case .starfield: "Starfield"
         }
     }
 
     /// Shown in the sticker picker (the rest are used by seasonal packs and templates).
-    public static let stickers: [ArtworkKind] = [.ketupat, .crescent, .lantern, .diya, .tree, .fireworks, .heart, .star, .flag, .speedLines]
+    public static let stickers: [ArtworkKind] = [.ketupat, .crescent, .lantern, .diya, .tree, .fireworks, .heart, .star, .flag, .speedLines, .sun, .road, .starfield]
 }
 
 /// What a layer draws.
@@ -182,6 +196,10 @@ public enum LayerContent: Codable, Sendable, Equatable, Hashable {
     case data(DataField)
     /// A gauge arc filled by a field's progress (e.g. km to service); `nil` draws a full decorative arc.
     case gauge(DataField?)
+    /// A full progress ring filled by a field's progress; `nil` draws a full ring.
+    case ring(DataField?)
+    /// A horizontal progress bar filled by a field's progress.
+    case progressBar(DataField?)
     case analogClock
     /// A number-plate style label.
     case plate(String)
@@ -211,6 +229,8 @@ public struct DesignLayer: Codable, Sendable, Equatable, Hashable, Identifiable 
     public var locked: Bool
     /// Optional short label for data layers ("km to service").
     public var caption: String?
+    /// Neon glow around the layer (nil in older files = off).
+    public var glow: Bool?
 
     public init(
         id: UUID = UUID(),
@@ -219,7 +239,7 @@ public struct DesignLayer: Codable, Sendable, Equatable, Hashable, Identifiable 
         rotation: Double = 0, opacity: Double = 1,
         font: DesignFont = .rounded, weight: DesignWeight = .bold, fontSize: Double = 28,
         colorHex: UInt32 = 0xFFFFFF, alignment: DesignAlignment = .leading,
-        shadow: Bool = false, locked: Bool = false, caption: String? = nil
+        shadow: Bool = false, locked: Bool = false, caption: String? = nil, glow: Bool? = nil
     ) {
         self.id = id
         self.content = content
@@ -237,12 +257,13 @@ public struct DesignLayer: Codable, Sendable, Equatable, Hashable, Identifiable 
         self.shadow = shadow
         self.locked = locked
         self.caption = caption
+        self.glow = glow
     }
 
     public var dataField: DataField? {
         switch content {
         case .data(let field): field
-        case .gauge(let field): field
+        case .gauge(let field), .ring(let field), .progressBar(let field): field
         default: nil
         }
     }
@@ -269,6 +290,13 @@ public enum DesignBackground: Codable, Sendable, Equatable, Hashable {
     case texture(DesignTexture, UInt32)
     /// A photo from the Photo Frame library (file name in the photos folder).
     case photo(String)
+    /// A vivid three-colour (aurora) gradient.
+    case aurora(UInt32, UInt32, UInt32)
+    /// A spotlight: a bright centre fading to a dark edge.
+    case spotlight(UInt32, UInt32)
+    /// A solid colour that follows the state of the design's first data field
+    /// (amber when due soon, red when overdue, the AQI band colour for haze); `base` otherwise.
+    case stateColor(UInt32)
 
     /// Approximate colour behind the text, for the contrast check (nil for photos: unknown).
     public var approximateHex: UInt32? {
@@ -277,6 +305,9 @@ public enum DesignBackground: Codable, Sendable, Equatable, Hashable {
         case .gradient(let a, let b): ColorMath.mix(a, b)
         case .texture(_, let hex): hex
         case .photo: nil
+        case .aurora(let a, let b, let c): ColorMath.mix(ColorMath.mix(a, c), b)
+        case .spotlight(let centre, let edge): ColorMath.mix(centre, edge)
+        case .stateColor(let hex): hex
         }
     }
 }
@@ -484,6 +515,15 @@ public enum StudioStores {
 
 /// Colour helpers for hex values (no SwiftUI needed, so tests can use them).
 public enum ColorMath {
+    /// `a` moved towards `b` by `amount` (0…1), per channel.
+    public static func mix(_ a: UInt32, _ b: UInt32, amount: Double) -> UInt32 {
+        func channel(_ shift: UInt32) -> UInt32 {
+            let x = Double((a >> shift) & 0xFF), y = Double((b >> shift) & 0xFF)
+            return UInt32((x + (y - x) * min(max(amount, 0), 1)).rounded()) << shift
+        }
+        return channel(16) | channel(8) | channel(0)
+    }
+
     public static func components(_ hex: UInt32) -> (r: Double, g: Double, b: Double) {
         (Double((hex >> 16) & 0xFF) / 255, Double((hex >> 8) & 0xFF) / 255, Double(hex & 0xFF) / 255)
     }

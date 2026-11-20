@@ -150,28 +150,40 @@ struct TemplateGalleryView: View {
                 Text("Previews use your real data. Pick one to open it in the builder.")
             }
 
-            Section {
-                let columns = [GridItem(.adaptive(minimum: canvas == .small ? 140 : 300), spacing: 12)]
-                LazyVGrid(columns: columns, spacing: 14) {
-                    ForEach(TemplateStyle.allCases) { style in
-                        let design = template(style)
-                        Button {
-                            onPick(design)
-                            dismiss()
-                        } label: {
-                            VStack(alignment: .leading, spacing: 6) {
-                                DesignView(card: DesignResolver.card(for: design, data: cars.data, studio: studio.state, at: .now))
-                                    .aspectRatio(canvas.aspectRatio, contentMode: .fit)
-                                    .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
-                                Text(style.displayName).font(.subheadline.weight(.semibold))
+            ForEach(TemplateGroup.allCases) { group in
+                Section(group.displayName) {
+                    let columns = [GridItem(.adaptive(minimum: canvas == .small ? 140 : 300), spacing: 12)]
+                    LazyVGrid(columns: columns, spacing: 14) {
+                        ForEach(group.styles) { style in
+                            let design = template(style)
+                            Button {
+                                onPick(design)
+                                dismiss()
+                            } label: {
+                                VStack(alignment: .leading, spacing: 6) {
+                                    DesignView(card: DesignResolver.card(for: design, data: cars.data, studio: studio.state, at: .now))
+                                        .aspectRatio(canvas.aspectRatio, contentMode: .fit)
+                                        .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+                                    HStack(spacing: 6) {
+                                        Text(style.displayName).font(.subheadline.weight(.semibold))
+                                        if style.isNew {
+                                            Text("NEW")
+                                                .font(.caption2.weight(.heavy))
+                                                .padding(.horizontal, 5)
+                                                .padding(.vertical, 1)
+                                                .background(Theme.accent, in: Capsule())
+                                                .accessibilityLabel("New")
+                                        }
+                                    }
+                                }
                             }
+                            .buttonStyle(.plain)
                         }
-                        .buttonStyle(.plain)
                     }
+                    .padding(.vertical, 6)
                 }
-                .padding(.vertical, 6)
+                .listRowBackground(Color.clear)
             }
-            .listRowBackground(Color.clear)
         }
         .navigationTitle("Templates")
     }

@@ -5,6 +5,7 @@ import WidgetKit
 /// The foreground of a slot, shared by the widget and the app's mock CarPlay screen
 /// so both look identical.
 public struct SlotContentView: View {
+    @Environment(\.cardLook) private var look
     private let slot: Int
     private let content: SlotContent
     private let isMedium: Bool
@@ -70,7 +71,7 @@ public struct SlotContentView: View {
 
     @ViewBuilder
     private func designView(_ design: SlotDesign) -> some View {
-        let iconColor: Color = design.style == .accent ? Theme.primaryText : Theme.accent
+        let iconColor: Color = design.style == .accent || look == .bold ? Theme.primaryText : CardLook.neon.appTint
         let labelColor: Color = design.style == .accent ? Theme.primaryText.opacity(0.8) : Theme.secondaryText
 
         if let url = design.imageURL, let image = UIImage(contentsOfFile: url.path(percentEncoded: false)) {
@@ -81,6 +82,7 @@ public struct SlotContentView: View {
                     .font(.system(size: 44, weight: .semibold))
                     .foregroundStyle(iconColor)
                     .widgetAccentable()
+                    .neonGlow(look == .neon ? iconColor : nil, radius: 6)
                     .frame(width: 64)
                 VStack(alignment: .leading, spacing: 2) {
                     valueText(design.value, size: 46)
@@ -92,9 +94,10 @@ public struct SlotContentView: View {
         } else {
             VStack(alignment: .leading, spacing: 2) {
                 Image(systemName: design.symbol)
-                    .font(.system(size: 24, weight: .semibold))
+                    .font(.system(size: look == .bold ? 30 : 26, weight: .bold))
                     .foregroundStyle(iconColor)
                     .widgetAccentable()
+                    .neonGlow(look == .neon ? iconColor : nil, radius: 6)
                 Spacer(minLength: 0)
                 valueText(design.value, size: 36)
                 labelText(design.title, color: labelColor)
@@ -127,11 +130,12 @@ public struct SlotContentView: View {
 
     private func valueText(_ value: String, size: CGFloat) -> some View {
         Text(value)
-            .font(Theme.number(size))
+            .font(Theme.number(size, weight: .heavy))
             .foregroundStyle(Theme.primaryText)
             .lineLimit(1)
             .minimumScaleFactor(0.4)
             .widgetAccentable()
+            .neonGlow(look == .neon ? CardLook.neon.appTint : nil, radius: 6)
     }
 
     private func labelText(_ title: String, color: Color) -> some View {
@@ -164,7 +168,7 @@ public struct SlotTile: View {
                 SlotContentView(slot: slot, content: content, isMedium: isMedium)
                     .padding(content.isCards ? 7 : 14)
                     .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-                    .background(WidgetCardBackground(style: content.cardStyle, tint: content.tint))
+                    .background(WidgetCardBackground(style: content.cardStyle, paint: content.paint))
             }
         }
         .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))

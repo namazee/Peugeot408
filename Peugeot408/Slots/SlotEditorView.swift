@@ -6,6 +6,7 @@ struct SlotEditorView: View {
     @Environment(SlotsModel.self) private var slots
     @Environment(CarDataModel.self) private var cars
     @Environment(StudioModel.self) private var studio
+    @Environment(AppearanceModel.self) private var appearance
     @Environment(\.dismiss) private var dismiss
 
     let slot: Int
@@ -43,8 +44,19 @@ struct SlotEditorView: View {
                         SlotTile(slot: slot, content: previewContent, isMedium: true)
                             .frame(height: 120)
                     }
+                    .environment(\.cardLook, draft.look ?? appearance.look)
                     .listRowInsets(EdgeInsets(top: 12, leading: 12, bottom: 12, trailing: 12))
                     .listRowBackground(Color.clear)
+                }
+
+                Section {
+                    Picker("Look", selection: $draft.look) {
+                        Text("App (\(appearance.look.displayName))").tag(CardLook?.none)
+                        ForEach(CardLook.allCases) { Text($0.displayName).tag(CardLook?.some($0)) }
+                    }
+                    .pickerStyle(.segmented)
+                } footer: {
+                    Text("Bold: full-colour tiles. Neon: dark tiles with glowing numbers. \"App\" follows Settings → Appearance.")
                 }
 
                 Section {

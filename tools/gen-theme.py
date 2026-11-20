@@ -34,6 +34,10 @@ def render():
                 continue
             swift_name = name if not prefix else prefix + name[0].upper() + name[1:]
             lines.append(f"    public static let {swift_name}: UInt32 = {hex_literal(value)}")
+    for look in ("bold", "neon"):
+        entries = ", ".join(f'"{name}": {hex_literal(value)}' for name, value in tokens[look].items() if not name.startswith("$"))
+        lines.append(f"    /// {look.capitalize()} look: colour per data source (keys are `DataSource` raw values).")
+        lines.append(f"    public static let {look}: [String: UInt32] = [{entries}]")
     for name, value in tokens["radius"].items():
         lines.append(f"    public static let {name}Radius: Double = {float(value)}")
     lines.append("}")

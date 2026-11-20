@@ -8,6 +8,13 @@ struct SlotEntry: TimelineEntry {
     let date: Date
     let slot: Int
     let content: SlotContent
+    /// The slot's own look, or the app-wide one.
+    var look: CardLook = .bold
+
+    /// Settings → Appearance, overridden by the slot's own choice.
+    static func look(slot: Int, state: SlotsState) -> CardLook {
+        state.design(for: slot).look ?? AppearanceStore.settings().load().look
+    }
 
     static func sample(slot: Int, date: Date = .now) -> SlotEntry {
         SlotEntry(date: date, slot: slot, content: .design(.starter(for: slot)))
@@ -28,8 +35,9 @@ struct SlotProvider: TimelineProvider {
         }
         let now = Date()
         let items = SlotTimeline.items(slot: slot, state: SlotStore.live.load(), data: CarData.load(), studio: StudioStores.studio().load(), now: now)
+        let state = SlotStore.live.load()
         let content = items.first?.content ?? .design(.starter(for: slot))
-        completion(SlotEntry(date: now, slot: slot, content: content))
+        completion(SlotEntry(date: now, slot: slot, content: content, look: SlotEntry.look(slot: slot, state: state)))
     }
 
     func getTimeline(in context: Context, completion: @escaping (Timeline<SlotEntry>) -> Void) {
@@ -53,12 +61,13 @@ struct SlotProvider: TimelineProvider {
         let needsData = SlotTimeline.needsData(slot: slot, state: state, studio: studio)
         let data = needsData ? CarData.load() : CarData.empty
         let items = SlotTimeline.items(slot: slot, state: state, data: data, studio: studio, now: now)
+        let look = SlotEntry.look(slot: slot, state: state)
         var entries = items.map { item -> SlotEntry in
             // The map uses the PNG rendered for this slot's size.
             if case .data(let card) = item.content, card.source == .map {
-                return SlotEntry(date: item.date, slot: slot, content: .data(data.mapCard(at: item.date, width: displaySize.width, height: displaySize.height)))
+                return SlotEntry(date: item.date, slot: slot, content: .data(data.mapCard(at: item.date, width: displaySize.width, height: displaySize.height)), look: look)
             }
-            return SlotEntry(date: item.date, slot: slot, content: item.content)
+            return SlotEntry(date: item.date, slot: slot, content: item.content, look: look)
         }
         if entries.isEmpty {
             entries = [.sample(slot: slot, date: now)]
@@ -81,6 +90,7 @@ struct SlotWidgetView: View {
 
     var body: some View {
         content
+            .environment(\.cardLook, entry.look)
             .widgetURL(URL(string: "peugeot408://slot/\(entry.slot)"))
     }
 
@@ -92,7 +102,7 @@ struct SlotWidgetView: View {
                     DesignBackgroundView(background: card.design.background, card: card)
                 }
         } else {
-            WidgetCard(style: entry.content.cardStyle, tint: entry.content.tint) {
+            WidgetCard(style: entry.content.cardStyle, paint: entry.content.paint) {
                 SlotContentView(slot: entry.slot, content: entry.content, isMedium: family == .systemMedium)
                     // Split / Quad cards use most of the tall CarPlay column; single content keeps the system margins.
                     .padding(entry.content.isCards ? EdgeInsets(top: 7, leading: 7, bottom: 7, trailing: 7) : margins)

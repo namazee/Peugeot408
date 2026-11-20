@@ -12,8 +12,38 @@ public enum TemplateStyle: String, Codable, Sendable, CaseIterable, Identifiable
     case countdown
     case anniversary
     case myCar
+    case boldTile
+    case neonRing
+    case twinGauges
+    case aurora
+    case sunsetDrive
+    case nightDrive
+    case showroom
+    case racingStripes
+    case starryNight
+    case bigDate
+    case yearProgress
+    case retroLED
 
     public var id: String { rawValue }
+
+    /// Gallery section.
+    public var group: TemplateGroup {
+        switch self {
+        case .sporty, .minimal, .premium, .dashboard, .boldTile, .neonRing, .twinGauges, .aurora, .racingStripes: .data
+        case .myCar, .photo, .nightDrive, .showroom, .sunsetDrive: .car
+        case .clockAnalog, .clockDigital, .bigDate, .retroLED, .yearProgress: .clockDate
+        case .countdown, .anniversary, .starryNight: .special
+        }
+    }
+
+    /// Marked "New" in the gallery.
+    public var isNew: Bool {
+        switch self {
+        case .sporty, .minimal, .premium, .dashboard, .photo, .clockAnalog, .clockDigital, .countdown, .anniversary, .myCar: false
+        default: true
+        }
+    }
 
     public var displayName: String {
         switch self {
@@ -27,16 +57,47 @@ public enum TemplateStyle: String, Codable, Sendable, CaseIterable, Identifiable
         case .countdown: "Countdown"
         case .anniversary: "Anniversary"
         case .myCar: "My Car"
+        case .boldTile: "Bold Tile"
+        case .neonRing: "Neon Ring"
+        case .twinGauges: "Twin Gauges"
+        case .aurora: "Aurora"
+        case .sunsetDrive: "Sunset Drive"
+        case .nightDrive: "Night Drive"
+        case .showroom: "Showroom"
+        case .racingStripes: "Racing Stripes"
+        case .starryNight: "Starry Night"
+        case .bigDate: "Big Date"
+        case .yearProgress: "Year Progress"
+        case .retroLED: "Retro LED"
         }
     }
 
     /// Templates that take a data source (the rest have their own content).
     public var usesDataSource: Bool {
         switch self {
-        case .sporty, .minimal, .premium, .dashboard, .photo, .myCar: true
-        case .clockAnalog, .clockDigital, .countdown, .anniversary: false
+        case .sporty, .minimal, .premium, .dashboard, .photo, .myCar,
+             .boldTile, .neonRing, .twinGauges, .aurora, .sunsetDrive, .nightDrive, .showroom, .racingStripes: true
+        case .clockAnalog, .clockDigital, .countdown, .anniversary, .starryNight, .bigDate, .yearProgress, .retroLED: false
         }
     }
+}
+
+/// Template gallery sections.
+public enum TemplateGroup: String, CaseIterable, Sendable, Identifiable {
+    case data, car, clockDate, special
+
+    public var id: String { rawValue }
+
+    public var displayName: String {
+        switch self {
+        case .data: "Data"
+        case .car: "Car"
+        case .clockDate: "Clock & Date"
+        case .special: "Special"
+        }
+    }
+
+    public var styles: [TemplateStyle] { TemplateStyle.allCases.filter { $0.group == self } }
 }
 
 /// The main and second value a data source contributes to a template.
@@ -163,10 +224,162 @@ public enum Templates {
             if wide {
                 layers.append(DesignLayer(content: .plate(""), x: 0.76, y: 0.74, width: 0.36, height: 0.17, fontSize: 16))
             }
+
+        case .boldTile:
+            background = .stateColor(boldHex(for: source))
+            layers = [
+                DesignLayer(content: .symbol(bind.symbol), x: wide ? 0.07 : 0.15, y: 0.17, width: wide ? 0.07 : 0.15, height: 0.15, opacity: 0.9, colorHex: white),
+                DesignLayer(content: .data(bind.primary), x: 0.5, y: 0.52, width: 0.9, height: 0.42, font: .rounded, weight: .heavy, fontSize: wide ? 54 : 42, colorHex: white, alignment: .center, shadow: true),
+                DesignLayer(content: .text(bind.label.uppercased()), x: 0.5, y: 0.82, width: 0.9, height: 0.13, opacity: 0.85, font: .rounded, weight: .bold, fontSize: 14, colorHex: white, alignment: .center),
+            ]
+
+        case .neonRing:
+            let neon: UInt32 = 0x22D3EE
+            background = .solid(0x05060A)
+            if wide {
+                layers = [
+                    DesignLayer(content: .ring(bind.primary), x: 0.2, y: 0.5, width: 0.36, height: 0.82, colorHex: neon, glow: true),
+                    DesignLayer(content: .symbol(bind.symbol), x: 0.2, y: 0.5, width: 0.09, height: 0.22, colorHex: neon, glow: true),
+                    DesignLayer(content: .data(bind.primary), x: 0.67, y: 0.44, width: 0.6, height: 0.36, font: .rounded, weight: .heavy, fontSize: 38, colorHex: white, alignment: .leading, glow: true),
+                    DesignLayer(content: .text(bind.label.uppercased()), x: 0.67, y: 0.72, width: 0.6, height: 0.14, font: .rounded, weight: .bold, fontSize: 14, colorHex: neon, alignment: .leading),
+                ]
+            } else {
+                layers = [
+                    DesignLayer(content: .ring(bind.primary), x: 0.5, y: 0.5, width: 0.88, height: 0.88, colorHex: neon, glow: true),
+                    DesignLayer(content: .symbol(bind.symbol), x: 0.5, y: 0.3, width: 0.14, height: 0.12, colorHex: neon),
+                    DesignLayer(content: .data(bind.primary), x: 0.5, y: 0.52, width: 0.6, height: 0.24, font: .rounded, weight: .heavy, fontSize: 26, colorHex: white, alignment: .center, glow: true),
+                    DesignLayer(content: .text(bind.label.uppercased()), x: 0.5, y: 0.7, width: 0.56, height: 0.1, font: .rounded, weight: .bold, fontSize: 14, colorHex: neon, alignment: .center),
+                ]
+            }
+
+        case .twinGauges:
+            background = .texture(.carbon, 0x0B0D12)
+            let second = bind.secondary ?? .yearProgress
+            let orange: UInt32 = 0xFB923C, cyan: UInt32 = 0x22D3EE
+            let gw = wide ? 0.3 : 0.48
+            layers = [
+                DesignLayer(content: .gauge(bind.primary), x: wide ? 0.27 : 0.26, y: 0.42, width: gw, height: wide ? 0.78 : 0.5, colorHex: orange, glow: true),
+                DesignLayer(content: .gauge(second), x: wide ? 0.73 : 0.74, y: 0.42, width: gw, height: wide ? 0.78 : 0.5, colorHex: cyan, glow: true),
+                DesignLayer(content: .data(bind.primary), x: wide ? 0.27 : 0.26, y: wide ? 0.5 : 0.78, width: wide ? 0.3 : 0.48, height: 0.2, font: .rajdhani, weight: .bold, fontSize: wide ? 24 : 18, colorHex: white, alignment: .center, caption: wide ? bind.label : nil),
+                DesignLayer(content: .data(second), x: wide ? 0.73 : 0.74, y: wide ? 0.5 : 0.78, width: wide ? 0.3 : 0.48, height: 0.2, font: .rajdhani, weight: .bold, fontSize: wide ? 24 : 18, colorHex: white, alignment: .center, caption: wide ? second.displayName : nil),
+            ]
+
+        case .aurora:
+            background = .aurora(0x7C3AED, 0x06B6D4, 0xF43F5E)
+            layers = [
+                DesignLayer(content: .symbol(bind.symbol), x: wide ? 0.07 : 0.15, y: 0.17, width: wide ? 0.07 : 0.15, height: 0.15, colorHex: white),
+                DesignLayer(content: .data(bind.primary), x: 0.5, y: 0.53, width: 0.9, height: 0.4, font: .rounded, weight: .heavy, fontSize: wide ? 50 : 38, colorHex: white, alignment: wide ? .leading : .center, shadow: true),
+                DesignLayer(content: .text(bind.label), x: 0.5, y: 0.82, width: 0.9, height: 0.13, font: .rounded, weight: .semibold, fontSize: 15, colorHex: white, alignment: wide ? .leading : .center),
+            ]
+
+        case .sunsetDrive:
+            background = .gradient(0xFF8A3D, 0x3B1C6E)
+            if wide {
+                layers = [
+                    DesignLayer(content: .sticker(.sun), x: 0.27, y: 0.42, width: 0.3, height: 0.62, colorHex: 0xFF4D6D),
+                    DesignLayer(content: .sticker(.road), x: 0.27, y: 0.86, width: 0.54, height: 0.3, colorHex: 0xFFD166),
+                    DesignLayer(content: .data(bind.primary), x: 0.74, y: 0.44, width: 0.48, height: 0.34, font: .rounded, weight: .heavy, fontSize: 34, colorHex: white, alignment: .leading, shadow: true),
+                    DesignLayer(content: .text(bind.label.uppercased()), x: 0.74, y: 0.7, width: 0.48, height: 0.14, font: .rounded, weight: .bold, fontSize: 14, colorHex: 0xFFE4C4, alignment: .leading),
+                ]
+            } else {
+                layers = [
+                    DesignLayer(content: .sticker(.sun), x: 0.5, y: 0.5, width: 0.56, height: 0.56, colorHex: 0xFF4D6D),
+                    DesignLayer(content: .sticker(.road), x: 0.5, y: 0.87, width: 1.0, height: 0.28, colorHex: 0xFFD166),
+                    DesignLayer(content: .data(bind.primary), x: 0.5, y: 0.17, width: 0.9, height: 0.22, font: .rounded, weight: .heavy, fontSize: 26, colorHex: white, alignment: .center, shadow: true),
+                ]
+            }
+
+        case .nightDrive:
+            let ice: UInt32 = 0x7DD3FC
+            background = .spotlight(0x1E3A8A, 0x020617)
+            if wide {
+                layers = [
+                    DesignLayer(content: .carPhoto, x: 0.32, y: 0.52, width: 0.6, height: 0.86, colorHex: white),
+                    DesignLayer(content: .data(bind.primary), x: 0.78, y: 0.44, width: 0.42, height: 0.32, font: .rounded, weight: .heavy, fontSize: 30, colorHex: ice, alignment: .leading, glow: true),
+                    DesignLayer(content: .text(bind.label.uppercased()), x: 0.78, y: 0.68, width: 0.42, height: 0.14, font: .rounded, weight: .bold, fontSize: 14, colorHex: 0xBFDBFE, alignment: .leading),
+                ]
+            } else {
+                layers = [
+                    DesignLayer(content: .carPhoto, x: 0.5, y: 0.44, width: 0.98, height: 0.6, colorHex: white),
+                    DesignLayer(content: .data(bind.primary), x: 0.5, y: 0.84, width: 0.9, height: 0.2, font: .rounded, weight: .heavy, fontSize: 22, colorHex: ice, alignment: .center, glow: true),
+                ]
+            }
+
+        case .showroom:
+            background = .spotlight(0x6B7A99, 0x07080C)
+            if wide {
+                layers = [
+                    DesignLayer(content: .carPhoto, x: 0.34, y: 0.52, width: 0.64, height: 0.88, colorHex: white),
+                    DesignLayer(content: .data(bind.primary), x: 0.8, y: 0.36, width: 0.38, height: 0.26, font: .rounded, weight: .bold, fontSize: 24, colorHex: white, alignment: .center, shadow: true, caption: bind.label),
+                    DesignLayer(content: .plate(""), x: 0.8, y: 0.72, width: 0.34, height: 0.17, fontSize: 16),
+                ]
+            } else {
+                layers = [
+                    DesignLayer(content: .data(bind.primary), x: 0.5, y: 0.13, width: 0.9, height: 0.16, font: .rounded, weight: .bold, fontSize: 18, colorHex: white, alignment: .center, shadow: true),
+                    DesignLayer(content: .carPhoto, x: 0.5, y: 0.5, width: 0.98, height: 0.58, colorHex: white),
+                    DesignLayer(content: .plate(""), x: 0.5, y: 0.87, width: 0.52, height: 0.14, fontSize: 14),
+                ]
+            }
+
+        case .racingStripes:
+            background = .solid(0xD7263D)
+            layers = [
+                DesignLayer(content: .sticker(.stripes), x: wide ? 0.86 : 0.8, y: 0.5, width: wide ? 0.3 : 0.5, height: 1.5, rotation: 18, opacity: 0.9, colorHex: white),
+                DesignLayer(content: .sticker(.flag), x: wide ? 0.06 : 0.13, y: 0.17, width: wide ? 0.07 : 0.14, height: 0.14, colorHex: white),
+                DesignLayer(content: .data(bind.primary), x: wide ? 0.4 : 0.42, y: 0.54, width: wide ? 0.72 : 0.76, height: 0.34, font: .orbitron, weight: .heavy, fontSize: wide ? 34 : 24, colorHex: white, alignment: .leading, shadow: true),
+                DesignLayer(content: .text(bind.label.uppercased()), x: wide ? 0.4 : 0.42, y: 0.8, width: wide ? 0.72 : 0.76, height: 0.13, font: .orbitron, weight: .bold, fontSize: 14, colorHex: 0xFFE4E6, alignment: .leading),
+            ]
+
+        case .starryNight:
+            background = .gradient(0x1E1B4B, 0x020617)
+            layers = [
+                DesignLayer(content: .sticker(.starfield), x: 0.5, y: 0.5, width: 1, height: 1, colorHex: white),
+                DesignLayer(content: .sticker(.crescent), x: wide ? 0.88 : 0.78, y: 0.24, width: wide ? 0.16 : 0.3, height: 0.32, colorHex: 0xFDE68A, glow: true),
+                DesignLayer(content: .data(.nextPrayerName), x: wide ? 0.36 : 0.45, y: 0.5, width: wide ? 0.64 : 0.82, height: 0.18, font: .rounded, weight: .semibold, fontSize: 18, colorHex: 0xC7D2FE, alignment: .leading),
+                DesignLayer(content: .data(.prayerCountdown), x: wide ? 0.36 : 0.45, y: 0.74, width: wide ? 0.64 : 0.82, height: 0.28, font: .rounded, weight: .heavy, fontSize: wide ? 40 : 30, colorHex: white, alignment: .leading, glow: true),
+            ]
+
+        case .bigDate:
+            background = .gradient(0xFFFFFF, 0xE2E8F0)
+            let red: UInt32 = 0xE11D48, ink: UInt32 = 0x0F172A
+            if wide {
+                layers = [
+                    DesignLayer(content: .data(.dayOfMonth), x: 0.24, y: 0.52, width: 0.4, height: 0.8, font: .rounded, weight: .heavy, fontSize: 92, colorHex: ink, alignment: .center),
+                    DesignLayer(content: .data(.weekday), x: 0.7, y: 0.4, width: 0.52, height: 0.2, font: .rounded, weight: .heavy, fontSize: 24, colorHex: red, alignment: .leading),
+                    DesignLayer(content: .data(.monthName), x: 0.7, y: 0.62, width: 0.52, height: 0.16, font: .rounded, weight: .bold, fontSize: 16, colorHex: 0x475569, alignment: .leading),
+                ]
+            } else {
+                layers = [
+                    DesignLayer(content: .data(.weekday), x: 0.5, y: 0.17, width: 0.9, height: 0.16, font: .rounded, weight: .heavy, fontSize: 17, colorHex: red, alignment: .center),
+                    DesignLayer(content: .data(.dayOfMonth), x: 0.5, y: 0.6, width: 0.9, height: 0.66, font: .rounded, weight: .heavy, fontSize: 86, colorHex: ink, alignment: .center),
+                ]
+            }
+
+        case .yearProgress:
+            let mint: UInt32 = 0x34D399
+            background = .gradient(0x0F172A, 0x020617)
+            layers = [
+                DesignLayer(content: .text("THIS YEAR"), x: 0.5, y: 0.2, width: 0.84, height: 0.13, font: .rounded, weight: .bold, fontSize: 14, colorHex: 0x94A3B8, alignment: .leading),
+                DesignLayer(content: .data(.yearProgress), x: 0.5, y: 0.48, width: 0.84, height: 0.38, font: .rounded, weight: .heavy, fontSize: wide ? 56 : 46, colorHex: white, alignment: .leading),
+                DesignLayer(content: .progressBar(.yearProgress), x: 0.5, y: 0.8, width: 0.84, height: 0.09, colorHex: mint, glow: true),
+            ]
+
+        case .retroLED:
+            let amber: UInt32 = 0xFFB020
+            background = .solid(0x050505)
+            layers = [
+                DesignLayer(content: .data(.clock), x: 0.5, y: 0.45, width: 0.92, height: 0.4, font: .mono, weight: .heavy, fontSize: wide ? 48 : 30, colorHex: amber, alignment: .center, glow: true),
+                DesignLayer(content: .data(.date), x: 0.5, y: 0.76, width: 0.9, height: 0.15, opacity: 0.75, font: .mono, weight: .bold, fontSize: 15, colorHex: amber, alignment: .center),
+            ]
         }
 
         let name = style.usesDataSource ? "\(style.displayName) · \(bind.label)" : style.displayName
         return CardDesign(name: name, canvas: canvas, background: background, layers: layers, template: style.rawValue, eventDate: eventDate)
+    }
+
+    /// Each source's own colour for Bold Tile (it turns amber or red when the value needs attention).
+    public static func boldHex(for source: DataSource) -> UInt32 {
+        CardPaint(source: source).hex(.bold)
     }
 
     /// The design a seasonal pack shows (iftar countdown in Ramadan, greetings otherwise).

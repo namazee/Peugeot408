@@ -27,6 +27,7 @@ public struct DesignView: View {
                         .rotationEffect(.degrees(layer.rotation))
                         .opacity(layer.opacity)
                         .shadow(color: layer.shadow ? .black.opacity(0.6) : .clear, radius: 3 * scale, y: 1.5 * scale)
+                        .modifier(NeonGlow(isOn: layer.glow == true, color: Color(hex: layer.colorHex), scale: scale))
                         .position(x: layer.x * geo.size.width, y: layer.y * geo.size.height)
                 }
             }
@@ -77,6 +78,35 @@ public struct DesignBackgroundView: View {
             } else {
                 Theme.surface
             }
+        case .aurora(let a, let b, let c):
+            ZStack {
+                LinearGradient(colors: [Color(hex: a), Color(hex: b)], startPoint: .topLeading, endPoint: .bottomTrailing)
+                RadialGradient(colors: [Color(hex: c).opacity(0.9), .clear], center: .bottomLeading, startRadius: 0, endRadius: 220)
+                RadialGradient(colors: [Color(hex: a).opacity(0.55), .clear], center: .topTrailing, startRadius: 0, endRadius: 160)
+            }
+        case .spotlight(let centre, let edge):
+            RadialGradient(colors: [Color(hex: centre), Color(hex: edge)], center: UnitPoint(x: 0.5, y: 0.42), startRadius: 4, endRadius: 190)
+        case .stateColor(let base):
+            let hex = card?.stateHex ?? base
+            LinearGradient(colors: [Color(hex: ColorMath.mix(hex, 0xFFFFFF, amount: 0.12)), Color(hex: ColorMath.mix(hex, 0x000000, amount: 0.28))],
+                           startPoint: .top, endPoint: .bottom)
+        }
+    }
+}
+
+/// Neon glow: two soft halos in the layer's own colour.
+private struct NeonGlow: ViewModifier {
+    let isOn: Bool
+    let color: Color
+    let scale: Double
+
+    func body(content: Content) -> some View {
+        if isOn {
+            content
+                .shadow(color: color.opacity(0.85), radius: 4 * scale)
+                .shadow(color: color.opacity(0.55), radius: 12 * scale)
+        } else {
+            content
         }
     }
 }
@@ -127,6 +157,12 @@ private struct LayerView: View {
             dataText(field)
         case .gauge(let field):
             ArtworkView(kind: .gaugeArc, color: color, progress: field.flatMap { card.values[$0]?.progress } ?? 1)
+        case .ring(let field):
+            ProgressRing(color: color, progress: field.flatMap { card.values[$0]?.progress } ?? 1)
+                .widgetAccentable()
+        case .progressBar(let field):
+            ProgressBar(color: color, progress: field.flatMap { card.values[$0]?.progress } ?? 1)
+                .widgetAccentable()
         case .analogClock:
             AnalogClock(date: card.date, color: color)
         case .seasonalArt(let occasion):
@@ -214,6 +250,46 @@ private struct LayerView: View {
         case .leading: .leading
         case .center: .center
         case .trailing: .trailing
+        }
+    }
+}
+
+/// A full ring with a track, filled clockwise from the top.
+private struct ProgressRing: View {
+    let color: Color
+    let progress: Double
+
+    var body: some View {
+        GeometryReader { geo in
+            let s = min(geo.size.width, geo.size.height)
+            ZStack {
+                Circle().stroke(color.opacity(0.22), lineWidth: s * 0.085)
+                Circle()
+                    .trim(from: 0, to: min(max(progress, 0), 1))
+                    .stroke(color, style: StrokeStyle(lineWidth: s * 0.085, lineCap: .round))
+                    .rotationEffect(.degrees(-90))
+            }
+            .padding(s * 0.05)
+            .frame(width: s, height: s)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+        }
+    }
+}
+
+/// A rounded bar with a track.
+private struct ProgressBar: View {
+    let color: Color
+    let progress: Double
+
+    var body: some View {
+        GeometryReader { geo in
+            let h = min(geo.size.height, 14)
+            ZStack(alignment: .leading) {
+                Capsule().fill(color.opacity(0.25))
+                Capsule().fill(color).frame(width: max(h, geo.size.width * min(max(progress, 0), 1)))
+            }
+            .frame(height: h)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
     }
 }

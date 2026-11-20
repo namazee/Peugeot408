@@ -15,6 +15,10 @@ public enum ThemeTokens {
     public static let aqiUnhealthy: UInt32 = 0xEAB308
     public static let aqiVeryUnhealthy: UInt32 = 0xF97316
     public static let aqiHazardous: UInt32 = 0xE5484D
+    /// Bold look: colour per data source (keys are `DataSource` raw values).
+    public static let bold: [String: UInt32] = ["service": 0x1F4FD8, "fuel": 0x0F766E, "renewals": 0x6D28D9, "tng": 0x059669, "parking": 0x2563EB, "prayer": 0x4338CA, "commute": 0x0E7490, "weather": 0x0284C7, "map": 0x2563EB, "photos": 0xBE185D, "music": 0xE11D48, "obd": 0xB91C1C]
+    /// Neon look: colour per data source (keys are `DataSource` raw values).
+    public static let neon: [String: UInt32] = ["service": 0x4DA3FF, "fuel": 0x2DD4BF, "renewals": 0xA78BFA, "tng": 0x34D399, "parking": 0x60A5FA, "prayer": 0x818CF8, "commute": 0x22D3EE, "weather": 0x38BDF8, "map": 0x60A5FA, "photos": 0xF472B6, "music": 0xFB7185, "obd": 0xF87171]
     public static let cardRadius: Double = 12.0
     public static let widgetRadius: Double = 22.0
 }

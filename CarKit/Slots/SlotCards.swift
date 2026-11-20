@@ -133,6 +133,7 @@ public struct SlotCardsView: View {
 /// One card. `compact` = Quad: icon + value only, no label.
 struct SlotCardView: View {
     @Environment(\.widgetRenderingMode) private var renderingMode
+    @Environment(\.cardLook) private var look
     let slot: Int
     let content: SlotContent
     let compact: Bool
@@ -191,12 +192,28 @@ struct SlotCardView: View {
         return .ok
     }
 
+    private var paint: CardPaint {
+        if case .data(let card) = content { return card.paint }
+        return .plain
+    }
+
+    /// Neon value / icon colour; white on Bold tiles.
+    private var ink: Color { look == .neon ? paint.color(.neon) : Theme.primaryText }
+
     @ViewBuilder
     private var background: some View {
         let shape = RoundedRectangle(cornerRadius: 12, style: .continuous)
         if renderingMode == .fullColor {
-            shape.fill(Theme.surface.opacity(0.75))
-                .overlay(shape.strokeBorder(urgency == .ok ? Color.white.opacity(0.07) : urgency.color().opacity(0.8), lineWidth: urgency == .ok ? 1 : 1.5))
+            switch look {
+            case .bold:
+                BoldBackground(color: paint.color(.bold))
+                    .clipShape(shape)
+                    .overlay(shape.strokeBorder(.white.opacity(0.12), lineWidth: 1))
+            case .neon:
+                shape.fill(Color(hex: 0x0A0D14).opacity(0.92))
+                    .overlay(RadialGradient(colors: [paint.color(.neon).opacity(0.28), .clear], center: .bottomTrailing, startRadius: 0, endRadius: 110).clipShape(shape))
+                    .overlay(shape.strokeBorder(paint.color(.neon).opacity(0.55), lineWidth: 1.2))
+            }
         } else {
             // Tinted / clear CarPlay: no fills, so a thin line keeps the cards apart.
             shape.strokeBorder(Color.white.opacity(0.35), lineWidth: 1)
@@ -247,24 +264,27 @@ struct SlotCardView: View {
             VStack(alignment: .leading, spacing: compact ? 2 : 3) {
                 HStack(spacing: 5) {
                     Image(systemName: card.symbol)
-                        .font(.system(size: compact ? 17 : 15, weight: .semibold))
-                        .foregroundStyle(card.urgency.color(fallback: Theme.accent))
+                        .font(.system(size: compact ? 18 : 16, weight: .bold))
+                        .foregroundStyle(look == .bold ? Theme.primaryText : ink)
                         .widgetAccentable()
+                        .neonGlow(look == .neon ? ink : nil, radius: 3)
                     if !compact {
-                        Text(card.label)
-                            .font(Theme.label(13))
-                            .foregroundStyle(Theme.secondaryText)
+                        Text(card.label.uppercased())
+                            .font(Theme.label(12))
+                            .tracking(0.4)
+                            .foregroundStyle(look == .bold ? Color.white.opacity(0.85) : Theme.secondaryText)
                             .lineLimit(1)
                             .minimumScaleFactor(0.85) // never below ~11 pt
                     }
                 }
                 Spacer(minLength: 0)
                 valueText(card.value)
-                    .font(Theme.number(compact ? 20 : 26))
-                    .foregroundStyle(color)
+                    .font(Theme.number(compact ? 22 : 30, weight: .heavy))
+                    .foregroundStyle(look == .bold ? Theme.primaryText : (card.urgency == .ok ? Theme.primaryText : color))
                     .lineLimit(compact ? 1 : 2)
-                    .minimumScaleFactor(0.7) // never below ~14 / 18 pt
+                    .minimumScaleFactor(0.6) // never below ~14 / 18 pt
                     .widgetAccentable()
+                    .neonGlow(look == .neon && renderingMode == .fullColor ? ink : nil, radius: 5)
             }
             .padding(compact ? 7 : 9)
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)

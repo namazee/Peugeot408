@@ -21,6 +21,8 @@ struct CompletionBox<Value>: @unchecked Sendable {
 struct DataEntry: TimelineEntry {
     let date: Date
     let card: DataCard
+    /// Settings → Appearance.
+    let look: CardLook = AppearanceStore.settings().load().look
 }
 
 /// Builds the timeline for one data source. Live sources (prayer, commute, weather, map) first
@@ -83,10 +85,11 @@ struct DataWidgetView: View {
     let entry: DataEntry
 
     var body: some View {
-        WidgetCard(style: .standard, tint: entry.card.tint) {
+        WidgetCard(style: .standard, paint: entry.card.paint) {
             DataCardView(card: entry.card, size: CardSize(family))
                 .overlay(alignment: .bottomTrailing) { musicControls }
         }
+        .environment(\.cardLook, entry.look)
         .widgetURL(entry.card.source.deepLink)
     }
 

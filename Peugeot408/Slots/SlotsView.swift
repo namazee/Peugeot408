@@ -64,6 +64,7 @@ struct MockCarPlayView: View {
     @Environment(SlotsModel.self) private var slots
     @Environment(CarDataModel.self) private var cars
     @Environment(StudioModel.self) private var studio
+    @Environment(\.cardLook) private var appLook
     @Binding var editing: SlotRef?
 
     var body: some View {
@@ -95,6 +96,7 @@ struct MockCarPlayView: View {
                             editing = SlotRef(slot: number)
                         } label: {
                             SlotTile(slot: number, content: content(for: number, at: context.date))
+                                .environment(\.cardLook, look(for: number))
                                 .frame(width: 64, height: 86)
                                 .overlay(alignment: .bottomTrailing) {
                                     Text("\(number)").font(.caption2.bold()).padding(4)
@@ -119,6 +121,11 @@ struct MockCarPlayView: View {
         }
     }
 
+    /// The slot's own look, or the app-wide one.
+    private func look(for number: Int) -> CardLook {
+        slots.design(for: number).look ?? appLook
+    }
+
     /// One tall CarPlay column. Split / Quad cards are tappable one by one.
     private func column(_ number: Int, date: Date) -> some View {
         let slotContent = content(for: number, at: date)
@@ -129,7 +136,7 @@ struct MockCarPlayView: View {
                         editing = SlotRef(slot: number, card: card)
                     }
                     .padding(7)
-                    .background(WidgetCardBackground(style: .standard, tint: Theme.accent))
+                    .background(WidgetCardBackground(style: .standard))
                     .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
                 } else {
                     Button {
@@ -142,6 +149,7 @@ struct MockCarPlayView: View {
                 }
             }
             .aspectRatio(0.72, contentMode: .fit)
+            .environment(\.cardLook, look(for: number))
             Text("Slot \(number)")
                 .font(.caption2.weight(.semibold))
                 .foregroundStyle(Theme.secondaryText)
