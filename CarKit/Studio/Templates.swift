@@ -378,7 +378,7 @@ public enum Templates {
             layers = [
                 DesignLayer(content: .text(eventName == "Married" ? "408 GT" : eventName), x: 0.5, y: 0.4, width: 0.98, height: 0.52, opacity: 0.2, font: .orbitron, weight: .heavy, fontSize: 118, colorHex: white, alignment: .center),
                 DesignLayer(content: .carPhoto, x: 0.5, y: 0.6, width: 0.6, height: 0.7, colorHex: white),
-                DesignLayer(content: .data(.greeting), x: 0.17, y: 0.11, width: 0.3, height: 0.12, font: .rounded, weight: .bold, fontSize: 18, colorHex: white, alignment: .leading, shadow: true),
+                DesignLayer(content: .data(.greeting), x: 0.155, y: 0.11, width: 0.27, height: 0.12, font: .rounded, weight: .bold, fontSize: 17, colorHex: white, alignment: .leading, shadow: true),
                 DesignLayer(content: .data(.clock), x: 0.84, y: 0.11, width: 0.28, height: 0.12, font: .rounded, weight: .bold, fontSize: 20, colorHex: white, alignment: .trailing, shadow: true),
                 DesignLayer(content: .data(.temperature), x: 0.12, y: 0.82, width: 0.2, height: 0.14, font: .rounded, weight: .heavy, fontSize: 28, colorHex: white, alignment: .leading, shadow: true),
                 DesignLayer(content: .data(.weatherPlace), x: 0.17, y: 0.92, width: 0.3, height: 0.08, font: .rounded, weight: .semibold, fontSize: 14, colorHex: 0xBFD3FF, alignment: .leading),

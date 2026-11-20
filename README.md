@@ -30,6 +30,12 @@ Two looks, picked in Settings → Appearance (or per slot):
 | ![Bold split cards](docs/images/carplay-split.png) | ![Neon split cards](docs/images/carplay-split-neon.png) |
 | ![Bold medium widgets](docs/images/widgets-medium.png) | ![Neon medium widgets](docs/images/widgets-medium-neon.png) |
 
+### Panorama hero
+
+One wide design across Slots 1–3 (Slots → Panorama hero), shown here with a placeholder car:
+
+![Panorama hero across the three columns](docs/images/carplay-panorama.png)
+
 ### Studio templates
 
 ![Data templates](docs/images/templates-data.png)

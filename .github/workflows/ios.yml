@@ -93,6 +93,8 @@ jobs:
 
       - name: Upload IPA
         if: steps.secrets.outputs.ready == 'true'
+        # A copy for safekeeping only; TestFlight already has the build, so a GitHub storage hiccup mustn't fail the run.
+        continue-on-error: true
         uses: actions/upload-artifact@v4
         with:
           name: Peugeot408-${{ github.run_number }}.ipa

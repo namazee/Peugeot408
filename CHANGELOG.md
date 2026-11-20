@@ -24,6 +24,8 @@ Fresh session? Read `docs/SPEC.md`, then this file, then continue from **Current
   - **Weather place · condition.**
 - **Builder:** the Panorama canvas is available, with the cut lines between columns shown as shaded gaps. The template gallery and My Car stay on Small/Medium; Hero is in the gallery's Car section, previewed at its real width.
 - A flash test still takes over Slots 1–3. The backup includes the panorama settings (slots and studio files).
+- CI run 46: all 173 tests passed and fastlane uploaded **1.1 (46)** to TestFlight. Only the extra "keep a copy of the IPA" step failed, because GitHub's artifact storage timed out. That step is now `continue-on-error`.
+- The Hero greeting is narrowed to stay inside Slot 1 (it touched the first gap in the render).
 - Tests: `PanoramaTests` (geometry, slots 1–3 vs 4, sources, designs kept, greeting by hour, older files). The README snapshots add `carplay-panorama.png`.
 
 
