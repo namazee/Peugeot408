@@ -7,6 +7,8 @@ public enum CardStyle: Sendable {
     case standard
     /// Solid accent gradient, for emphasis (and the slot "flash" test).
     case accentFill
+    /// Near-black frame behind Split / Quad cards, so the cards carry the colour.
+    case frame
 }
 
 /// The card background, usable both inside widgets and in the app's previews. Draws the current
@@ -30,6 +32,8 @@ public struct WidgetCardBackground: View {
                 case .bold: BoldBackground(color: paint.color(.bold))
                 case .neon: NeonBackground(glow: paint.color(.neon))
                 }
+            case .frame:
+                LinearGradient(colors: [Color(hex: 0x0B0E15), Color(hex: 0x030407)], startPoint: .top, endPoint: .bottom)
             case .accentFill:
                 let tint = look == .neon ? paint.color(.neon) : Theme.accent
                 LinearGradient(

@@ -249,7 +249,8 @@ public enum SlotContent: Sendable, Equatable {
     public var cardStyle: CardStyle {
         switch self {
         case .design(let design): design.style.cardStyle
-        case .data, .studio, .cards: .standard
+        case .data, .studio: .standard
+        case .cards: .frame
         case .flash, .flashCard: .accentFill
         }
     }

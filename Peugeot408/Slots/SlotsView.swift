@@ -136,7 +136,7 @@ struct MockCarPlayView: View {
                         editing = SlotRef(slot: number, card: card)
                     }
                     .padding(7)
-                    .background(WidgetCardBackground(style: .standard))
+                    .background(WidgetCardBackground(style: .frame))
                     .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
                 } else {
                     Button {

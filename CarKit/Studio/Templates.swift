@@ -260,8 +260,9 @@ public enum Templates {
             layers = [
                 DesignLayer(content: .gauge(bind.primary), x: wide ? 0.27 : 0.26, y: 0.42, width: gw, height: wide ? 0.78 : 0.5, colorHex: orange, glow: true),
                 DesignLayer(content: .gauge(second), x: wide ? 0.73 : 0.74, y: 0.42, width: gw, height: wide ? 0.78 : 0.5, colorHex: cyan, glow: true),
-                DesignLayer(content: .data(bind.primary), x: wide ? 0.27 : 0.26, y: wide ? 0.5 : 0.78, width: wide ? 0.3 : 0.48, height: 0.2, font: .rajdhani, weight: .bold, fontSize: wide ? 24 : 18, colorHex: white, alignment: .center, caption: wide ? bind.label : nil),
-                DesignLayer(content: .data(second), x: wide ? 0.73 : 0.74, y: wide ? 0.5 : 0.78, width: wide ? 0.3 : 0.48, height: 0.2, font: .rajdhani, weight: .bold, fontSize: wide ? 24 : 18, colorHex: white, alignment: .center, caption: wide ? second.displayName : nil),
+                DesignLayer(content: .data(bind.primary), x: wide ? 0.27 : 0.26, y: wide ? 0.5 : 0.46, width: wide ? 0.24 : 0.36, height: 0.2, font: .rajdhani, weight: .bold, fontSize: wide ? 26 : 18, colorHex: white, alignment: .center),
+                DesignLayer(content: .data(second), x: wide ? 0.73 : 0.74, y: wide ? 0.5 : 0.46, width: wide ? 0.24 : 0.36, height: 0.2, font: .rajdhani, weight: .bold, fontSize: wide ? 26 : 18, colorHex: white, alignment: .center),
+                DesignLayer(content: .text(bind.label.uppercased()), x: 0.5, y: wide ? 0.9 : 0.82, width: 0.9, height: 0.12, font: .rajdhani, weight: .bold, fontSize: 14, colorHex: orange, alignment: .center),
             ]
 
         case .aurora:
@@ -324,7 +325,8 @@ public enum Templates {
         case .racingStripes:
             background = .solid(0xD7263D)
             layers = [
-                DesignLayer(content: .sticker(.stripes), x: wide ? 0.86 : 0.8, y: 0.5, width: wide ? 0.3 : 0.5, height: 1.5, rotation: 18, opacity: 0.9, colorHex: white),
+                DesignLayer(content: .progressBar(nil), x: wide ? 0.84 : 0.8, y: 0.5, width: 1.6, height: wide ? 0.13 : 0.11, rotation: -62, opacity: 0.95, colorHex: white),
+                DesignLayer(content: .progressBar(nil), x: wide ? 0.93 : 0.95, y: 0.5, width: 1.6, height: wide ? 0.13 : 0.11, rotation: -62, opacity: 0.95, colorHex: white),
                 DesignLayer(content: .sticker(.flag), x: wide ? 0.06 : 0.13, y: 0.17, width: wide ? 0.07 : 0.14, height: 0.14, colorHex: white),
                 DesignLayer(content: .data(bind.primary), x: wide ? 0.4 : 0.42, y: 0.54, width: wide ? 0.72 : 0.76, height: 0.34, font: .orbitron, weight: .heavy, fontSize: wide ? 34 : 24, colorHex: white, alignment: .leading, shadow: true),
                 DesignLayer(content: .text(bind.label.uppercased()), x: wide ? 0.4 : 0.42, y: 0.8, width: wide ? 0.72 : 0.76, height: 0.13, font: .orbitron, weight: .bold, fontSize: 14, colorHex: 0xFFE4E6, alignment: .leading),

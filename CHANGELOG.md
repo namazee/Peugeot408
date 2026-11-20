@@ -26,6 +26,11 @@ Fresh session? Read `docs/SPEC.md`, then this file, then continue from **Current
   - sun, road and starfield stickers.
   - The builder has all of these too.
 - **How to add to CarPlay:** a Google Maps ETA tip (add Google's own widget to a slot's stack). Also in SETUP.md step 9.6.
+- Fixes after reviewing the CI renders:
+  - Racing Stripes used the Merdeka flag artwork; it now has plain white racing stripes.
+  - Twin Gauges' values sit inside the gauges, with the label underneath.
+  - Split/Quad slots sit on a neutral near-black frame, so the coloured cards stand out.
+- CI: green on run 40. The builder needed the new ring and bar layers in its sizing switch.
 - Sample data now has an OBD reading, so the OBD widget's preview shows a gauge.
 - Tests: `LooksTests` (palettes, faces, the new templates pass the glanceability checks, calendar fields, JSON round trip). README snapshots now render both looks and the template gallery.
 
