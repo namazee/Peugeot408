@@ -217,10 +217,14 @@ struct DesignBuilderView: View {
     private func add(_ content: LayerContent) {
         var layer = DesignLayer(content: content)
         switch content {
-        case .symbol, .sticker, .carPhoto, .analogClock, .gauge, .seasonalArt:
+        case .symbol, .sticker, .carPhoto, .analogClock, .gauge, .ring, .seasonalArt:
             layer.width = design.canvas == .small ? 0.4 : 0.22
             layer.height = 0.4
             layer.colorHex = content == .carPhoto ? 0xFFFFFF : Theme.Hex.accent
+        case .progressBar:
+            layer.width = 0.8
+            layer.height = 0.08
+            layer.colorHex = 0x34D399
         case .plate:
             layer.width = 0.4
             layer.height = 0.16
