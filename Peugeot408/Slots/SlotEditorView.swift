@@ -133,6 +133,16 @@ struct SlotEditorView: View {
                     TextField("Big value (optional)", text: cardText(index, \.value))
                     TextField("Short label (optional)", text: cardText(index, \.title))
                     SlotPicturePicker(imageFile: cardImage(index))
+                    Toggle("Own colour", isOn: Binding(
+                        get: { draft.card(index).style == .custom },
+                        set: { on in updateCard(index) { $0.style = on ? .custom : .dark; if on, $0.backgroundHex == nil { $0.backgroundHex = Theme.Hex.accent } } }
+                    ))
+                    if draft.card(index).style == .custom {
+                        SlotColourPicker(hex: Binding(
+                            get: { draft.card(index).backgroundHex ?? Theme.Hex.accent },
+                            set: { hex in updateCard(index) { $0.backgroundHex = hex } }
+                        ))
+                    }
                 }
             } header: {
                 Text(index == focusCard ? "\(name) card (tapped)" : "\(name) card")
@@ -182,6 +192,13 @@ struct SlotEditorView: View {
                 draft.cards = cards
             }
         )
+    }
+
+    private func updateCard(_ index: Int, _ change: (inout SlotDesign) -> Void) {
+        var cards = draft.layoutCards
+        guard cards.indices.contains(index) else { return }
+        change(&cards[index])
+        draft.cards = cards
     }
 
     private func cardImage(_ index: Int) -> Binding<String?> {
@@ -278,13 +295,22 @@ struct SlotEditorView: View {
             }
         }
 
-        Section("Background") {
+        Section {
             Picker("Background", selection: $draft.style) {
                 ForEach(SlotStyle.allCases, id: \.self) { style in
                     Text(style.displayName).tag(style)
                 }
             }
             .pickerStyle(.segmented)
+            if draft.style == .custom {
+                SlotColourPicker(hex: Binding(get: { draft.backgroundHex ?? Theme.Hex.accent }, set: { draft.backgroundHex = $0 }))
+            }
+        } header: {
+            Text("Background")
+        } footer: {
+            if draft.style == .custom {
+                Text("Bold look: the tile is this colour. Neon look: it's the glow colour on black. The first five are the 408's paint colours.")
+            }
         }
 
         Section {
@@ -351,5 +377,32 @@ struct ChoicePicker: View {
                 }
             }
         }
+    }
+}
+
+/// Swatches (408 paint colours first) plus a full colour picker.
+struct SlotColourPicker: View {
+    @Binding var hex: UInt32
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 8), count: 6), spacing: 10) {
+                ForEach(SlotDesign.colourSwatches, id: \.self) { swatch in
+                    Button {
+                        hex = swatch
+                    } label: {
+                        Circle()
+                            .fill(Color(hex: swatch))
+                            .frame(width: 34, height: 34)
+                            .overlay(Circle().strokeBorder(.white.opacity(swatch == hex ? 0.95 : 0.2), lineWidth: swatch == hex ? 3 : 1))
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel(String(format: "Colour %06X", swatch))
+                    .accessibilityAddTraits(swatch == hex ? .isSelected : [])
+                }
+            }
+            ColorPicker("Any colour", selection: Binding(get: { Color(hex: hex) }, set: { hex = $0.hexValue }), supportsOpacity: false)
+        }
+        .padding(.vertical, 4)
     }
 }

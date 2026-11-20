@@ -4,6 +4,12 @@ Fresh session? Read `docs/SPEC.md`, then this file, then continue from **Current
 
 ## Current phase: 11 (Widget styles) — built. Next: "Continue with Phase 12" (Sound packs), then 13 (Lyrics), 14 (Panorama hero). Phase 8 split cards still waiting for your car test.
 
+## Change after Phase 11 — any background colour for text slots (spec updated first)
+- Text slot designs have a third background option, **Colour**: 12 swatches (the 408's five paint colours first, then vivid ones) plus a full colour picker. Custom text cards in Split/Quad slots get an **Own colour** toggle with the same picker.
+- Bold look: the tile is that colour, with the usual sheen and texture. Light colours such as Okenite White switch to dark text. Neon look: the colour becomes the glow on black.
+- "Dark" is now a true near-black tile in both looks (before, in Bold it showed blue).
+- `SlotDesign.backgroundHex` is optional, so older files still load.
+
 ## Phase 11 — Widget styles and new templates
 ### Done
 - **Two looks:** Bold and Neon (spec §3), for every data widget, split/quad card, text slot and app preview.

@@ -4,19 +4,41 @@ import Foundation
 public enum SlotStyle: String, Codable, CaseIterable, Sendable {
     case dark
     case accent
+    /// Any colour (`SlotDesign.backgroundHex`).
+    case custom
 
     public var displayName: String {
         switch self {
         case .dark: "Dark"
         case .accent: "Blue"
+        case .custom: "Colour"
         }
     }
 
     public var cardStyle: CardStyle {
         switch self {
-        case .dark: .standard
+        case .dark: .frame
         case .accent: .accentFill
+        case .custom: .standard
         }
+    }
+}
+
+public extension SlotDesign {
+    /// Quick swatches: the 408's Malaysian paint colours, then a few vivid ones.
+    static let colourSwatches: [UInt32] = [
+        Theme.Hex.accent, 0x8E1A22, 0xE6E6E2, 0x5B5E63, 0x16171A,
+        0x7C3AED, 0x059669, 0xF97316, 0xDB2777, 0x0EA5E9, 0xEAB308, 0x0F766E,
+    ]
+
+    /// What colours this text design's tile (Bold: the tile; Neon: the glow).
+    var paint: CardPaint {
+        style == .custom ? CardPaint(stateHex: backgroundHex ?? Theme.Hex.accent) : .plain
+    }
+
+    /// True when the Bold tile is light enough to need dark text (e.g. Okenite White).
+    var needsDarkText: Bool {
+        style == .custom && ColorMath.luminance(backgroundHex ?? Theme.Hex.accent) > 0.45
     }
 }
 
@@ -80,8 +102,10 @@ public struct SlotDesign: Codable, Sendable, Equatable, Hashable {
     public var imageFile: String?
     /// This slot's own look (Bold / Neon); nil = the app-wide look from Settings → Appearance.
     public var look: CardLook?
+    /// Background colour when `style` is `.custom` (0xRRGGBB). Nil in older files.
+    public var backgroundHex: UInt32?
 
-    public init(value: String, title: String, symbol: String, style: SlotStyle = .dark, source: DataSource? = nil, studioDesignID: UUID? = nil, rotations: [SlotRotation]? = nil, layout: SlotLayout? = nil, cards: [SlotDesign]? = nil, imageFile: String? = nil, look: CardLook? = nil) {
+    public init(value: String, title: String, symbol: String, style: SlotStyle = .dark, source: DataSource? = nil, studioDesignID: UUID? = nil, rotations: [SlotRotation]? = nil, layout: SlotLayout? = nil, cards: [SlotDesign]? = nil, imageFile: String? = nil, look: CardLook? = nil, backgroundHex: UInt32? = nil) {
         self.value = value
         self.title = title
         self.symbol = symbol
@@ -93,6 +117,7 @@ public struct SlotDesign: Codable, Sendable, Equatable, Hashable {
         self.cards = cards
         self.imageFile = imageFile
         self.look = look
+        self.backgroundHex = backgroundHex
     }
 
     /// The picture's file, if one is set.

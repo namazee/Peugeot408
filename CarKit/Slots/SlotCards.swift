@@ -193,8 +193,11 @@ struct SlotCardView: View {
     }
 
     private var paint: CardPaint {
-        if case .data(let card) = content { return card.paint }
-        return .plain
+        switch content {
+        case .data(let card): card.paint
+        case .design(let design): design.paint
+        default: .plain
+        }
     }
 
     /// Neon value / icon colour; white on Bold tiles.

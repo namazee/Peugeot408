@@ -40,7 +40,7 @@ public struct SlotContentView: View {
     /// A picture design: the picture whole (fit, never cropped) at the largest size the slot
     /// allows, with the value and label below it (small) or beside it (medium).
     @ViewBuilder
-    private func pictureView(_ design: SlotDesign, image: UIImage, labelColor: Color) -> some View {
+    private func pictureView(_ design: SlotDesign, image: UIImage, labelColor: Color, valueColor: Color = Theme.primaryText, glow: Color? = nil) -> some View {
         let hasText = !design.value.trimmingCharacters(in: .whitespaces).isEmpty || !design.title.trimmingCharacters(in: .whitespaces).isEmpty
         let picture = Image(uiImage: image)
             .resizable()
@@ -54,7 +54,7 @@ public struct SlotContentView: View {
             HStack(spacing: 14) {
                 picture
                 VStack(alignment: .leading, spacing: 2) {
-                    valueText(design.value, size: 40)
+                    valueText(design.value, size: 40, color: valueColor, glow: glow)
                     labelText(design.title, color: labelColor)
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -62,7 +62,7 @@ public struct SlotContentView: View {
         } else {
             VStack(alignment: .leading, spacing: 2) {
                 picture
-                valueText(design.value, size: 28)
+                valueText(design.value, size: 28, color: valueColor, glow: glow)
                 labelText(design.title, color: labelColor)
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
@@ -71,21 +71,27 @@ public struct SlotContentView: View {
 
     @ViewBuilder
     private func designView(_ design: SlotDesign) -> some View {
-        let iconColor: Color = design.style == .accent || look == .bold ? Theme.primaryText : CardLook.neon.appTint
-        let labelColor: Color = design.style == .accent ? Theme.primaryText.opacity(0.8) : Theme.secondaryText
+        let darkText = look == .bold && design.needsDarkText
+        let neonColor = design.style == .custom ? design.paint.color(.neon) : CardLook.neon.appTint
+        let iconColor: Color = darkText ? Color(hex: 0x111318)
+            : (design.style == .accent || look == .bold ? Theme.primaryText : neonColor)
+        let labelColor: Color = darkText ? Color(hex: 0x111318).opacity(0.75)
+            : (design.style == .accent || (look == .bold && design.style == .custom) ? Theme.primaryText.opacity(0.85) : Theme.secondaryText)
+        let valueColor: Color = darkText ? Color(hex: 0x111318) : Theme.primaryText
+        let glow: Color? = look == .neon ? neonColor : nil
 
         if let url = design.imageURL, let image = UIImage(contentsOfFile: url.path(percentEncoded: false)) {
-            pictureView(design, image: image, labelColor: labelColor)
+            pictureView(design, image: image, labelColor: labelColor, valueColor: valueColor, glow: glow)
         } else if isMedium {
             HStack(spacing: 16) {
                 Image(systemName: design.symbol)
                     .font(.system(size: 44, weight: .semibold))
                     .foregroundStyle(iconColor)
                     .widgetAccentable()
-                    .neonGlow(look == .neon ? iconColor : nil, radius: 6)
+                    .neonGlow(glow, radius: 6)
                     .frame(width: 64)
                 VStack(alignment: .leading, spacing: 2) {
-                    valueText(design.value, size: 46)
+                    valueText(design.value, size: 46, color: valueColor, glow: glow)
                     labelText(design.title, color: labelColor)
                 }
                 Spacer(minLength: 0)
@@ -97,9 +103,9 @@ public struct SlotContentView: View {
                     .font(.system(size: look == .bold ? 30 : 26, weight: .bold))
                     .foregroundStyle(iconColor)
                     .widgetAccentable()
-                    .neonGlow(look == .neon ? iconColor : nil, radius: 6)
+                    .neonGlow(glow, radius: 6)
                 Spacer(minLength: 0)
-                valueText(design.value, size: 36)
+                valueText(design.value, size: 36, color: valueColor, glow: glow)
                 labelText(design.title, color: labelColor)
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
@@ -128,14 +134,14 @@ public struct SlotContentView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
-    private func valueText(_ value: String, size: CGFloat) -> some View {
+    private func valueText(_ value: String, size: CGFloat, color: Color = Theme.primaryText, glow: Color? = nil) -> some View {
         Text(value)
             .font(Theme.number(size, weight: .heavy))
-            .foregroundStyle(Theme.primaryText)
+            .foregroundStyle(color)
             .lineLimit(1)
             .minimumScaleFactor(0.4)
             .widgetAccentable()
-            .neonGlow(look == .neon ? CardLook.neon.appTint : nil, radius: 6)
+            .neonGlow(glow, radius: 6)
     }
 
     private func labelText(_ title: String, color: Color) -> some View {

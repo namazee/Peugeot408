@@ -13,6 +13,18 @@ struct LooksTests {
         #expect(AppearanceStore.settings(in: missing).load().look == .bold)
     }
 
+    @Test func customSlotColour() throws {
+        var design = SlotDesign(value: "408", title: "GT", symbol: "car.fill", style: .custom, backgroundHex: 0x8E1A22)
+        #expect(design.paint.hex(.bold) == 0x8E1A22)
+        #expect(SlotContent.design(design).cardStyle == .standard)
+        #expect(!design.needsDarkText)
+        design.backgroundHex = 0xE6E6E2
+        #expect(design.needsDarkText)
+        let back = try JSONDecoder().decode(SlotDesign.self, from: JSONEncoder().encode(design))
+        #expect(back.backgroundHex == 0xE6E6E2 && back.style == .custom)
+        #expect(SlotContent.design(SlotDesign(value: "", title: "", symbol: "car.fill")).cardStyle == .frame)
+    }
+
     @Test func paintFollowsSourceAndState() {
         #expect(CardPaint(source: .fuel).hex(.bold) == ThemeTokens.bold["fuel"])
         #expect(CardPaint(source: .fuel).hex(.neon) == ThemeTokens.neon["fuel"])

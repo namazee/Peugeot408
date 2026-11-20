@@ -108,8 +108,11 @@ public extension DataCard {
 
 public extension SlotContent {
     var paint: CardPaint {
-        if case .data(let card) = self { return card.paint }
-        return .plain
+        switch self {
+        case .data(let card): card.paint
+        case .design(let design): design.paint
+        default: .plain
+        }
     }
 }
 

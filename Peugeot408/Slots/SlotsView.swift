@@ -177,7 +177,7 @@ struct SlotRow: View {
     var studioName: String?
 
     var body: some View {
-        let isAccent = design.source == nil && design.style == .accent
+        let isAccent = design.source == nil && design.style != .dark
         HStack(spacing: 12) {
             Image(systemName: design.studioDesignID != nil ? "paintpalette.fill" : design.source?.symbol ?? design.symbol)
                 .font(.title3.weight(.semibold))
@@ -185,7 +185,7 @@ struct SlotRow: View {
                 .frame(width: 44, height: 44)
                 .background(
                     RoundedRectangle(cornerRadius: 10, style: .continuous)
-                        .fill(isAccent ? Theme.accent : Theme.surface)
+                        .fill(design.style == .custom ? Color(hex: design.backgroundHex ?? Theme.Hex.accent) : (isAccent ? Theme.accent : Theme.surface))
                 )
             VStack(alignment: .leading, spacing: 2) {
                 Text(studioName ?? design.summary).font(.headline)
