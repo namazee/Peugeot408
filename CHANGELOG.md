@@ -2,7 +2,33 @@
 
 Fresh session? Read `docs/SPEC.md`, then this file, then continue from **Current phase**.
 
-## Current phase: 1 — Skeleton + slots (code done, waiting on setup + device check)
+## Current phase: 2 — done, waiting for "Continue with Phase 3"
+
+## Phase 2 — Service Tracker, Fuel Log, Road Tax & Insurance, Touch 'n Go
+
+### Done
+- CarKit `Car/`: `ServiceLog`, `FuelLog`, `RenewalLog`, `TnGState`, each saved as JSON in the App Group (`service.json`, `fuel.json`, `renewals.json`, `tng.json`) through a generic `JSONFileStore`. `CarData` loads all four and builds view-ready summaries (`DataCard`).
+- Calculations, all unit-tested (35 tests in total):
+  - full-to-full km/L, with partial fills counted toward the next full tank;
+  - distance-weighted average over the last 3 segments, last price per litre, RM this month, mod before/after comparison;
+  - mileage estimate from the average daily km (180-day window; fill-ups count as odometer readings);
+  - service due by km or date, whichever comes first (amber at 1,000 km or 30 days or less, red when overdue);
+  - renewal countdowns (amber at 30 days or less, red at 7 days or less or overdue) and reminder dates (30 and 7 days before, at 09:00);
+  - TnG "Top up soon" when the balance is below the threshold.
+- Widgets: Service Tracker, Fuel Log, Road Tax & Insurance and Touch 'n Go, each `.systemSmall` + `.systemMedium` + Lock Screen `.accessoryRectangular`. Timelines hold entries for now and the next 7 midnights. The card glow turns amber or red with urgency, and each widget has empty states and `#Preview`s with sample data.
+- Slots: the slot editor has a "Shows" picker (custom text or any of the four data widgets). Phase 1 `slots.json` still decodes (`source` is optional).
+- App: the Car tab (Service, Fuel, Renewals) and Daily tab (Touch 'n Go) have entry screens, each showing a head-unit preview of its card. Service has presets, custom and one-off items, mark done and odometer readings. Fuel has fill-ups (RON95/97, full or partial) and mod tags. Renewals has road tax, insurance, licence, Puspakom and other, plus local reminders. TnG has quick +/- buttons, an exact balance, a threshold and recent changes.
+- Each save reloads only the affected kinds: the source's widget plus any slot showing it. Fuel changes also reload Service, because fill-ups move the mileage estimate.
+- Deep links `peugeot408://data/<service|fuel|renewals|tng>` open the matching screen.
+
+### Decisions
+- JSON files rather than SwiftData (the spec allows "JSON files where simpler"). The widget reads them without a model container.
+- Service preset intervals are typical values (e.g. oil 10,000 km / 12 months), editable per item.
+- Slot rotation (up to 3 designs per slot) stays in Phase 5, together with the Studio designs.
+
+### Left over / open
+- [ ] You: install the new TestFlight build, enter some real data, assign e.g. Service to a slot, and check it in the car.
+- [ ] Notification permission is asked the first time a renewal is saved.
 
 ## Phase 1 — Skeleton + slots
 
@@ -29,6 +55,6 @@ Fresh session? Read `docs/SPEC.md`, then this file, then continue from **Current
 
 ### Left over / open
 - [x] Setup done; first upload (went up as 1.0 (1)) on 2026-11-19. Build 5 was 0.1.0; from build 6 the version is 1.1.
-- [ ] You: install via TestFlight, add Car Slot 1–5 in CarPlay, confirm a slot change shows on the head unit.
+- [x] Confirmed in the car on 2026-11-20: Car Slot 1–3 show on the head unit and the flash test works.
 - [ ] Onboarding screenshots: deferred to Phase 8 (Remotion onboarding clip), since there are no device screenshots yet.
 - [ ] Slot rotation (up to 3 designs per slot) and assigning data widgets/templates: Phases 2 and 5 once those designs exist.
