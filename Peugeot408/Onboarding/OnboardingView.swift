@@ -41,8 +41,16 @@ struct OnboardingView: View {
     private var welcome: some View {
         VStack(spacing: 20) {
             Spacer()
-            SlotTile(slot: 1, content: .design(.starter(for: 1)))
-                .frame(width: 170, height: 170)
+            if IconRevealView.clipURL != nil {
+                // Icon reveal clip from /remotion (spec §3 App icon).
+                IconRevealView()
+                    .frame(width: 240, height: 240)
+                    .clipShape(RoundedRectangle(cornerRadius: 36, style: .continuous))
+                    .accessibilityLabel("Peugeot408 app icon")
+            } else {
+                SlotTile(slot: 1, content: .design(.starter(for: 1)))
+                    .frame(width: 170, height: 170)
+            }
             Text("Your car screen, your way")
                 .font(.largeTitle.bold())
                 .multilineTextAlignment(.center)

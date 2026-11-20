@@ -1,0 +1,23 @@
+{
+  "name": "peugeot408-remotion",
+  "private": true,
+  "description": "Remotion assets for the Peugeot408 app (app icon, previews, videos).",
+  "scripts": {
+    "studio": "remotion studio",
+    "icon": "node scripts/render-icon.mjs",
+    "check-icon": "node scripts/check-icon-alpha.mjs out/AppIcon-1024.png",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@remotion/cli": "4.0.540",
+    "@remotion/studio": "4.0.540",
+    "react": "19.1.1",
+    "react-dom": "19.1.1",
+    "remotion": "4.0.540"
+  },
+  "devDependencies": {
+    "@types/react": "19.1.12",
+    "pngjs": "7.0.0",
+    "typescript": "5.9.2"
+  }
+}

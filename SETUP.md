@@ -147,6 +147,18 @@ Until the required secrets exist, CI still runs the tests and skips the upload w
 2. In the app: Studio → Music → **Allow Apple Music**. Recently played needs an Apple Music subscription; a featured playlist needs the playlist in your library (Sync Library on).
 3. Studio → Photo Frame → **Add photos**. To give the Photo Frame widget its own album: long-press the widget → **Edit Widget** → Album. Car Slots use the album chosen in the app.
 
+## 12. App icon (no Mac)
+
+The icon comes from your artwork in `remotion/assets/icon/` (spec §3 App icon). To change it on Windows:
+
+1. Replace `remotion/assets/icon/icon-default.jpg` (optionally add `icon-dark.jpg` / `icon-tinted.jpg`; otherwise those are generated).
+2. In PowerShell: `cd remotion`, `npm install` (first time), `npm run icon`.
+3. Check `remotion/out/IconPreview.png`, then commit. The script has already copied the three PNGs into `Peugeot408/Resources/Assets.xcassets/AppIcon.appiconset/` and the reveal clip to `Peugeot408/Resources/IconReveal.mp4`.
+
+`npm run icon` and the iOS test job both fail if the default icon PNG has an alpha channel (App Store Connect rejects it). The **Remotion** workflow re-renders everything on each push under `remotion/` and uploads the outputs as artifacts.
+
+> A full Icon Composer `.icon` file (layered Liquid Glass icon) needs Icon Composer on a Mac. Our no-Mac route is a single 1024 PNG with **Any**, **Dark** and **Tinted** appearances in the asset catalog; iOS 26 uses those directly and applies its own glass treatment.
+
 ---
 
 ## Troubleshooting

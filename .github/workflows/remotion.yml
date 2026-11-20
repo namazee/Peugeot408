@@ -1,0 +1,53 @@
+name: Remotion
+
+on:
+  push:
+    branches: [main]
+    paths: ["remotion/**", ".github/workflows/remotion.yml"]
+  pull_request:
+    paths: ["remotion/**", ".github/workflows/remotion.yml"]
+  workflow_dispatch:
+
+concurrency:
+  group: remotion-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  render:
+    name: Render Remotion assets
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: remotion
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: remotion/package-lock.json
+
+      - name: Install
+        run: npm ci
+
+      - name: Type-check
+        run: npm run typecheck
+
+      # App icon (spec §3): AppIcon PNGs (Any/Dark/Tinted), IconPreview.png, IconReveal MP4s.
+      # Fails if the default icon PNG has an alpha channel.
+      - name: Render app icon
+        run: npm run icon
+
+      - name: Check the icon committed in the app has no alpha
+        run: node scripts/check-icon-alpha.mjs ../Peugeot408/Resources/Assets.xcassets/AppIcon.appiconset/AppIcon-1024.png
+
+      - name: Upload icon outputs
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-icon-${{ github.run_number }}
+          path: |
+            remotion/out/*.png
+            remotion/out/*.mp4
+          if-no-files-found: error

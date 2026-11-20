@@ -1,3 +1,4 @@
+# SUPERSEDED: the app icon now comes from /remotion (`npm run icon`, spec §3 App icon). Kept for reference only.
 # Generates the original app icon (1024x1024, opaque PNG) with plain shapes only:
 # a blue gradient and a stylised gauge. No logos, no fonts.
 # Run on Windows:  powershell -ExecutionPolicy Bypass -File tools/make-icon.ps1

@@ -2,6 +2,9 @@
 # Runs CarKitTests on an iOS 26 iPhone simulator, then builds the app for the simulator (unsigned).
 set -euo pipefail
 
+# App icon must be opaque (spec §3 App icon): fail the build if the default icon has an alpha channel.
+node remotion/scripts/check-icon-alpha.mjs Peugeot408/Resources/Assets.xcassets/AppIcon.appiconset/AppIcon-1024.png
+
 UDID=$(xcrun simctl list devices available -j | python3 -c '
 import json, re, sys
 devices = json.load(sys.stdin)["devices"]
