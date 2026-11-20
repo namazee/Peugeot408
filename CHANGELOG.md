@@ -18,6 +18,8 @@ Fresh session? Read `docs/SPEC.md`, then this file, then continue from **Current
   - The builder has "Seasonal art" in its Add menu.
 - **Rendering:** `npm run videos` renders everything and copies the clips and art into the app (`--no-copy` skips the copy). The Remotion workflow now also renders them and uploads `videos-<run>` as build artifacts.
 
+- CI: the Remotion workflow is green (renders and uploads every video and still). The iOS build needed one fix: an orphaned footer left in the slot editor by the Phase 8 edit. "Reset to default" now restores the split defaults. Green on run 33 (147 tests in 24 suites); **1.1 (33)** includes Phases 8 and 9.
+
 ### Decisions
 - The rendered clips and art are committed (like the icon), because the iOS build doesn't run Node. CI re-renders them as artifacts.
 - The videos use Inter and Nunito, since SF fonts can't be used on the web or in Linux renders.
