@@ -30,7 +30,7 @@ final class StudioModel {
         }
     }
 
-    private static let cutoutVersion = 2
+    private static let cutoutVersion = 3
     private static let cutoutVersionKey = "builtInCutoutVersion"
 
     /// Renders a bundled photo (with the chosen paint colour and plate) into the App Group as the My Car photo.
@@ -233,12 +233,12 @@ struct BuiltInCarPhoto: Identifiable {
         BuiltInCarPhoto(id: "rear-three-quarter", name: "Rear ¾", plateQuad: PlateQuad((87, 174), (186, 172), (184, 200), (82, 203)), glass: [[(95, 72), (175, 40), (335, 38), (385, 62), (350, 92), (240, 98), (108, 98)], [(440, 62), (475, 40), (560, 30), (640, 35), (748, 102), (700, 108), (520, 112), (440, 95)]]),
         BuiltInCarPhoto(id: "front", name: "Front", plateQuad: PlateQuad((380, 555), (587, 554), (587, 631), (380, 632)), glass: [[(215, 42), (685, 42), (740, 120), (755, 192), (140, 192), (160, 120)]]),
         BuiltInCarPhoto(id: "front-detail", name: "Front detail", plateQuad: PlateQuad((828, 377), (892, 339), (890, 413), (830, 455)), glass: [[(0, 0), (300, 0), (345, 25), (200, 45), (60, 62), (0, 70)]]),
-        // Studio renders (1024 x 1024).
-        BuiltInCarPhoto(id: "studio-front-three-quarter", name: "Studio front ¾", plateQuad: PlateQuad((262, 676), (478, 678), (478, 731), (262, 728)), needsCutout: true, glass: [[(288, 380), (410, 260), (782, 256), (808, 300), (808, 392), (560, 384)], [(800, 255), (858, 262), (906, 345), (812, 392)]]),
-        BuiltInCarPhoto(id: "studio-front", name: "Studio front", plateQuad: PlateQuad((378, 708), (646, 708), (646, 760), (378, 760)), needsCutout: true, glass: [[(268, 222), (752, 222), (838, 366), (172, 366)]]),
-        BuiltInCarPhoto(id: "studio-side", name: "Studio side", needsCutout: true, glass: [[(158, 447), (240, 412), (330, 402), (470, 400), (585, 410), (708, 484), (500, 486), (265, 464)]]),
-        BuiltInCarPhoto(id: "studio-rear-three-quarter", name: "Studio rear ¾", plateQuad: PlateQuad((750, 522), (874, 516), (873, 557), (749, 562)), needsCutout: true, glass: [[(178, 452), (262, 378), (332, 350), (482, 350), (522, 396), (470, 422), (360, 442), (232, 455)], [(522, 362), (600, 344), (762, 350), (884, 418), (820, 428), (640, 422), (562, 398)]]),
-        BuiltInCarPhoto(id: "studio-rear", name: "Studio rear", plateQuad: PlateQuad((383, 519), (641, 519), (641, 576), (383, 576)), needsCutout: true, glass: [[(240, 243), (782, 243), (812, 362), (204, 362)]]),
-        BuiltInCarPhoto(id: "studio-front-detail", name: "Studio detail", plateQuad: PlateQuad((826, 572), (893, 548), (894, 617), (828, 646)), needsCutout: true, glass: [[(0, 98), (125, 112), (302, 236), (205, 248), (0, 268)]]),
+        // Studio renders, supplied already cut out (cropped from 1024 × 1024 frames).
+        BuiltInCarPhoto(id: "studio-front-three-quarter", name: "Studio front ¾", plateQuad: PlateQuad((184, 450), (400, 452), (400, 505), (184, 502)), glass: [[(210, 154), (332, 34), (704, 30), (730, 74), (730, 166), (482, 158)], [(722, 29), (780, 36), (828, 119), (734, 166)]]),
+        BuiltInCarPhoto(id: "studio-front", name: "Studio front", plateQuad: PlateQuad((312, 516), (580, 516), (580, 568), (312, 568)), glass: [[(202, 30), (686, 30), (772, 174), (106, 174)]]),
+        BuiltInCarPhoto(id: "studio-side", name: "Studio side", glass: [[(122, 68), (204, 33), (294, 23), (434, 21), (549, 31), (672, 105), (464, 107), (229, 85)]]),
+        BuiltInCarPhoto(id: "studio-rear-three-quarter", name: "Studio rear ¾", plateQuad: PlateQuad((708, 210), (832, 204), (831, 245), (707, 250)), glass: [[(136, 140), (220, 66), (290, 38), (440, 38), (480, 84), (428, 110), (318, 130), (190, 143)], [(480, 50), (558, 32), (720, 38), (842, 106), (778, 116), (598, 110), (520, 86)]]),
+        BuiltInCarPhoto(id: "studio-rear", name: "Studio rear", plateQuad: PlateQuad((317, 335), (575, 335), (575, 392), (317, 392)), glass: [[(174, 59), (716, 59), (746, 178), (138, 178)]]),
+        BuiltInCarPhoto(id: "studio-front-detail", name: "Studio detail", plateQuad: PlateQuad((826, 480), (893, 456), (894, 525), (828, 554)), glass: [[(0, 6), (125, 20), (302, 144), (205, 156), (0, 176)]]),
     ]
 }

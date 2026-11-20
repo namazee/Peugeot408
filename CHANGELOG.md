@@ -4,6 +4,11 @@ Fresh session? Read `docs/SPEC.md`, then this file, then continue from **Current
 
 ## Current phase: 9 (Remotion) — done; Phase 8 still waiting for your car test. Next: "Continue with Phase 10" (Polish)
 
+## Change before Phase 10 — pre-cut studio My Car photos (spec updated first)
+- You supplied the six studio renders already cut out. They replace the studio JPGs: no on-device Vision step, cleaner edges, and picking one is instant.
+- Wheel-hub logos are removed with the same smooth fill, and each photo is cropped to the car. Plate corners and window outlines are shifted by each crop.
+- A studio photo already in use is re-rendered once on first launch (`cutoutVersion` 3). The on-device cut-out code stays for your own photos.
+
 ## Phase 9 — Remotion assets (§7)
 
 ### Done

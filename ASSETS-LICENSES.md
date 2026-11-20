@@ -36,7 +36,7 @@ All seasonal artwork and stickers are original: drawn in code with SwiftUI shape
 | Asset | Source | Licence |
 |---|---|---|
 | `Resources/MyCar/mycar-{side,front-three-quarter,rear-three-quarter,front,front-detail}.png` | Supplied by the project author on 2026-11-20 as their own photos (backgrounds already removed). The lion badges (grille, tailgate, fender, wheel caps) were removed here with a smooth fill from the surrounding pixels, and the photos were cropped and scaled to 900 px wide. A sixth (straight rear) photo was left out because it still showed a third-party watermark. | The project author, who stated they hold the rights |
-| `Resources/MyCar/mycar-studio-{front-three-quarter,front,side,rear-three-quarter,rear,front-detail}.jpg` | Studio renders of the 408 supplied by the project author on 2026-11-20 (dark background; the app removes it on the device). Wheel-cap logos were removed here with a smooth fill; the grille shields are already blank and the plates already empty. Re-encoded as JPEG (quality 90), 1024 × 1024. | The project author, who stated they hold the rights |
+| `Resources/MyCar/mycar-studio-{front-three-quarter,front,side,rear-three-quarter,rear,front-detail}.png` | Studio renders of the 408 supplied by the project author on 2026-11-20, already cut out (transparent). Wheel-cap logos were removed here with a smooth fill; the grille shields are already blank and the plates already empty. Cropped to the car (from 1024 × 1024). | The project author, who stated they hold the rights |
 
 ## Phase 9: Remotion videos and art
 
