@@ -49,6 +49,26 @@ Work in phases (below). At the end of each phase: commit, push, make sure the CI
 * Build a shared `WidgetCard` style in `CarKit` so all widgets look like one family.
 * Every widget gets an Xcode `#Preview` with sample data (useful later even though I can't run previews now), and the same sample data powers the placeholder and snapshot states.
 
+### Widget styles (switchable)
+
+* Every widget, every Split/Quad card, and the app's screens come in two complete looks. Settings → Appearance sets the style for the whole app; each Car Slot can override it (Default / Bold / Neon). The aim is attractive and eye-catching, like a gallery of designed tiles rather than one repeated dark card.
+   * **Bold:** each data source has its own full-colour background (a soft gradient with a subtle texture), and the colour follows the state:
+      * air quality uses the AQI band colours;
+      * service and renewals go blue → amber → red;
+      * Touch 'n Go is teal, and amber when low;
+      * prayer shows a sky that changes with the next prayer (dawn, day, dusk, night);
+      * weather shows a sky for the condition and time of day.
+     Each tile has one huge centred number, a short caps label, and a large symbol or illustration.
+   * **Neon:** a near-black base, and the key value in a bright colour with a soft glow. It has progress rings and arc gauges (service km left of the interval, renewal days, fuel against my best km/L, boost), thin tick rings, and glowing accent lines. It uses the same state colours.
+   * Both styles:
+      * use rings and gauges wherever a value has a range;
+      * show my My Car photo as the hero on car widgets where it fits;
+      * keep every value big and glanceable (§2).
+   * Tinted / clear rendering: backgrounds and glows step aside, key values stay `widgetAccentable()`, and the warning glyph stays.
+   * Both palettes live in `theme/tokens.json`, so Remotion can match.
+   * The app's screens use the selected style (the Slots mock, the card previews on the Car and Daily screens, the tab tint), so the phone matches the head unit.
+   * Original artwork only; no brand logos.
+
 ### App icon
 
 * Source art: my own icon artwork (generated from a photo of my car), stored in `remotion/assets/icon/` as `icon-default.jpg` (plus `icon-dark.jpg` and `icon-tinted.jpg` if I provide them). This is the master art: don't redraw the car. No logos; the only text is the "GTCP" wordmark (layer 5).
@@ -215,6 +235,7 @@ Widgets themselves are static SwiftUI, so use Remotion only for the animated ass
 8. Split-card slot layouts (§4b): Single / Split / Quad per slot, a data source or design per card, the 3-column mock with tap-to-change cards, the new default setup, and per-card flash labels. Stop and let me test it in the car.
 9. Remotion assets (also use Remotion to render seasonal pack artwork and the onboarding clip showing the slot setup).
 10. Polish: rendering modes, accessibility, empty states, JSON backup, README with screenshots/video frames.
+11. Widget styles (§3): Bold and Neon looks for every widget, card and app screen, Settings → Appearance plus a per-slot override, both palettes in the shared tokens, and refreshed README snapshots.
 
 ## 9. Quality bar
 
