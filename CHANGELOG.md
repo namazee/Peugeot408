@@ -4,6 +4,10 @@ Fresh session? Read `docs/SPEC.md`, then this file, then continue from **Current
 
 ## Current phase: 9 (Remotion) — done; Phase 8 still waiting for your car test. Next: "Continue with Phase 10" (Polish)
 
+## Change before Phase 10 — built-in slot pictures keep their original colours (spec updated first)
+- Built-in photos picked as a slot picture are no longer recoloured with your My Car paint. They keep their original colours and still get your plate. The live My Car option still follows your paint.
+- Pictures already picked keep their old colours until you pick them again.
+
 ## Change before Phase 10 — picture instead of an icon in slots (spec updated first)
 - Text slot designs, and the new "Custom text" option in Split/Quad cards, can show a **picture** instead of the SF Symbol icon:
   - your live My Car photo (`mycar.png`, so paint and plate changes follow);

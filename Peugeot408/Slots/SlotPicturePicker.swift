@@ -131,10 +131,10 @@ struct SlotPicturePicker: View {
         "\(SlotPicture.folder)/builtin-\(photo.id).png"
     }
 
-    /// The built-in photo with your current paint colour and plate.
+    /// The built-in photo in its original colours (spec: whatever paint is picked), with your plate.
     private func useBuiltIn(_ photo: BuiltInCarPhoto) {
         let state = studio.state
-        guard let png = CarPhotoRenderer.render(photo, paintHex: state.carPaintHex, plate: state.plateText, font: state.plateFont ?? .classic),
+        guard let png = CarPhotoRenderer.render(photo, paintHex: nil, plate: state.plateText, font: state.plateFont ?? .classic),
               let path = try? SlotPicture.save(png, ext: "png", name: "builtin-\(photo.id)") else {
             message = "Couldn't prepare that photo."
             return
