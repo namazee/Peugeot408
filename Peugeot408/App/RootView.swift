@@ -6,7 +6,11 @@ enum AppTab: Hashable {
 }
 
 struct SlotRef: Identifiable, Hashable {
-    let id: Int
+    let slot: Int
+    /// Card tapped in a Split / Quad slot (0 = top / first).
+    var card: Int = 0
+
+    var id: Int { slot * 10 + card }
 }
 
 struct RootView: View {
@@ -69,7 +73,7 @@ struct RootView: View {
         case "slot":
             guard let number = Int(url.lastPathComponent), SlotsState.slotNumbers.contains(number) else { return }
             tab = .slots
-            editing = SlotRef(id: number)
+            editing = SlotRef(slot: number)
         case "data":
             guard let source = DataSource(rawValue: url.lastPathComponent) else { return }
             switch source {

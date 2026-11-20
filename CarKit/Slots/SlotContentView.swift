@@ -28,6 +28,10 @@ public struct SlotContentView: View {
             flashView
                 .accessibilityElement(children: .ignore)
                 .accessibilityLabel("Car slot \(slot) test card")
+        case .cards(let layout, let parts):
+            SlotCardsView(slot: slot, layout: layout, parts: parts, isMedium: isMedium)
+        case .flashCard:
+            SlotCardView(slot: slot, content: content, compact: false)
         }
     }
 
@@ -116,7 +120,7 @@ public struct SlotTile: View {
                 DesignView(card: card)
             } else {
                 SlotContentView(slot: slot, content: content, isMedium: isMedium)
-                    .padding(14)
+                    .padding(content.isCards ? 7 : 14)
                     .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
                     .background(WidgetCardBackground(style: content.cardStyle, tint: content.tint))
             }

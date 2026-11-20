@@ -22,6 +22,12 @@ public extension SlotContent {
         if case .data(let card) = self { return card.tint }
         return Theme.accent
     }
+
+    /// Split / Quad content (cards draw their own backgrounds and need less padding).
+    var isCards: Bool {
+        if case .cards = self { return true }
+        return false
+    }
 }
 
 /// Which layout to draw.

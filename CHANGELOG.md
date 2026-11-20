@@ -2,7 +2,36 @@
 
 Fresh session? Read `docs/SPEC.md`, then this file, then continue from **Current phase**.
 
-## Current phase: 7 — done, waiting for "Continue with Phase 8"
+## Current phase: 8 (split-card slot layouts) — built, waiting for your test in the car
+
+Note: this change request came after Phase 2, so it became the new Phase 8 (spec commit "spec: split-card slot layouts"). Remotion moved to Phase 9 and Polish to Phase 10.
+
+## Phase 8 — Split-card slot layouts (§4b)
+
+### Done
+- `SlotLayout`: Single / Split (default) / Quad. Each `SlotDesign` has an optional `layout` and `cards` (each card is its own data source, Studio design or text). Older files decode, since both fields are optional.
+- **Default setup:** Slot 1 = Next prayer / Road tax, Slot 2 = Service / Fuel, Slot 3 = Weather & haze / Parking, all Split. Slots 4–5 stay single for stacking behind the columns.
+  - `SlotsState` is now version 2. A version-1 file is upgraded once when loaded: slots 1–3 take the defaults, 4–5 are kept.
+- **Timeline:**
+  - Split and Quad slots draw `.cards(layout, parts)`, and their entry dates are the union of every card's dates (e.g. prayer times and midnights).
+  - Reload and live-refresh logic includes every card's sources.
+  - Seasonal takeover still replaces the whole slot. Time-of-day rotation applies to Single only.
+- **Cards (`SlotCardsView` / `SlotCardView`):**
+  - Split: icon + short label (13 pt, never below about 11) + one big value (26 pt, never below about 18).
+  - Quad: icon + value only (20 pt).
+  - 6 pt gaps between cards, with a thin outline in tinted/clear CarPlay. The urgency colour applies per card (value colour and border).
+  - Map, photo and music cards show their image. Timers and relative times tick by themselves.
+  - The compact version of every data source is `DataCard.compact`.
+- **Flash test:** each card shows "Slot N · Top ✓" / "Bottom ✓" (Quad: Top left …); single slots still show "Slot N ✓".
+- **Slots tab:**
+  - The mock screen shows the real 3 tall columns (Slot 1–3) with split cards; tapping a card opens the editor with that card highlighted. Slots 4–5 are shown smaller underneath as "Behind (Smart Rotate)".
+  - The editor has a Layout picker and one "Shows" picker per card. Quad shows the readability warning.
+- **Widget:** split content uses 7 pt insets so the cards fill the tall CarPlay column; single content keeps the system margins.
+- **Tests:** default setup, the one-time upgrade (and that your later edits are kept), split/quad card counts, layout switching keeping cards, single → first card, entry dates covering every card, flash labels, sources, compact urgency, summaries.
+
+### Left over / open
+- [ ] You: install the new build, check that the head unit shows 6 cards in Slot 1–3, try the flash test, and tap a card in the Slots tab to change it. Tell me if any text is too small or a value gets cut.
+
 
 ## Change after Phase 7 — built-in My Car photos (spec §4b)
 - Spec updated first (`spec:` commit): five photos of the 408 that you supplied, already cut out, are bundled as built-in My Car photos.

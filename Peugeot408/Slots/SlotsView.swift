@@ -14,13 +14,13 @@ struct SlotsView: View {
                         .listRowInsets(EdgeInsets())
                         .listRowBackground(Color.clear)
                 } footer: {
-                    Text("Tap a slot to change it. CarPlay may take a moment to redraw; reconnecting the phone redraws it fastest.")
+                    Text("Your 408 shows 3 columns: Slot 1–3. Tap any card to change it. Slots 4 and 5 sit behind the columns (Smart Rotate). CarPlay may take a moment to redraw; reconnecting the phone redraws it fastest.")
                 }
 
                 Section {
                     ForEach(SlotsState.slotNumbers, id: \.self) { number in
                         Button {
-                            editing = SlotRef(id: number)
+                            editing = SlotRef(slot: number)
                         } label: {
                             SlotRow(number: number, design: slots.design(for: number), studioName: studio.design(slots.design(for: number).studioDesignID)?.name)
                         }
@@ -40,7 +40,7 @@ struct SlotsView: View {
                 } header: {
                     Text("Test")
                 } footer: {
-                    Text("Shows a big \"Slot N ✓\" on each slot for 10 minutes so you can see which is which in the car.")
+                    Text("Shows \"Slot N ✓\" on each slot, or \"Slot N · Top ✓\" / \"Bottom ✓\" on each card, for 10 minutes so you can see which is which in the car.")
                 }
 
                 if let error = slots.lastError {
@@ -53,7 +53,7 @@ struct SlotsView: View {
             .navigationTitle("Slots")
             .toolbar { EditButton() }
             .sheet(item: $editing) { ref in
-                SlotEditorView(slot: ref.id, initial: slots.design(for: ref.id))
+                SlotEditorView(slot: ref.slot, initial: slots.design(for: ref.slot), focusCard: ref.card)
             }
         }
     }
@@ -78,26 +78,34 @@ struct MockCarPlayView: View {
                 .foregroundStyle(Theme.secondaryText)
                 .padding(.horizontal, 16)
 
-                ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: 10) {
-                        ForEach(SlotsState.slotNumbers, id: \.self) { number in
-                            Button {
-                                editing = SlotRef(id: number)
-                            } label: {
-                                VStack(spacing: 6) {
-                                    SlotTile(slot: number, content: content(for: number, at: context.date))
-                                        .frame(width: 140, height: 140)
-                                    Text("Slot \(number)")
-                                        .font(.caption2.weight(.semibold))
-                                        .foregroundStyle(Theme.secondaryText)
-                                }
-                            }
-                            .buttonStyle(.plain)
-                            .accessibilityLabel("Edit car slot \(number)")
-                        }
+                // The 408 head unit: 3 tall columns (Slot 1–3).
+                HStack(spacing: 10) {
+                    ForEach(1...3, id: \.self) { number in
+                        column(number, date: context.date)
                     }
-                    .padding(.horizontal, 16)
                 }
+                .padding(.horizontal, 12)
+
+                HStack(spacing: 8) {
+                    Text("Behind (Smart Rotate)")
+                        .font(.caption2.weight(.semibold))
+                        .foregroundStyle(Theme.secondaryText)
+                    ForEach(4...5, id: \.self) { number in
+                        Button {
+                            editing = SlotRef(slot: number)
+                        } label: {
+                            SlotTile(slot: number, content: content(for: number, at: context.date))
+                                .frame(width: 64, height: 86)
+                                .overlay(alignment: .bottomTrailing) {
+                                    Text("\(number)").font(.caption2.bold()).padding(4)
+                                }
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityLabel("Edit car slot \(number)")
+                    }
+                    Spacer(minLength: 0)
+                }
+                .padding(.horizontal, 12)
             }
             .padding(.vertical, 14)
             .background(
@@ -111,8 +119,38 @@ struct MockCarPlayView: View {
         }
     }
 
+    /// One tall CarPlay column. Split / Quad cards are tappable one by one.
+    private func column(_ number: Int, date: Date) -> some View {
+        let slotContent = content(for: number, at: date)
+        return VStack(spacing: 6) {
+            Group {
+                if case .cards(let layout, let parts) = slotContent {
+                    SlotCardsView(slot: number, layout: layout, parts: parts) { card in
+                        editing = SlotRef(slot: number, card: card)
+                    }
+                    .padding(7)
+                    .background(WidgetCardBackground(style: .standard, tint: Theme.accent))
+                    .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
+                } else {
+                    Button {
+                        editing = SlotRef(slot: number)
+                    } label: {
+                        SlotTile(slot: number, content: slotContent)
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel("Edit car slot \(number)")
+                }
+            }
+            .aspectRatio(0.72, contentMode: .fit)
+            Text("Slot \(number)")
+                .font(.caption2.weight(.semibold))
+                .foregroundStyle(Theme.secondaryText)
+        }
+        .frame(maxWidth: .infinity)
+    }
+
     private func content(for slot: Int, at date: Date) -> SlotContent {
-        if slots.state.isFlashing(at: date) { return .flash }
+        if slots.state.isFlashing(at: date) { return SlotTimeline.flashContent(for: slots.design(for: slot)) }
         let design = slots.design(for: slot)
         return SlotTimeline.content(
             at: date,

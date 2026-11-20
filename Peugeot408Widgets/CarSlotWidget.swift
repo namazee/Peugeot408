@@ -94,7 +94,8 @@ struct SlotWidgetView: View {
         } else {
             WidgetCard(style: entry.content.cardStyle, tint: entry.content.tint) {
                 SlotContentView(slot: entry.slot, content: entry.content, isMedium: family == .systemMedium)
-                    .padding(margins)
+                    // Split / Quad cards use most of the tall CarPlay column; single content keeps the system margins.
+                    .padding(entry.content.isCards ? EdgeInsets(top: 7, leading: 7, bottom: 7, trailing: 7) : margins)
             }
         }
     }

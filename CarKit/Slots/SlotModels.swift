@@ -20,6 +20,44 @@ public enum SlotStyle: String, Codable, CaseIterable, Sendable {
     }
 }
 
+/// How a slot widget is divided (spec §4b, split-card layouts). The 408 shows 3 tall columns,
+/// so splitting a slot puts more information on the screen.
+public enum SlotLayout: String, Codable, Sendable, CaseIterable, Identifiable {
+    /// One card: the original behaviour.
+    case single
+    /// Two cards stacked top / bottom (the default).
+    case split
+    /// 2 × 2 cards, icon + value only.
+    case quad
+
+    public var id: String { rawValue }
+
+    public var displayName: String {
+        switch self {
+        case .single: "Single"
+        case .split: "Split"
+        case .quad: "Quad"
+        }
+    }
+
+    public var cardCount: Int {
+        switch self {
+        case .single: 1
+        case .split: 2
+        case .quad: 4
+        }
+    }
+
+    /// Card names, for the editor and the flash test.
+    public var cardNames: [String] {
+        switch self {
+        case .single: ["Card"]
+        case .split: ["Top", "Bottom"]
+        case .quad: ["Top left", "Top right", "Bottom left", "Bottom right"]
+        }
+    }
+}
+
 /// A slot design: either a simple text card (one big value, a short label and an SF Symbol)
 /// or, when `source` is set, one of the live data widgets.
 public struct SlotDesign: Codable, Sendable, Equatable, Hashable {
@@ -33,8 +71,12 @@ public struct SlotDesign: Codable, Sendable, Equatable, Hashable {
     public var studioDesignID: UUID?
     /// Up to 2 more designs shown during set hours (3 in total with this one). Nil in older files.
     public var rotations: [SlotRotation]?
+    /// Single / Split / Quad. Nil in older files (= single).
+    public var layout: SlotLayout?
+    /// The cards of a Split or Quad layout, each with its own data source, Studio design or text.
+    public var cards: [SlotDesign]?
 
-    public init(value: String, title: String, symbol: String, style: SlotStyle = .dark, source: DataSource? = nil, studioDesignID: UUID? = nil, rotations: [SlotRotation]? = nil) {
+    public init(value: String, title: String, symbol: String, style: SlotStyle = .dark, source: DataSource? = nil, studioDesignID: UUID? = nil, rotations: [SlotRotation]? = nil, layout: SlotLayout? = nil, cards: [SlotDesign]? = nil) {
         self.value = value
         self.title = title
         self.symbol = symbol
@@ -42,10 +84,54 @@ public struct SlotDesign: Codable, Sendable, Equatable, Hashable {
         self.source = source
         self.studioDesignID = studioDesignID
         self.rotations = rotations
+        self.layout = layout
+        self.cards = cards
+    }
+
+    public var effectiveLayout: SlotLayout { layout ?? .single }
+
+    /// A card showing a data source.
+    public static func card(_ source: DataSource) -> SlotDesign {
+        SlotDesign(value: source.displayName, title: "", symbol: source.symbol, source: source)
+    }
+
+    /// Cards used to fill a layout when it gains cards.
+    static let fillerSources: [DataSource] = [.prayer, .renewals, .service, .fuel, .weather, .parking, .tng, .commute]
+
+    /// The card at `index` (padded with sensible defaults, never empty).
+    public func card(_ index: Int) -> SlotDesign {
+        let list = cards ?? []
+        if list.indices.contains(index) { return list[index] }
+        return .card(Self.fillerSources[index % Self.fillerSources.count])
+    }
+
+    /// Exactly the cards the current layout shows.
+    public var layoutCards: [SlotDesign] {
+        (0..<effectiveLayout.cardCount).map(card)
+    }
+
+    /// Changes the layout, keeping existing cards and filling new ones.
+    public mutating func setLayout(_ newLayout: SlotLayout) {
+        if newLayout != .single, (cards ?? []).isEmpty, source != nil || studioDesignID != nil {
+            // The single design becomes the first card.
+            cards = [SlotDesign(value: value, title: title, symbol: symbol, style: style, source: source, studioDesignID: studioDesignID)]
+        }
+        layout = newLayout
+        if newLayout != .single {
+            let current = self
+            cards = (0..<newLayout.cardCount).map { current.card($0) }
+        }
     }
 
     /// Name shown in the app's slot list (Studio design names are looked up by the app).
     public var summary: String {
+        if effectiveLayout != .single {
+            return layoutCards.map(\.cardSummary).joined(separator: " / ")
+        }
+        return cardSummary
+    }
+
+    var cardSummary: String {
         if studioDesignID != nil { return "Studio design" }
         return source?.displayName ?? value
     }
@@ -59,6 +145,17 @@ public struct SlotDesign: Codable, Sendable, Equatable, Hashable {
 
     /// Longest big value that still reads comfortably at a glance on the CarPlay small size.
     public static let maxGlanceableValueLength = 10
+
+    /// Spec default setup: Slot 1 = Next prayer / Road tax, Slot 2 = Service / Fuel, Slot 3 = Weather / Parking,
+    /// all Split. Slots 4 and 5 stay single, for stacking behind the visible columns.
+    public static func splitDefault(for slot: Int) -> SlotDesign? {
+        let pairs: [Int: (DataSource, DataSource)] = [1: (.prayer, .renewals), 2: (.service, .fuel), 3: (.weather, .parking)]
+        guard let pair = pairs[slot] else { return nil }
+        var design = starter(for: slot)
+        design.layout = .split
+        design.cards = [.card(pair.0), .card(pair.1)]
+        return design
+    }
 
     public static func starter(for slot: Int) -> SlotDesign {
         switch slot {
@@ -125,19 +222,24 @@ public enum SlotContent: Sendable, Equatable {
     case studio(StudioCard)
     /// Identifying "Slot N ✓" card used by the "Test: flash all slots" button.
     case flash
+    /// Split / Quad: one content per card.
+    indirect case cards(SlotLayout, [SlotContent])
+    /// Flash label for one card, e.g. "Top" → "Slot 2 · Top ✓".
+    case flashCard(String)
 
     public var cardStyle: CardStyle {
         switch self {
         case .design(let design): design.style.cardStyle
-        case .data, .studio: .standard
-        case .flash: .accentFill
+        case .data, .studio, .cards: .standard
+        case .flash, .flashCard: .accentFill
         }
     }
 }
 
 /// Everything the five Car Slot widgets need, stored as JSON in the App Group.
 public struct SlotsState: Codable, Sendable, Equatable {
-    public static let currentVersion = 1
+    /// 2: split-card layouts (slots 1–3 move to the new default setup once).
+    public static let currentVersion = 2
     public static let slotCount = 5
     public static let slotNumbers = Array(1...slotCount)
 
@@ -154,7 +256,17 @@ public struct SlotsState: Codable, Sendable, Equatable {
     }
 
     public static var starter: SlotsState {
-        SlotsState(slots: slotNumbers.map(SlotDesign.starter(for:)))
+        SlotsState(slots: slotNumbers.map { SlotDesign.splitDefault(for: $0) ?? SlotDesign.starter(for: $0) })
+    }
+
+    /// Upgrades older files: slots 1–3 take the split default setup (spec §4b), slots 4–5 are kept.
+    public mutating func migrate() {
+        normalize()
+        guard version < 2 else { return }
+        for slot in 1...3 {
+            if let design = SlotDesign.splitDefault(for: slot) { setDesign(design, for: slot) }
+        }
+        version = 2
     }
 
     /// Design for a 1-based slot number; never traps on bad input.

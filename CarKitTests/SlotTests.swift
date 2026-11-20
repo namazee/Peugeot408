@@ -64,8 +64,9 @@ struct SlotTimelineTests {
     let now = Date(timeIntervalSinceReferenceDate: 800_000_000)
 
     @Test func noFlashGivesSingleDesignEntry() {
-        let items = SlotTimeline.items(slot: 2, state: .starter, now: now)
-        #expect(items == [SlotTimelineItem(date: now, content: .design(.starter(for: 2)))])
+        // Slots 4 and 5 stay single text designs (slots 1–3 are split by default).
+        let items = SlotTimeline.items(slot: 4, state: .starter, now: now)
+        #expect(items == [SlotTimelineItem(date: now, content: .design(.starter(for: 4)))])
     }
 
     @Test func activeFlashShowsFlashThenDesign() {
@@ -83,8 +84,8 @@ struct SlotTimelineTests {
     @Test func expiredFlashIsIgnored() {
         var state = SlotsState.starter
         state.flashUntil = now.addingTimeInterval(-1)
-        let items = SlotTimeline.items(slot: 1, state: state, now: now)
-        #expect(items == [SlotTimelineItem(date: now, content: .design(.starter(for: 1)))])
+        let items = SlotTimeline.items(slot: 5, state: state, now: now)
+        #expect(items == [SlotTimelineItem(date: now, content: .design(.starter(for: 5)))])
     }
 }
 

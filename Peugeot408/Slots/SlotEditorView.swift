@@ -9,19 +9,23 @@ struct SlotEditorView: View {
     @Environment(\.dismiss) private var dismiss
 
     let slot: Int
+    let focusCard: Int
     @State private var draft: SlotDesign
 
-    init(slot: Int, initial: SlotDesign) {
+    init(slot: Int, initial: SlotDesign, focusCard: Int = 0) {
         self.slot = slot
+        self.focusCard = focusCard
         _draft = State(initialValue: initial)
     }
+
+    private var isSplit: Bool { draft.effectiveLayout != .single }
 
     private var valueTooLong: Bool {
         draft.value.count > SlotDesign.maxGlanceableValueLength
     }
 
     private var canSave: Bool {
-        draft.source != nil || draft.studioDesignID != nil || !draft.value.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        isSplit || draft.source != nil || draft.studioDesignID != nil || !draft.value.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
     }
 
     private var previewContent: SlotContent {
@@ -33,18 +37,37 @@ struct SlotEditorView: View {
             Form {
                 Section("Preview") {
                     HStack(spacing: 12) {
+                        // As on the 408: a tall column.
                         SlotTile(slot: slot, content: previewContent)
-                            .frame(width: 130, height: 130)
+                            .frame(width: 116, height: 160)
                         SlotTile(slot: slot, content: previewContent, isMedium: true)
-                            .frame(height: 130)
+                            .frame(height: 120)
                     }
                     .listRowInsets(EdgeInsets(top: 12, leading: 12, bottom: 12, trailing: 12))
                     .listRowBackground(Color.clear)
                 }
 
                 Section {
-                    ChoicePicker(title: "Shows", choice: primaryChoice, allowsText: true, designs: studio.state.designs)
+                    Picker("Layout", selection: layout) {
+                        ForEach(SlotLayout.allCases) { Text($0.displayName).tag($0) }
+                    }
+                    .pickerStyle(.segmented)
                 } footer: {
+                    switch draft.effectiveLayout {
+                    case .single: Text("One card fills the column.")
+                    case .split: Text("Two cards stacked: icon, short label and one big value each.")
+                    case .quad:
+                        Label("Quad shows icon + value only, with no labels. It's harder to read while driving; prefer Split for anything you check on the move.", systemImage: "exclamationmark.triangle.fill")
+                            .foregroundStyle(Theme.dueSoon)
+                    }
+                }
+
+                if isSplit {
+                    cardSections
+                } else {
+                    singleSections
+                }
+
                     if draft.studioDesignID != nil {
                         Text("A design from the Studio. Edit it there; the slot follows.")
                     } else if draft.source != nil {
@@ -52,11 +75,7 @@ struct SlotEditorView: View {
                     }
                 }
 
-                if draft.source == nil && draft.studioDesignID == nil {
-                    textSections
-                }
 
-                rotationSection
 
                 Section {
                     Button("Reset to default", role: .destructive) {
@@ -79,6 +98,62 @@ struct SlotEditorView: View {
                 }
             }
         }
+    }
+
+    @ViewBuilder
+    private var singleSections: some View {
+        Section {
+            ChoicePicker(title: "Shows", choice: primaryChoice, allowsText: true, designs: studio.state.designs)
+        } footer: {
+            if draft.studioDesignID != nil {
+                Text("A design from the Studio. Edit it there; the slot follows.")
+            } else if draft.source != nil {
+                Text("Live data from the Car and Daily tabs. The slot updates by itself when the data changes.")
+            }
+        }
+
+        if draft.source == nil && draft.studioDesignID == nil {
+            textSections
+        }
+
+        rotationSection
+    }
+
+    /// One picker per card; the card that was tapped on the Slots screen is highlighted.
+    @ViewBuilder
+    private var cardSections: some View {
+        let names = draft.effectiveLayout.cardNames
+        ForEach(Array(names.enumerated()), id: \.offset) { index, name in
+            Section {
+                ChoicePicker(title: "Shows", choice: cardChoice(index), allowsText: false, designs: studio.state.designs)
+            } header: {
+                Text(index == focusCard ? "\(name) card (tapped)" : "\(name) card")
+            }
+            .listRowBackground(index == focusCard ? Theme.accent.opacity(0.18) : nil)
+        }
+    }
+
+    private var layout: Binding<SlotLayout> {
+        Binding(get: { draft.effectiveLayout }, set: { draft.setLayout($0) })
+    }
+
+    private func cardChoice(_ index: Int) -> Binding<SlotChoice?> {
+        Binding(
+            get: { draft.card(index).primaryChoice },
+            set: { choice in
+                guard let choice else { return }
+                var cards = draft.layoutCards
+                guard cards.indices.contains(index) else { return }
+                if let source = choice.source {
+                    cards[index] = .card(source)
+                } else {
+                    cards[index].source = nil
+                    cards[index].studioDesignID = choice.studioDesignID
+                    cards[index].symbol = "paintpalette.fill"
+                }
+                draft.cards = cards
+            }
+        )
     }
 
     /// The main choice: text (both nil), a data source, or a Studio design.

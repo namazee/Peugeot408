@@ -18,7 +18,7 @@ public struct SlotStore: Sendable {
         else {
             return .starter
         }
-        state.normalize()
+        state.migrate()
         return state
     }
 
@@ -66,7 +66,14 @@ public enum SlotTimeline {
         let rotations = Array((design.rotations ?? []).prefix(SlotDesign.maxRotations))
         let seasonal = studio.seasonal.enabled && studio.seasonal.slot == slot
 
-        var dates = Set(choiceDates(design.primaryChoice, data: data, studio: studio, from: start, calendar: calendar))
+        var dates = Set<Date>()
+        if design.effectiveLayout == .single {
+            dates.formUnion(choiceDates(design.primaryChoice, data: data, studio: studio, from: start, calendar: calendar))
+        } else {
+            for card in design.layoutCards {
+                dates.formUnion(choiceDates(card.primaryChoice, data: data, studio: studio, from: start, calendar: calendar))
+            }
+        }
         for rotation in rotations {
             dates.formUnion(choiceDates(rotation.choice, data: data, studio: studio, from: start, calendar: calendar))
             dates.formUnion(hourBoundaries([rotation.fromHour, rotation.toHour], from: start, calendar: calendar))
@@ -81,7 +88,7 @@ public enum SlotTimeline {
 
         var items: [SlotTimelineItem] = []
         if flashUntil != nil {
-            items.append(SlotTimelineItem(date: now, content: .flash))
+            items.append(SlotTimelineItem(date: now, content: flashContent(for: design)))
         }
         for date in ordered {
             let entryContent = content(at: date, design: design, rotations: rotations, seasonal: seasonal, data: data, studio: studio, calendar: calendar)
@@ -94,6 +101,12 @@ public enum SlotTimeline {
     public static func content(at date: Date, design: SlotDesign, rotations: [SlotRotation], seasonal: Bool, data: CarData, studio: StudioState, calendar: Calendar = .current) -> SlotContent {
         if seasonal, let occasion = SeasonalCalendar.active(at: date, settings: studio.seasonal) {
             return .studio(DesignResolver.card(for: Templates.seasonal(occasion), data: data, studio: studio, at: date, calendar: calendar))
+        }
+        if design.effectiveLayout != .single {
+            let parts = design.layoutCards.map { card in
+                choiceContent(card.primaryChoice, data: data, studio: studio, at: date, calendar: calendar) ?? .design(card)
+            }
+            return .cards(design.effectiveLayout, parts)
         }
         let hour = calendar.component(.hour, from: date)
         if let rotation = rotations.first(where: { $0.contains(hour: hour) }),
@@ -137,11 +150,18 @@ public enum SlotTimeline {
         return result
     }
 
+    /// The flash test: "Slot N ✓" for a single card, or one labelled card per part ("Slot 2 · Top ✓").
+    public static func flashContent(for design: SlotDesign) -> SlotContent {
+        let layout = design.effectiveLayout
+        guard layout != .single else { return .flash }
+        return .cards(layout, layout.cardNames.map { .flashCard($0) })
+    }
+
     /// Every source a slot can show (main, rotations, Studio fields, seasonal), for live refreshes.
     public static func sources(slot: Int, state: SlotsState, studio: StudioState) -> Set<DataSource> {
         let design = state.design(for: slot)
         var result = Set<DataSource>()
-        let choices = [design.primaryChoice] + (design.rotations ?? []).map { $0.choice }
+        let choices = [design.primaryChoice] + (design.rotations ?? []).map { $0.choice } + design.layoutCards.map(\.primaryChoice)
         for choice in choices {
             if let source = choice.source { result.insert(source) }
             if let studioDesign = studio.design(choice.studioDesignID) { result.formUnion(studioDesign.sources) }
@@ -154,6 +174,7 @@ public enum SlotTimeline {
     public static func needsData(slot: Int, state: SlotsState, studio: StudioState) -> Bool {
         let design = state.design(for: slot)
         return design.source != nil || design.studioDesignID != nil || !(design.rotations ?? []).isEmpty
+            || (design.effectiveLayout != .single && design.layoutCards.contains { $0.source != nil || $0.studioDesignID != nil })
             || (studio.seasonal.enabled && studio.seasonal.slot == slot)
     }
 }
