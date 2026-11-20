@@ -1,6 +1,7 @@
 import CarKit
 import Foundation
 import Observation
+import UIKit
 import WidgetKit
 
 /// App-side owner of `studio.json` (designs, seasonal packs, My Car photo).
@@ -10,6 +11,8 @@ import WidgetKit
 final class StudioModel {
     private(set) var state: StudioState
     var lastError: String?
+    /// True while a studio-render photo is being cut out and painted.
+    private(set) var isPreparingPhoto = false
 
     @ObservationIgnored let directory: URL
 
@@ -23,12 +26,43 @@ final class StudioModel {
     }
 
     /// Renders a bundled photo (with the chosen paint colour and plate) into the App Group as the My Car photo.
+    /// Studio renders are cut out on the device first (the Vision mask is cached in the App Group).
     func useBuiltInCarPhoto(_ id: String) {
-        guard let photo = BuiltInCarPhoto.all.first(where: { $0.id == id }),
-              let png = CarPhotoRenderer.render(photo, paintHex: state.carPaintHex, plate: state.plateText, font: state.plateFont ?? .classic) else {
+        guard let photo = BuiltInCarPhoto.all.first(where: { $0.id == id }) else { return }
+        let font = state.plateFont ?? .classic
+        if photo.needsCutout {
+            isPreparingPhoto = true
+            Task {
+                defer { isPreparingPhoto = false }
+                guard let processed = CarPhotoRenderer.processed(photo, paintHex: state.carPaintHex, plate: state.plateText, font: font),
+                      let mask = await cutoutMask(for: photo),
+                      let cutout = CarCutout.composite(image: UIImage(cgImage: processed), mask: mask, maxPixelSize: 900),
+                      let png = cutout.pngData() else {
+                    lastError = "Couldn't cut out that photo on this device."
+                    return
+                }
+                finishBuiltIn(png, id: id)
+            }
+            return
+        }
+        guard let png = CarPhotoRenderer.render(photo, paintHex: state.carPaintHex, plate: state.plateText, font: font) else {
             lastError = "Couldn't prepare that photo."
             return
         }
+        finishBuiltIn(png, id: id)
+    }
+
+    /// The foreground mask of a studio render: made once with Vision, then reused.
+    private func cutoutMask(for photo: BuiltInCarPhoto) async -> UIImage? {
+        let cache = directory.appending(path: "mask-\(photo.id).png", directoryHint: .notDirectory)
+        if let cached = UIImage(contentsOfFile: cache.path(percentEncoded: false)) { return cached }
+        guard let url = photo.url, let data = try? Data(contentsOf: url),
+              let result = try? await CarCutout.makeMask(from: data) else { return nil }
+        try? result.mask.pngData()?.write(to: cache, options: .atomic)
+        return result.mask
+    }
+
+    private func finishBuiltIn(_ png: Data, id: String) {
         do {
             try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
             let target = directory.appending(path: StudioState.carPhotoFileName, directoryHint: .notDirectory)
@@ -166,15 +200,20 @@ final class StudioModel {
     }
 }
 
-/// Built-in My Car photos (spec §4b): supplied by the owner, cut out, lion badges pixelated.
-/// Files: `Resources/MyCar/mycar-<id>.png`.
+/// Built-in My Car photos (spec §4b): supplied by the owner, badges pixelated.
+/// Files: `Resources/MyCar/mycar-<id>.png` (already cut out) and `mycar-studio-<view>.jpg`
+/// (dark studio background, cut out on the device). Plate corners are in the file's pixels.
 struct BuiltInCarPhoto: Identifiable {
     let id: String
     let name: String
-    /// Corners of the white show plate, measured from the photo; nil when no plate is visible.
+    /// Corners of the show plate, measured from the photo; nil when no plate is visible.
     var plateQuad: PlateQuad? = nil
+    /// Studio renders keep their background in the bundle; Vision removes it.
+    var needsCutout = false
 
     var resource: String { "mycar-\(id)" }
+    var fileExtension: String { needsCutout ? "jpg" : "png" }
+    var url: URL? { Bundle.main.url(forResource: resource, withExtension: fileExtension) }
 
     static let defaultID = "side"
 
@@ -184,5 +223,12 @@ struct BuiltInCarPhoto: Identifiable {
         BuiltInCarPhoto(id: "rear-three-quarter", name: "Rear ¾", plateQuad: PlateQuad((87, 174), (186, 172), (184, 200), (82, 203))),
         BuiltInCarPhoto(id: "front", name: "Front", plateQuad: PlateQuad((380, 555), (587, 554), (587, 631), (380, 632))),
         BuiltInCarPhoto(id: "front-detail", name: "Front detail", plateQuad: PlateQuad((828, 377), (892, 339), (890, 413), (830, 455))),
+        // Studio renders (1024 x 1024).
+        BuiltInCarPhoto(id: "studio-front-three-quarter", name: "Studio front ¾", plateQuad: PlateQuad((262, 676), (478, 678), (478, 731), (262, 728)), needsCutout: true),
+        BuiltInCarPhoto(id: "studio-front", name: "Studio front", plateQuad: PlateQuad((378, 708), (646, 708), (646, 760), (378, 760)), needsCutout: true),
+        BuiltInCarPhoto(id: "studio-side", name: "Studio side", needsCutout: true),
+        BuiltInCarPhoto(id: "studio-rear-three-quarter", name: "Studio rear ¾", plateQuad: PlateQuad((750, 522), (874, 516), (873, 557), (749, 562)), needsCutout: true),
+        BuiltInCarPhoto(id: "studio-rear", name: "Studio rear", plateQuad: PlateQuad((383, 519), (641, 519), (641, 576), (383, 576)), needsCutout: true),
+        BuiltInCarPhoto(id: "studio-front-detail", name: "Studio detail", plateQuad: PlateQuad((826, 572), (893, 548), (894, 617), (828, 646)), needsCutout: true),
     ]
 }

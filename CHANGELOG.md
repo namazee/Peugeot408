@@ -20,6 +20,10 @@ Fresh session? Read `docs/SPEC.md`, then this file, then continue from **Current
 - **Plate font:** classic bold, condensed, monospaced, rounded, Orbitron or Rajdhani (bundled or system fonts only, nothing new downloaded). The same font is used by plate layers in Studio designs.
 - Tests: paint weight (paint vs trim, plate, lights, reflections, highlights), the red recolour keeping shading, unchanged non-paint pixels, cube size, presets, plate quad aspect and growth, older studio files decoding.
 - CI green on run 26 (137 tests in 23 suites); uploaded as **1.1 (26)**.
+- **Six studio-render built-in photos** (spec updated first): front ¾, front, side, rear ¾, rear and detail, on a dark background.
+  - Wheel-cap logos are pixelated; the grille shields and plates were already blank.
+  - They're bundled as JPEGs (about 780 KB in total). When you pick one, the app removes the background on the device with Vision and keeps the mask (`mask-<id>.png` in the App Group), so later colour or plate changes only repaint.
+  - The paint colour and plate work the same way; plate corners were measured for the five views that show a plate.
 - [ ] You: check the recolour and plate overlay on the phone. White paint looks flatter than real white, as expected, and the plate perspective on the front-detail photo is the steepest.
 
 ## Phase 7 — OBD2 + Live Activity (with demo mode)

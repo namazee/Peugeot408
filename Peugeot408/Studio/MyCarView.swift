@@ -166,7 +166,7 @@ struct MyCarView: View {
                                 message = "Using the built-in \(photo.name.lowercased()) photo."
                             } label: {
                                 VStack(spacing: 4) {
-                                    BuiltInThumb(resource: photo.resource)
+                                    BuiltInThumb(photo: photo)
                                         .frame(width: 120, height: 72)
                                         .background(Checkerboard())
                                         .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
@@ -210,6 +210,12 @@ struct MyCarView: View {
                             .foregroundStyle(Theme.secondaryText)
                     }
                     .padding(.vertical, 4)
+                }
+                if studio.isPreparingPhoto {
+                    HStack {
+                        ProgressView()
+                        Text("Removing the background and painting…")
+                    }
                 }
             } header: {
                 Text("Built-in photos")
@@ -405,10 +411,10 @@ struct Checkerboard: View {
 }
 
 private struct BuiltInThumb: View {
-    let resource: String
+    let photo: BuiltInCarPhoto
 
     var body: some View {
-        if let url = Bundle.main.url(forResource: resource, withExtension: "png"), let image = UIImage(contentsOfFile: url.path(percentEncoded: false)) {
+        if let url = photo.url, let image = UIImage(contentsOfFile: url.path(percentEncoded: false)) {
             Image(uiImage: image).resizable().scaledToFit().padding(4)
         } else {
             Image(systemName: "car.side").foregroundStyle(Theme.secondaryText)

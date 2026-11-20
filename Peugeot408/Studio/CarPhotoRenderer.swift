@@ -7,9 +7,14 @@ import UIKit
 enum CarPhotoRenderer {
     private static let context = CIContext(options: [.workingColorSpace: CGColorSpace(name: CGColorSpace.sRGB) as Any])
 
+    /// PNG for a built-in photo that is already cut out.
     static func render(_ photo: BuiltInCarPhoto, paintHex: UInt32?, plate: String, font: PlateFont) -> Data? {
-        guard let url = Bundle.main.url(forResource: photo.resource, withExtension: "png"),
-              let base = CIImage(contentsOf: url) else { return nil }
+        processed(photo, paintHex: paintHex, plate: plate, font: font).flatMap { UIImage(cgImage: $0).pngData() }
+    }
+
+    /// The full-size photo with paint colour and plate applied (background still there for studio renders).
+    static func processed(_ photo: BuiltInCarPhoto, paintHex: UInt32?, plate: String, font: PlateFont) -> CGImage? {
+        guard let url = photo.url, let base = CIImage(contentsOf: url) else { return nil }
         var image = base
 
         if let paintHex {
@@ -39,8 +44,7 @@ enum CarPhotoRenderer {
             }
         }
 
-        guard let cgImage = context.createCGImage(image, from: base.extent) else { return nil }
-        return UIImage(cgImage: cgImage).pngData()
+        return context.createCGImage(image, from: base.extent)
     }
 
     /// A Malaysian-style plate: black, thin light edge, white characters.
