@@ -4,6 +4,16 @@ Fresh session? Read `docs/SPEC.md`, then this file, then continue from **Current
 
 ## Current phase: 9 (Remotion) — done; Phase 8 still waiting for your car test. Next: "Continue with Phase 10" (Polish)
 
+## Change before Phase 10 — picture instead of an icon in slots (spec updated first)
+- Text slot designs, and the new "Custom text" option in Split/Quad cards, can show a **picture** instead of the SF Symbol icon:
+  - your live My Car photo (`mycar.png`, so paint and plate changes follow);
+  - any of the 11 built-in photos, rendered with your paint and plate;
+  - an upload (PhotosPicker).
+- Uploads are shrunk to 800 px. Transparent pictures stay PNG with their empty margins trimmed; opaque ones become JPEG. Files go in `slot-images/` in the App Group.
+- The picture is always drawn whole (fit), as large as the slot allows: the value and label sit below it (small) or beside it (medium), or the picture shows alone when the text is empty. In cards, the picture fills the card with the value underneath.
+- Changing the My Car photo reloads all slot widgets.
+- `SlotDesign.imageFile` is optional, so older files still load.
+
 ## Change before Phase 10 — pre-cut studio My Car photos (spec updated first)
 - You supplied the six studio renders already cut out. They replace the studio JPGs: no on-device Vision step, cleaner edges, and picking one is instant.
 - Wheel-hub logos are removed with the same smooth fill, and each photo is cropped to the car. Plate corners and window outlines are shifted by each crop.

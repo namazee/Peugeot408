@@ -25,7 +25,7 @@ struct SlotEditorView: View {
     }
 
     private var canSave: Bool {
-        isSplit || draft.source != nil || draft.studioDesignID != nil || !draft.value.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        isSplit || draft.imageFile != nil || draft.source != nil || draft.studioDesignID != nil || !draft.value.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
     }
 
     private var previewContent: SlotContent {
@@ -116,7 +116,12 @@ struct SlotEditorView: View {
         let names = draft.effectiveLayout.cardNames
         ForEach(Array(names.enumerated()), id: \.offset) { index, name in
             Section {
-                ChoicePicker(title: "Shows", choice: cardChoice(index), allowsText: false, designs: studio.state.designs)
+                ChoicePicker(title: "Shows", choice: cardChoice(index), allowsText: true, designs: studio.state.designs)
+                if draft.card(index).source == nil && draft.card(index).studioDesignID == nil {
+                    TextField("Big value (optional)", text: cardText(index, \.value))
+                    TextField("Short label (optional)", text: cardText(index, \.title))
+                    SlotPicturePicker(imageFile: cardImage(index))
+                }
             } header: {
                 Text(index == focusCard ? "\(name) card (tapped)" : "\(name) card")
             }
@@ -130,11 +135,19 @@ struct SlotEditorView: View {
 
     private func cardChoice(_ index: Int) -> Binding<SlotChoice?> {
         Binding(
-            get: { draft.card(index).primaryChoice },
+            get: {
+                let card = draft.card(index)
+                return card.source == nil && card.studioDesignID == nil ? nil : card.primaryChoice
+            },
             set: { choice in
-                guard let choice else { return }
                 var cards = draft.layoutCards
                 guard cards.indices.contains(index) else { return }
+                guard let choice else {
+                    // Custom text / picture card.
+                    cards[index] = SlotDesign(value: "", title: "", symbol: "car.side.fill", imageFile: SlotDesign.myCarImageFile)
+                    draft.cards = cards
+                    return
+                }
                 if let source = choice.source {
                     cards[index] = .card(source)
                 } else {
@@ -142,6 +155,30 @@ struct SlotEditorView: View {
                     cards[index].studioDesignID = choice.studioDesignID
                     cards[index].symbol = "paintpalette.fill"
                 }
+                draft.cards = cards
+            }
+        )
+    }
+
+    private func cardText(_ index: Int, _ keyPath: WritableKeyPath<SlotDesign, String>) -> Binding<String> {
+        Binding(
+            get: { draft.card(index)[keyPath: keyPath] },
+            set: { value in
+                var cards = draft.layoutCards
+                guard cards.indices.contains(index) else { return }
+                cards[index][keyPath: keyPath] = value
+                draft.cards = cards
+            }
+        )
+    }
+
+    private func cardImage(_ index: Int) -> Binding<String?> {
+        Binding(
+            get: { draft.card(index).imageFile },
+            set: { value in
+                var cards = draft.layoutCards
+                guard cards.indices.contains(index) else { return }
+                cards[index].imageFile = value
                 draft.cards = cards
             }
         )
@@ -236,6 +273,14 @@ struct SlotEditorView: View {
                 }
             }
             .pickerStyle(.segmented)
+        }
+
+        Section {
+            SlotPicturePicker(imageFile: $draft.imageFile)
+        } header: {
+            Text("Picture")
+        } footer: {
+            Text("A picture replaces the icon and is shown whole, as large as the slot allows. Leave the text empty to show only the picture.")
         }
 
         Section("Icon") {

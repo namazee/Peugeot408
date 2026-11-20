@@ -19,13 +19,16 @@ public struct CompactCard: Sendable, Equatable {
     public let urgency: Urgency
     /// Full-bleed image (map, photo, music artwork) behind the label.
     public let imagePath: String?
+    /// Show the whole image (a slot picture) instead of filling the card.
+    public let imageFits: Bool
 
-    public init(symbol: String, label: String, value: CompactValue, urgency: Urgency = .ok, imagePath: String? = nil) {
+    public init(symbol: String, label: String, value: CompactValue, urgency: Urgency = .ok, imagePath: String? = nil, imageFits: Bool = false) {
         self.symbol = symbol
         self.label = label
         self.value = value
         self.urgency = urgency
         self.imagePath = imagePath
+        self.imageFits = imageFits
     }
 }
 
@@ -146,7 +149,8 @@ struct SlotCardView: View {
             case .data(let card):
                 values(card.compact)
             case .design(let design):
-                values(CompactCard(symbol: design.symbol, label: design.title, value: .text(design.value)))
+                values(CompactCard(symbol: design.symbol, label: design.title, value: .text(design.value),
+                                   imagePath: design.imageURL?.path(percentEncoded: false), imageFits: true))
             case .flash:
                 flash("")
             case .cards:
@@ -175,7 +179,24 @@ struct SlotCardView: View {
 
     @ViewBuilder
     private func values(_ card: CompactCard) -> some View {
-        if let path = card.imagePath, let image = UIImage(contentsOfFile: path) {
+        if card.imageFits, let path = card.imagePath, let image = UIImage(contentsOfFile: path) {
+            // A slot picture: whole, as large as the card allows, with the value under it.
+            VStack(spacing: 2) {
+                Image(uiImage: image)
+                    .resizable()
+                    .widgetAccentedRenderingMode(.fullColor)
+                    .scaledToFit()
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                if case .text(let text) = card.value, !text.isEmpty {
+                    Text(text)
+                        .font(Theme.number(compact ? 15 : 18))
+                        .foregroundStyle(Theme.primaryText)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.7)
+                }
+            }
+            .padding(compact ? 5 : 7)
+        } else if let path = card.imagePath, let image = UIImage(contentsOfFile: path) {
             ZStack(alignment: .bottomLeading) {
                 Image(uiImage: image)
                     .resizable()

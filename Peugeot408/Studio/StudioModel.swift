@@ -126,6 +126,8 @@ final class StudioModel {
     }
 
     func setCarPhoto(file: String?, plate: String? = nil) {
+        // Slots can show the live My Car photo as their picture.
+        for kind in SlotKind.all { WidgetCenter.shared.reloadTimelines(ofKind: kind) }
         var next = state
         next.carPhotoFile = file
         if let plate { next.plateText = plate }

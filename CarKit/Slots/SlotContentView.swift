@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 import WidgetKit
 
 /// The foreground of a slot, shared by the widget and the app's mock CarPlay screen
@@ -35,12 +36,46 @@ public struct SlotContentView: View {
         }
     }
 
+    /// A picture design: the picture whole (fit, never cropped) at the largest size the slot
+    /// allows, with the value and label below it (small) or beside it (medium).
+    @ViewBuilder
+    private func pictureView(_ design: SlotDesign, image: UIImage, labelColor: Color) -> some View {
+        let hasText = !design.value.trimmingCharacters(in: .whitespaces).isEmpty || !design.title.trimmingCharacters(in: .whitespaces).isEmpty
+        let picture = Image(uiImage: image)
+            .resizable()
+            .widgetAccentedRenderingMode(.fullColor)
+            .scaledToFit()
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .accessibilityHidden(true)
+        if !hasText {
+            picture
+        } else if isMedium {
+            HStack(spacing: 14) {
+                picture
+                VStack(alignment: .leading, spacing: 2) {
+                    valueText(design.value, size: 40)
+                    labelText(design.title, color: labelColor)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+            }
+        } else {
+            VStack(alignment: .leading, spacing: 2) {
+                picture
+                valueText(design.value, size: 28)
+                labelText(design.title, color: labelColor)
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
+        }
+    }
+
     @ViewBuilder
     private func designView(_ design: SlotDesign) -> some View {
         let iconColor: Color = design.style == .accent ? Theme.primaryText : Theme.accent
         let labelColor: Color = design.style == .accent ? Theme.primaryText.opacity(0.8) : Theme.secondaryText
 
-        if isMedium {
+        if let url = design.imageURL, let image = UIImage(contentsOfFile: url.path(percentEncoded: false)) {
+            pictureView(design, image: image, labelColor: labelColor)
+        } else if isMedium {
             HStack(spacing: 16) {
                 Image(systemName: design.symbol)
                     .font(.system(size: 44, weight: .semibold))

@@ -75,8 +75,11 @@ public struct SlotDesign: Codable, Sendable, Equatable, Hashable {
     public var layout: SlotLayout?
     /// The cards of a Split or Quad layout, each with its own data source, Studio design or text.
     public var cards: [SlotDesign]?
+    /// A picture shown instead of the icon (path in the App Group, e.g. "slot-images/x.png", or
+    /// "mycar.png" for the live My Car photo). Nil in older files.
+    public var imageFile: String?
 
-    public init(value: String, title: String, symbol: String, style: SlotStyle = .dark, source: DataSource? = nil, studioDesignID: UUID? = nil, rotations: [SlotRotation]? = nil, layout: SlotLayout? = nil, cards: [SlotDesign]? = nil) {
+    public init(value: String, title: String, symbol: String, style: SlotStyle = .dark, source: DataSource? = nil, studioDesignID: UUID? = nil, rotations: [SlotRotation]? = nil, layout: SlotLayout? = nil, cards: [SlotDesign]? = nil, imageFile: String? = nil) {
         self.value = value
         self.title = title
         self.symbol = symbol
@@ -86,7 +89,16 @@ public struct SlotDesign: Codable, Sendable, Equatable, Hashable {
         self.rotations = rotations
         self.layout = layout
         self.cards = cards
+        self.imageFile = imageFile
     }
+
+    /// The picture's file, if one is set.
+    public var imageURL: URL? {
+        imageFile.map { AppGroup.containerURL.appending(path: $0, directoryHint: .notDirectory) }
+    }
+
+    /// The file name used for the live My Car photo.
+    public static let myCarImageFile = "mycar.png"
 
     public var effectiveLayout: SlotLayout { layout ?? .single }
 
@@ -133,7 +145,11 @@ public struct SlotDesign: Codable, Sendable, Equatable, Hashable {
 
     var cardSummary: String {
         if studioDesignID != nil { return "Studio design" }
-        return source?.displayName ?? value
+        if let source { return source.displayName }
+        if value.trimmingCharacters(in: .whitespaces).isEmpty, imageFile != nil {
+            return imageFile == Self.myCarImageFile ? "My Car picture" : "Picture"
+        }
+        return value
     }
 
     /// This design without its rotations: what shows outside the rotation hours.

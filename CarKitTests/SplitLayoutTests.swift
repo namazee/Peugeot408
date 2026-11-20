@@ -113,6 +113,22 @@ struct SplitLayoutTests {
         #expect(prayer.value == .text("--"))
     }
 
+    @Test func pictureCardsAndOlderFiles() throws {
+        var design = SlotDesign.splitDefault(for: 3) ?? .starter(for: 3)
+        design.cards?[1] = SlotDesign(value: "", title: "", symbol: "car.side.fill", imageFile: SlotDesign.myCarImageFile)
+        var state = SlotsState.starter
+        state.setDesign(design, for: 3)
+        guard case .cards(_, let parts) = SlotTimeline.items(slot: 3, state: state, now: now, calendar: calendar).first?.content,
+              case .design(let picture) = parts[1] else {
+            Issue.record("expected a picture card")
+            return
+        }
+        #expect(picture.imageFile == "mycar.png")
+        #expect(design.summary == "Weather & Haze / My Car picture")
+        let json = #"{"value":"408 GT","title":"Hi","symbol":"car.fill","style":"accent"}"#
+        #expect(try JSONDecoder().decode(SlotDesign.self, from: Data(json.utf8)).imageFile == nil)
+    }
+
     @Test func summaryNamesBothCards() {
         #expect(SlotsState.starter.design(for: 2).summary == "Service Tracker / Fuel Log")
     }
