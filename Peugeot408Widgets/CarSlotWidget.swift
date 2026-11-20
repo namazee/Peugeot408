@@ -101,6 +101,12 @@ struct SlotWidgetView: View {
                 .containerBackground(for: .widget) {
                     DesignBackgroundView(background: card.design.background, card: card)
                 }
+        } else if case .panorama(let card, let part) = entry.content {
+            // This slot's third of the Panorama hero, edge to edge.
+            Color.clear
+                .containerBackground(for: .widget) {
+                    PanoramaSlice(card: card, part: part)
+                }
         } else {
             WidgetCard(style: entry.content.cardStyle, paint: entry.content.paint) {
                 SlotContentView(slot: entry.slot, content: entry.content, isMedium: family == .systemMedium)

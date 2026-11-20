@@ -106,7 +106,7 @@ struct DesignRow: View {
     var body: some View {
         HStack(spacing: 12) {
             DesignView(card: DesignResolver.card(for: design, data: cars.data, studio: studio.state, at: .now))
-                .frame(width: design.canvas == .small ? 64 : 120, height: 64)
+                .frame(width: 64 * min(design.canvas.aspectRatio, 2.4), height: 64)
                 .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
             VStack(alignment: .leading, spacing: 2) {
                 Text(design.name).font(.headline)
@@ -140,7 +140,7 @@ struct TemplateGalleryView: View {
         List {
             Section {
                 Picker("Size", selection: $canvas) {
-                    ForEach(DesignCanvas.allCases, id: \.self) { Text($0.displayName).tag($0) }
+                    ForEach(DesignCanvas.widgetCanvases, id: \.self) { Text($0.displayName).tag($0) }
                 }
                 .pickerStyle(.segmented)
                 Picker("Data", selection: $source) {
@@ -162,7 +162,7 @@ struct TemplateGalleryView: View {
                             } label: {
                                 VStack(alignment: .leading, spacing: 6) {
                                     DesignView(card: DesignResolver.card(for: design, data: cars.data, studio: studio.state, at: .now))
-                                        .aspectRatio(canvas.aspectRatio, contentMode: .fit)
+                                        .aspectRatio(design.canvas.aspectRatio, contentMode: .fit)
                                         .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
                                     HStack(spacing: 6) {
                                         Text(style.displayName).font(.subheadline.weight(.semibold))

@@ -36,6 +36,25 @@ struct SlotsView: View {
                 }
 
                 Section {
+                    NavigationLink {
+                        PanoramaView()
+                    } label: {
+                        Label {
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text("Panorama hero")
+                                Text(slots.state.activePanoramaID != nil ? "On: one picture across Slots 1–3" : "Off")
+                                    .font(.footnote)
+                                    .foregroundStyle(Theme.secondaryText)
+                            }
+                        } icon: {
+                            Image(systemName: "rectangle.split.3x1.fill")
+                        }
+                    }
+                } footer: {
+                    Text("Spread one wide design, like your car with big lettering behind it, across the three columns.")
+                }
+
+                Section {
                     FlashControls()
                 } header: {
                     Text("Test")
@@ -158,16 +177,7 @@ struct MockCarPlayView: View {
     }
 
     private func content(for slot: Int, at date: Date) -> SlotContent {
-        if slots.state.isFlashing(at: date) { return SlotTimeline.flashContent(for: slots.design(for: slot)) }
-        let design = slots.design(for: slot)
-        return SlotTimeline.content(
-            at: date,
-            design: design,
-            rotations: Array((design.rotations ?? []).prefix(SlotDesign.maxRotations)),
-            seasonal: studio.state.seasonal.enabled && studio.state.seasonal.slot == slot,
-            data: cars.data,
-            studio: studio.state
-        )
+        SlotTimeline.currentContent(slot: slot, state: slots.state, data: cars.data, studio: studio.state, at: date)
     }
 }
 

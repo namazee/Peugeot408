@@ -160,7 +160,7 @@ struct SlotCardView: View {
                                    imagePath: design.imageURL?.path(percentEncoded: false), imageFits: true))
             case .flash:
                 flash("")
-            case .cards:
+            case .cards, .panorama:
                 EmptyView()
             }
         }
@@ -186,7 +186,7 @@ struct SlotCardView: View {
         case .design(let design):
             let text = [design.title, design.value].filter { !$0.trimmingCharacters(in: .whitespaces).isEmpty }.joined(separator: ", ")
             return text.isEmpty ? design.cardSummary : text
-        case .studio(let card): return card.design.name
+        case .studio(let card), .panorama(let card, _): return card.design.name
         case .flashCard(let name): return name.isEmpty ? "Slot \(slot) test card" : "Slot \(slot), \(name) test card"
         case .flash: return "Slot \(slot) test card"
         case .cards: return ""

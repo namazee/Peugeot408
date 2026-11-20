@@ -2,7 +2,30 @@
 
 Fresh session? Read `docs/SPEC.md`, then this file, then continue from **Current phase**.
 
-## Current phase: 13 (Synced lyrics) — built. Next: the single-slot extras (centre picture, text alignment, per-line size; spec already updated), then "Continue with Phase 14" (Panorama hero). Phase 8 split cards still waiting for your car test.
+## Current phase: 14 (Panorama hero) — built. All spec phases are built. Phase 8 split cards still waiting for your car test.
+
+## Phase 14 — Panorama hero
+### Done
+- **One picture across Slots 1–3.** There's a new **Panorama** canvas (3 columns + 2 gaps, about 2.25:1). Each of Slots 1–3 draws its third (`PanoramaSlice`, `SlotContent.panorama`), skipping the gaps between the 408's columns, so the three columns read as one picture.
+- **Slots → Panorama hero:**
+  - a live 3-column preview;
+  - an on/off switch that asks first ("replaces what Slots 1–3 show until you turn it off");
+  - a design picker with an edit button;
+  - **Create a Hero design**.
+  - Slots 1–3 keep their own designs underneath, so turning it off brings them back. The Slots mock and the slot editor show when the panorama is on. Slots 4–5 aren't affected.
+- **Hero template:**
+  - your My Car photo in the middle, with big "408 GT" lettering behind it (change the text in the builder);
+  - a greeting top left and the clock top right;
+  - temperature and "place · condition" bottom left;
+  - your plate bottom right.
+  - No logos.
+- **New data fields:**
+  - **Greeting:** "Good morning, …" / "Selamat pagi, …", which changes at 5:00, 12:00, 15:00 and 18:00/19:00 (timeline entries at those hours). The name and language are set on the Panorama screen.
+  - **Weather place · condition.**
+- **Builder:** the Panorama canvas is available, with the cut lines between columns shown as shaded gaps. The template gallery and My Car stay on Small/Medium; Hero is in the gallery's Car section, previewed at its real width.
+- A flash test still takes over Slots 1–3. The backup includes the panorama settings (slots and studio files).
+- Tests: `PanoramaTests` (geometry, slots 1–3 vs 4, sources, designs kept, greeting by hour, older files). The README snapshots add `carplay-panorama.png`.
+
 
 ## Change after Phase 13 — single-slot extras (spec updated first)
 - **Centre picture** for any Single slot showing data (Service, Prayer, Fuel and so on; not Map, Photos or Music, which are pictures already).

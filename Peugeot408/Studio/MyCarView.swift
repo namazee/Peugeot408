@@ -256,7 +256,7 @@ struct MyCarView: View {
             }
 
             Section {
-                ForEach(DesignCanvas.allCases, id: \.self) { canvas in
+                ForEach(DesignCanvas.widgetCanvases, id: \.self) { canvas in
                     Button {
                         onCreateDesign(Templates.make(.myCar, source: .service, canvas: canvas))
                     } label: {

@@ -149,6 +149,14 @@ final class StudioModel {
         rerenderBuiltIn()
     }
 
+    /// Name and language for the Greeting field (Panorama hero).
+    func setGreeting(name: String, malay: Bool) {
+        var next = state
+        next.ownerName = name.trimmingCharacters(in: .whitespacesAndNewlines)
+        next.greetingMalay = malay
+        commit(next, reloadSlotsShowing: Set(next.designs.map(\.id)))
+    }
+
     private func rerenderBuiltIn() {
         if let id = state.builtInCarPhoto { useBuiltInCarPhoto(id) }
     }
@@ -198,7 +206,8 @@ final class StudioModel {
         let affected = SlotsState.slotNumbers.filter { slot in
             let design = slots.design(for: slot)
             let choices = [design.primaryChoice] + (design.rotations ?? []).map(\.choice)
-            return choices.contains { $0.studioDesignID.map(ids.contains) ?? false }
+            let showsPanorama = SlotsState.isPanoramaSlot(slot) && (slots.activePanoramaID.map(ids.contains) ?? false)
+            return showsPanorama || choices.contains { $0.studioDesignID.map(ids.contains) ?? false }
         }
         reloadSlots(affected)
     }

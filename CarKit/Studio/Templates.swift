@@ -24,6 +24,8 @@ public enum TemplateStyle: String, Codable, Sendable, CaseIterable, Identifiable
     case bigDate
     case yearProgress
     case retroLED
+    /// Panorama hero across Slots 1–3 (always the panorama canvas).
+    case hero
 
     public var id: String { rawValue }
 
@@ -31,7 +33,7 @@ public enum TemplateStyle: String, Codable, Sendable, CaseIterable, Identifiable
     public var group: TemplateGroup {
         switch self {
         case .sporty, .minimal, .premium, .dashboard, .boldTile, .neonRing, .twinGauges, .aurora, .racingStripes: .data
-        case .myCar, .photo, .nightDrive, .showroom, .sunsetDrive: .car
+        case .myCar, .photo, .nightDrive, .showroom, .sunsetDrive, .hero: .car
         case .clockAnalog, .clockDigital, .bigDate, .retroLED, .yearProgress: .clockDate
         case .countdown, .anniversary, .starryNight: .special
         }
@@ -69,6 +71,7 @@ public enum TemplateStyle: String, Codable, Sendable, CaseIterable, Identifiable
         case .bigDate: "Big Date"
         case .yearProgress: "Year Progress"
         case .retroLED: "Retro LED"
+        case .hero: "Hero (Panorama)"
         }
     }
 
@@ -77,7 +80,7 @@ public enum TemplateStyle: String, Codable, Sendable, CaseIterable, Identifiable
         switch self {
         case .sporty, .minimal, .premium, .dashboard, .photo, .myCar,
              .boldTile, .neonRing, .twinGauges, .aurora, .sunsetDrive, .nightDrive, .showroom, .racingStripes: true
-        case .clockAnalog, .clockDigital, .countdown, .anniversary, .starryNight, .bigDate, .yearProgress, .retroLED: false
+        case .clockAnalog, .clockDigital, .countdown, .anniversary, .starryNight, .bigDate, .yearProgress, .retroLED, .hero: false
         }
     }
 }
@@ -130,7 +133,8 @@ public enum Templates {
     /// A new design from a template. `photoFile` is used by the Photo template (a Photo Frame file).
     public static func make(_ style: TemplateStyle, source: DataSource = .service, canvas: DesignCanvas = .small, photoFile: String? = nil, eventDate: Date? = nil, eventName: String = "Married") -> CardDesign {
         let bind = TemplateBinding.of(source)
-        let wide = canvas == .medium
+        let surface = style == .hero ? DesignCanvas.panorama : canvas
+        let wide = surface != .small
         let accent = Theme.Hex.accent
         let white: UInt32 = 0xFFFFFF
         let grey = Theme.Hex.secondaryText
@@ -367,6 +371,20 @@ public enum Templates {
                 DesignLayer(content: .progressBar(.yearProgress), x: 0.5, y: 0.8, width: 0.84, height: 0.09, colorHex: mint, glow: true),
             ]
 
+        case .hero:
+            // One picture across Slots 1–3: greeting and clock on top, big lettering behind the
+            // car in the middle, the weather along the bottom. No brand logos.
+            background = .spotlight(0x2A5BD7, 0x04060C)
+            layers = [
+                DesignLayer(content: .text(eventName == "Married" ? "408 GT" : eventName), x: 0.5, y: 0.4, width: 0.98, height: 0.52, opacity: 0.2, font: .orbitron, weight: .heavy, fontSize: 118, colorHex: white, alignment: .center),
+                DesignLayer(content: .carPhoto, x: 0.5, y: 0.6, width: 0.6, height: 0.7, colorHex: white),
+                DesignLayer(content: .data(.greeting), x: 0.17, y: 0.11, width: 0.3, height: 0.12, font: .rounded, weight: .bold, fontSize: 18, colorHex: white, alignment: .leading, shadow: true),
+                DesignLayer(content: .data(.clock), x: 0.84, y: 0.11, width: 0.28, height: 0.12, font: .rounded, weight: .bold, fontSize: 20, colorHex: white, alignment: .trailing, shadow: true),
+                DesignLayer(content: .data(.temperature), x: 0.12, y: 0.82, width: 0.2, height: 0.14, font: .rounded, weight: .heavy, fontSize: 28, colorHex: white, alignment: .leading, shadow: true),
+                DesignLayer(content: .data(.weatherPlace), x: 0.17, y: 0.92, width: 0.3, height: 0.08, font: .rounded, weight: .semibold, fontSize: 14, colorHex: 0xBFD3FF, alignment: .leading),
+                DesignLayer(content: .plate(""), x: 0.86, y: 0.88, width: 0.17, height: 0.11, fontSize: 15),
+            ]
+
         case .retroLED:
             let amber: UInt32 = 0xFFB020
             background = .solid(0x050505)
@@ -377,7 +395,7 @@ public enum Templates {
         }
 
         let name = style.usesDataSource ? "\(style.displayName) · \(bind.label)" : style.displayName
-        return CardDesign(name: name, canvas: canvas, background: background, layers: layers, template: style.rawValue, eventDate: eventDate)
+        return CardDesign(name: name, canvas: surface, background: background, layers: layers, template: style.rawValue, eventDate: eventDate)
     }
 
     /// Each source's own colour for Bold Tile (it turns amber or red when the value needs attention).

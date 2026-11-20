@@ -63,6 +63,18 @@ public enum SlotTimeline {
         let design = state.design(for: slot)
         let flashUntil = state.flashUntil.flatMap { $0 > now ? $0 : nil }
         let start = flashUntil ?? now
+
+        // Panorama hero: Slots 1–3 each draw their third of one wide design.
+        if SlotsState.isPanoramaSlot(slot), let hero = studio.design(state.activePanoramaID) {
+            var items: [SlotTimelineItem] = []
+            if flashUntil != nil {
+                items.append(SlotTimelineItem(date: now, content: .flash))
+            }
+            for date in DesignResolver.dates(for: hero, data: data, from: start, calendar: calendar) {
+                items.append(SlotTimelineItem(date: date, content: .panorama(DesignResolver.card(for: hero, data: data, studio: studio, at: date, calendar: calendar), slot - 1)))
+            }
+            return items
+        }
         let rotations = Array((design.rotations ?? []).prefix(SlotDesign.maxRotations))
         let seasonal = studio.seasonal.enabled && studio.seasonal.slot == slot
 
@@ -164,8 +176,27 @@ public enum SlotTimeline {
         return .cards(layout, layout.cardNames.map { .flashCard($0) })
     }
 
+    /// True when this slot shows a third of the panorama.
+    public static func isPanoramaActive(slot: Int, state: SlotsState, studio: StudioState) -> Bool {
+        SlotsState.isPanoramaSlot(slot) && studio.design(state.activePanoramaID) != nil
+    }
+
+    /// The content a slot shows right now (the app's Slots screen).
+    public static func currentContent(slot: Int, state: SlotsState, data: CarData, studio: StudioState, at date: Date, calendar: Calendar = .current) -> SlotContent {
+        if state.isFlashing(at: date) { return flashContent(for: state.design(for: slot)) }
+        if isPanoramaActive(slot: slot, state: state, studio: studio), let hero = studio.design(state.activePanoramaID) {
+            return .panorama(DesignResolver.card(for: hero, data: data, studio: studio, at: date, calendar: calendar), slot - 1)
+        }
+        let design = state.design(for: slot)
+        return content(at: date, design: design, rotations: Array((design.rotations ?? []).prefix(SlotDesign.maxRotations)),
+                       seasonal: studio.seasonal.enabled && studio.seasonal.slot == slot, data: data, studio: studio, calendar: calendar)
+    }
+
     /// Every source a slot can show (main, rotations, Studio fields, seasonal), for live refreshes.
     public static func sources(slot: Int, state: SlotsState, studio: StudioState) -> Set<DataSource> {
+        if isPanoramaActive(slot: slot, state: state, studio: studio), let hero = studio.design(state.activePanoramaID) {
+            return hero.sources
+        }
         let design = state.design(for: slot)
         var result = Set<DataSource>()
         let cards = design.effectiveLayout == .single ? [] : design.layoutCards.map(\.primaryChoice)
@@ -180,6 +211,7 @@ public enum SlotTimeline {
 
     /// True when the slot needs data files at all (a pure text slot doesn't).
     public static func needsData(slot: Int, state: SlotsState, studio: StudioState) -> Bool {
+        if isPanoramaActive(slot: slot, state: state, studio: studio) { return true }
         let design = state.design(for: slot)
         return design.source != nil || design.studioDesignID != nil || !(design.rotations ?? []).isEmpty
             || (design.effectiveLayout != .single && design.layoutCards.contains { $0.source != nil || $0.studioDesignID != nil })

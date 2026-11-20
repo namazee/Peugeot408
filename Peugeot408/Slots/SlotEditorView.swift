@@ -49,6 +49,13 @@ struct SlotEditorView: View {
                     .listRowBackground(Color.clear)
                 }
 
+                if SlotsState.isPanoramaSlot(slot) && slots.state.activePanoramaID != nil {
+                    Section {
+                        Label("The Panorama hero is on, so this slot shows its part of the panorama. What you set here comes back when you turn the panorama off (Slots → Panorama hero).", systemImage: "rectangle.split.3x1.fill")
+                            .font(.footnote)
+                    }
+                }
+
                 Section {
                     Picker("Look", selection: $draft.look) {
                         Text("App (\(appearance.look.displayName))").tag(CardLook?.none)

@@ -51,6 +51,30 @@ public struct DesignView: View {
     }
 }
 
+/// One column of the Panorama hero: the whole design drawn at panorama width, shifted so this
+/// slot shows its third (the gaps between columns fall between the slices).
+public struct PanoramaSlice: View {
+    private let card: StudioCard
+    private let part: Int
+
+    public init(card: StudioCard, part: Int) {
+        self.card = card
+        self.part = min(max(part, 0), PanoramaGeometry.columns - 1)
+    }
+
+    public var body: some View {
+        GeometryReader { geo in
+            let full = geo.size.width * PanoramaGeometry.widthInColumns
+            DesignView(card: card)
+                .frame(width: full, height: geo.size.height)
+                .offset(x: -full * PanoramaGeometry.partStart(part))
+        }
+        .clipped()
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("\(card.design.name), part \(part + 1) of \(PanoramaGeometry.columns)")
+    }
+}
+
 public struct DesignBackgroundView: View {
     let background: DesignBackground
     let card: StudioCard?

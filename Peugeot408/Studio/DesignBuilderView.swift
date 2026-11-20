@@ -74,6 +74,9 @@ struct DesignBuilderView: View {
                 DesignView(card: DesignResolver.card(for: design, data: cars.data, studio: studio.state, at: .now))
                 if snapToGrid {
                     GridOverlay().allowsHitTesting(false)
+                    if design.canvas == .panorama {
+                        PanoramaGapsOverlay().allowsHitTesting(false)
+                    }
                 }
                 if showSafeArea {
                     // CarPlay keeps about 8% clear at the edges (the widget's content margins).
@@ -378,6 +381,20 @@ struct DesignBuilderView: View {
         case .analogClock: "Analogue clock"
         case .plate(let text): "Plate \(text)"
         case .seasonalArt(let occasion): "Art: \(occasion.displayName)"
+        }
+    }
+}
+
+/// Where the panorama is cut: the gaps between the 408's three columns (Slots 1–3).
+private struct PanoramaGapsOverlay: View {
+    var body: some View {
+        Canvas { context, size in
+            for part in 1..<PanoramaGeometry.columns {
+                let start = size.width * (PanoramaGeometry.partStart(part) - PanoramaGeometry.gap * PanoramaGeometry.partWidth)
+                let gap = size.width * PanoramaGeometry.gap * PanoramaGeometry.partWidth
+                context.fill(Path(CGRect(x: start, y: 0, width: gap, height: size.height)), with: .color(.black.opacity(0.55)))
+                context.stroke(Path(CGRect(x: start, y: 0, width: gap, height: size.height)), with: .color(.yellow.opacity(0.7)), style: StrokeStyle(lineWidth: 1, dash: [4, 3]))
+            }
         }
     }
 }

@@ -61,6 +61,11 @@ struct ReadmeSnapshots {
 
         // The Studio template gallery, small size, with sample data.
         let data = SampleData.carData(now: now)
+
+        // Panorama hero across the three visible columns.
+        let hero = Templates.make(.hero)
+        let heroCard = DesignResolver.card(for: hero, data: data, studio: .empty, at: now)
+        save(carPlayScreen((0..<3).map { SlotContent.panorama(heroCard, $0) }), "carplay-panorama.png", in: directory)
         for group in TemplateGroup.allCases {
             let designs = group.styles.map { Templates.make($0, source: .service, canvas: .small, eventDate: now.addingTimeInterval(-86_400 * 3_500)) }
             let rows = stride(from: 0, to: designs.count, by: 4).map { Array(designs[$0..<min($0 + 4, designs.count)]) }
@@ -70,7 +75,7 @@ struct ReadmeSnapshots {
                         HStack(spacing: 12) {
                             ForEach(row) { design in
                                 DesignView(card: DesignResolver.card(for: design, data: data, studio: .empty, at: now))
-                                    .frame(width: 150, height: 150)
+                                    .frame(width: 150 * min(design.canvas.aspectRatio, 2.4), height: 150)
                                     .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
                             }
                         }

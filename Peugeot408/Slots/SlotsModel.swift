@@ -54,8 +54,19 @@ final class SlotsModel {
         state = store.load()
     }
 
+    /// Turns the Panorama hero on or off (Slots 1–3 keep their own designs underneath).
+    func setPanorama(_ settings: PanoramaSettings?) {
+        var next = state
+        next.panorama = settings
+        commit(next, reloadingSlots: Array(1...PanoramaGeometry.columns))
+    }
+
     func reloadAllWidgets() {
         WidgetCenter.shared.reloadAllTimelines()
+    }
+
+    private func commit(_ next: SlotsState, reloadingSlots slots: [Int]) {
+        commit(next, reloading: slots)
     }
 
     private func commit(_ next: SlotsState, reloading slots: [Int]) {

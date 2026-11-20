@@ -3,18 +3,57 @@ import Foundation
 // Studio designs: a versioned Codable model, stored as JSON in the App Group and rendered by
 // `DesignView` in both the builder and the widget, so the two always look the same.
 
-/// The two canvases a design is built for (CarPlay small and medium).
+/// The canvases a design is built for: CarPlay small and medium, and the Panorama hero
+/// (one wide design spread over the three tall columns of Slots 1–3, spec §3 Panorama hero).
 public enum DesignCanvas: String, Codable, Sendable, CaseIterable {
     case small
     case medium
+    case panorama
 
-    /// Width ÷ height of the widget (systemSmall 170×170, systemMedium 364×170 points).
-    public var aspectRatio: Double { self == .small ? 1 : 364.0 / 170.0 }
+    /// Width ÷ height (systemSmall 170×170, systemMedium 364×170 points, panorama = 3 columns + 2 gaps).
+    public var aspectRatio: Double {
+        switch self {
+        case .small: 1
+        case .medium: 364.0 / 170.0
+        case .panorama: PanoramaGeometry.canvasAspect
+        }
+    }
 
     /// Reference height in points: font sizes are stored at this height and scale with the widget.
     public static let referenceHeight = 170.0
 
-    public var displayName: String { self == .small ? "Small" : "Medium" }
+    public var displayName: String {
+        switch self {
+        case .small: "Small"
+        case .medium: "Medium"
+        case .panorama: "Panorama"
+        }
+    }
+
+    /// The single-widget canvases (template gallery, My Car template).
+    public static let widgetCanvases: [DesignCanvas] = [.small, .medium]
+}
+
+/// How the panorama is cut into Slots 1–3. The 408 shows three tall columns (about 0.72 wide
+/// per 1 high) with a thin gap between them; each slot draws its third, skipping the gaps, so
+/// the three columns read as one picture.
+public enum PanoramaGeometry {
+    public static let columns = 3
+    /// Column width ÷ height.
+    public static let columnAspect = 0.72
+    /// Gap between columns, as a share of a column's width.
+    public static let gap = 0.06
+    /// Canvas width in column widths (3 columns + 2 gaps).
+    public static let widthInColumns = Double(columns) + Double(columns - 1) * gap
+    public static let canvasAspect = widthInColumns * columnAspect
+
+    /// Left edge of a part (0, 1, 2) as a share of the canvas width.
+    public static func partStart(_ part: Int) -> Double {
+        Double(part) * (1 + gap) / widthInColumns
+    }
+
+    /// One part's width as a share of the canvas width.
+    public static let partWidth = 1 / widthInColumns
 }
 
 /// Fonts offered in the builder: system designs plus the bundled OFL fonts (ASSETS-LICENSES.md).
@@ -79,6 +118,8 @@ public enum DataField: String, Codable, Sendable, CaseIterable, Identifiable {
     case monthName
     case yearProgress
     case musicTitle
+    case greeting
+    case weatherPlace
     case boost
     case coolantTemp
     case batteryVoltage
@@ -117,6 +158,8 @@ public enum DataField: String, Codable, Sendable, CaseIterable, Identifiable {
         case .monthName: "Month"
         case .yearProgress: "Year progress"
         case .musicTitle: "Music title"
+        case .greeting: "Greeting (time of day + your name)"
+        case .weatherPlace: "Weather place · condition"
         case .boost: "Boost (OBD2)"
         case .coolantTemp: "Coolant (OBD2)"
         case .batteryVoltage: "Battery voltage (OBD2)"
@@ -133,11 +176,11 @@ public enum DataField: String, Codable, Sendable, CaseIterable, Identifiable {
         case .tngBalance: .tng
         case .daysToRoadTax, .nearestRenewal: .renewals
         case .parkingPlace, .parkingTime: .parking
-        case .temperature, .rainToday, .airQuality: .weather
+        case .temperature, .rainToday, .airQuality, .weatherPlace: .weather
         case .commuteTime, .nextEvent: .commute
         case .musicTitle: .music
         case .boost, .coolantTemp, .batteryVoltage, .engineRPM: .obd
-        case .clock, .date, .dayCounter, .countdownDays, .weekday, .dayOfMonth, .monthName, .yearProgress: nil
+        case .clock, .date, .dayCounter, .countdownDays, .weekday, .dayOfMonth, .monthName, .yearProgress, .greeting: nil
         }
     }
 }
@@ -488,6 +531,10 @@ public struct StudioState: Codable, Sendable, Equatable {
     public var carPaintHex: UInt32?
     /// Font of the number plate (built-in photos and plate layers). Nil in older files = classic.
     public var plateFont: PlateFont?
+    /// Name used by the Greeting field ("Good morning, …"). Nil in older files.
+    public var ownerName: String?
+    /// Greeting in Malay ("Selamat pagi, …") instead of English.
+    public var greetingMalay: Bool?
 
     public init(version: Int = StudioState.currentVersion, designs: [CardDesign] = [], seasonal: SeasonalSettings = SeasonalSettings(), carPhotoFile: String? = nil, plateText: String = "") {
         self.version = version

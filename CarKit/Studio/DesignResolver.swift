@@ -65,7 +65,9 @@ public enum DesignResolver {
     public static func card(for design: CardDesign, data: CarData, studio: StudioState, at date: Date, calendar: Calendar = .current) -> StudioCard {
         var values: [DataField: ResolvedField] = [:]
         for field in Set(design.dataFields) {
-            values[field] = resolve(field, data: data, design: design, at: date, calendar: calendar)
+            values[field] = field == .greeting
+                ? ResolvedField(text: greetingText(at: date, name: studio.ownerName, malay: studio.greetingMalay == true, calendar: calendar))
+                : resolve(field, data: data, design: design, at: date, calendar: calendar)
         }
         return StudioCard(design: design, date: date, values: values, directory: data.directory, carPhotoFile: studio.carPhotoFile, plateText: studio.plateText, plateFont: studio.plateFont ?? .classic)
     }
@@ -77,6 +79,9 @@ public enum DesignResolver {
             dates.formUnion(DataTimeline.dates(for: source, data: data, from: start, calendar: calendar))
         }
         dates.formUnion(DayMath.refreshDates(from: start, days: 2, calendar: calendar))
+        if design.dataFields.contains(.greeting) {
+            dates.formUnion(SlotTimeline.hourBoundaries([5, 12, 15, 18, 19], from: start, calendar: calendar))
+        }
         if design.layers.contains(where: { $0.content == .analogClock }) {
             let minute = calendar.dateInterval(of: .minute, for: start)?.start ?? start
             for offset in 1...60 { dates.insert(minute.addingTimeInterval(Double(offset) * 60)) }
@@ -84,7 +89,8 @@ public enum DesignResolver {
         return [start] + dates.filter { $0 > start }.sorted().prefix(70)
     }
 
-    public static func resolve(_ field: DataField, data: CarData, design: CardDesign, at date: Date, calendar: Calendar = .current) -> ResolvedField {
+    public static func resolve(_ field: DataField, data: CarData, design: CardDesign, at date: Date, calendar: Calendar = .current,
+                               studioName: String? = nil, studioMalay: Bool = false) -> ResolvedField {
         func card(_ source: DataSource) -> DataCard { data.card(for: source, at: date, calendar: calendar) }
         let time = Date.FormatStyle(date: .omitted, time: .shortened)
 
@@ -173,6 +179,14 @@ public enum DesignResolver {
             guard let event = design.eventDate else { return ResolvedField(text: "Set a date") }
             return ResolvedField(text: anniversaryText(from: event, to: date, calendar: calendar))
 
+        case .greeting:
+            return ResolvedField(text: greetingText(at: date, name: studioName, malay: studioMalay, calendar: calendar))
+
+        case .weatherPlace:
+            guard case .weather(let s) = card(.weather) else { return ResolvedField(text: "--") }
+            let parts = [s.placeLabel, s.condition].compactMap { $0 }.filter { !$0.isEmpty && $0 != "Current location" }
+            return ResolvedField(text: parts.isEmpty ? (s.condition ?? "--") : parts.joined(separator: " · "))
+
         case .weekday:
             return ResolvedField(text: date.formatted(.dateTime.weekday(.wide)).uppercased())
 
@@ -223,6 +237,22 @@ public enum DesignResolver {
         case (_, 0): return years == 1 ? "1 year" : "\(years) years"
         default: return "\(years == 1 ? "1 year" : "\(years) years"), \(CarFormat.days(days))"
         }
+    }
+
+    /// "Good morning, Namazee" / "Selamat petang, Namazee" (no name: just the greeting).
+    public static func greetingText(at date: Date, name: String?, malay: Bool, calendar: Calendar = .current) -> String {
+        let hour = calendar.component(.hour, from: date)
+        let line: String = switch (malay, hour) {
+        case (false, 5..<12): "Good morning"
+        case (false, 12..<18): "Good afternoon"
+        case (false, _): "Good evening"
+        case (true, 5..<12): "Selamat pagi"
+        case (true, 12..<15): "Selamat tengah hari"
+        case (true, 15..<19): "Selamat petang"
+        case (true, _): "Selamat malam"
+        }
+        let trimmed = (name ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
+        return trimmed.isEmpty ? line : "\(line), \(trimmed)"
     }
 
     /// Amber / red for due soon / overdue, nil when fine.

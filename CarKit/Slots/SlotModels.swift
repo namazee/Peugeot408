@@ -37,6 +37,17 @@ public enum SlotTextAlignment: String, Codable, Sendable, CaseIterable {
     }
 }
 
+/// Panorama hero settings.
+public struct PanoramaSettings: Codable, Sendable, Equatable {
+    public var enabled: Bool
+    public var designID: UUID?
+
+    public init(enabled: Bool = false, designID: UUID? = nil) {
+        self.enabled = enabled
+        self.designID = designID
+    }
+}
+
 public extension SlotDesign {
     /// Quick swatches: the 408's Malaysian paint colours, then a few vivid ones.
     static let colourSwatches: [UInt32] = [
@@ -306,11 +317,13 @@ public enum SlotContent: Sendable, Equatable {
     case flashCard(String)
     /// A data card with a picture in the middle (Single layout, "Centre picture").
     case pictured(DataCard, String)
+    /// One third (0, 1, 2) of the Panorama hero design (Slots 1–3).
+    case panorama(StudioCard, Int)
 
     public var cardStyle: CardStyle {
         switch self {
         case .design(let design): design.style.cardStyle
-        case .data, .studio, .pictured: .standard
+        case .data, .studio, .pictured, .panorama: .standard
         case .cards: .frame
         case .flash, .flashCard: .accentFill
         }
@@ -328,6 +341,18 @@ public struct SlotsState: Codable, Sendable, Equatable {
     public var slots: [SlotDesign]
     /// While set and in the future, every slot shows its identifying flash card.
     public var flashUntil: Date?
+    /// Panorama hero across Slots 1–3 (Phase 14). Their own designs are kept underneath and come
+    /// back when it's turned off. Nil in older files.
+    public var panorama: PanoramaSettings?
+
+    /// The panorama design shown by Slots 1–3, when turned on.
+    public var activePanoramaID: UUID? {
+        guard let panorama, panorama.enabled else { return nil }
+        return panorama.designID
+    }
+
+    /// True for the slots the panorama covers.
+    public static func isPanoramaSlot(_ slot: Int) -> Bool { (1...PanoramaGeometry.columns).contains(slot) }
 
     public init(version: Int = SlotsState.currentVersion, slots: [SlotDesign], flashUntil: Date? = nil) {
         self.version = version
