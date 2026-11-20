@@ -4,6 +4,16 @@ Fresh session? Read `docs/SPEC.md`, then this file, then continue from **Current
 
 ## Current phase: 13 (Synced lyrics) — built. Next: the single-slot extras (centre picture, text alignment, per-line size; spec already updated), then "Continue with Phase 14" (Panorama hero). Phase 8 split cards still waiting for your car test.
 
+## Change after Phase 13 — single-slot extras (spec updated first)
+- **Centre picture** for any Single slot showing data (Service, Prayer, Fuel and so on; not Map, Photos or Music, which are pictures already).
+  - Pick your My Car photo, a built-in photo or an upload in the slot editor's new "Centre picture" row.
+  - The tile then shows the label on top, the car whole in the middle, and the big value at the bottom. On medium widgets the car sits on the left.
+  - It's drawn by a new `SlotContent.pictured` case.
+- **Custom text:**
+  - **Align** Left / Centre / Right.
+  - **Big value size** and **Label size** sliders (70–150%). Text still shrinks to fit, so nothing is cut off.
+- New `SlotDesign` fields are optional, so older files still load.
+
 ## Phase 13 — Synced lyrics
 ### Done
 - **New data source "Lyrics":**
@@ -24,6 +34,7 @@ Fresh session? Read `docs/SPEC.md`, then this file, then continue from **Current
 - **Live Activity:** turned on in the Lyrics screen. It changes lines only while the app is running, because iOS doesn't let Live Activities change text on their own.
 - **Translations:** LRCLIB has none, so there's no translation line; the spec only asks for one when the source provides it.
 - **Spotify** isn't supported. The app and SETUP.md say why.
+- CI: green first time on run 44 (168 tests); **1.1 (44)** is in TestFlight.
 - Tests: `LyricsTests` (parser, windows, timeline dates, summary modes, cache limit, LRCLIB mapping).
 
 

@@ -111,9 +111,16 @@ public enum SlotTimeline {
         let hour = calendar.component(.hour, from: date)
         if let rotation = rotations.first(where: { $0.contains(hour: hour) }),
            let content = choiceContent(rotation.choice, data: data, studio: studio, at: date, calendar: calendar) {
-            return content
+            return withCentrePicture(content, design: design)
         }
-        return choiceContent(design.primaryChoice, data: data, studio: studio, at: date, calendar: calendar) ?? .design(design)
+        return withCentrePicture(choiceContent(design.primaryChoice, data: data, studio: studio, at: date, calendar: calendar) ?? .design(design), design: design)
+    }
+
+    /// Single layout: puts the slot's centre picture into a data card (not the image cards).
+    static func withCentrePicture(_ content: SlotContent, design: SlotDesign) -> SlotContent {
+        guard let file = design.centerImageFile, case .data(let card) = content,
+              ![DataSource.map, .photos, .music].contains(card.source) else { return content }
+        return .pictured(card, file)
     }
 
     static func choiceContent(_ choice: SlotChoice, data: CarData, studio: StudioState, at date: Date, calendar: Calendar) -> SlotContent? {

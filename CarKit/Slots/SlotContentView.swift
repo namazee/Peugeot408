@@ -24,6 +24,14 @@ public struct SlotContentView: View {
                 .accessibilityLabel(designLabel(design))
         case .data(let card):
             DataCardView(card: card, size: isMedium ? .medium : .small)
+        case .pictured(let card, let file):
+            if let image = UIImage(contentsOfFile: AppGroup.containerURL.appending(path: file, directoryHint: .notDirectory).path(percentEncoded: false)) {
+                picturedView(card, image: image)
+                    .accessibilityElement(children: .ignore)
+                    .accessibilityLabel("\(card.source.displayName): \(card.compact.label)")
+            } else {
+                DataCardView(card: card, size: isMedium ? .medium : .small)
+            }
         case .studio(let card):
             DesignView(card: card)
         case .flash:
@@ -42,6 +50,7 @@ public struct SlotContentView: View {
     @ViewBuilder
     private func pictureView(_ design: SlotDesign, image: UIImage, labelColor: Color, valueColor: Color = Theme.primaryText, glow: Color? = nil) -> some View {
         let hasText = !design.value.trimmingCharacters(in: .whitespaces).isEmpty || !design.title.trimmingCharacters(in: .whitespaces).isEmpty
+        let align = Self.alignment(design.textAlignment)
         let picture = Image(uiImage: image)
             .resizable()
             .widgetAccentedRenderingMode(.fullColor)
@@ -53,19 +62,19 @@ public struct SlotContentView: View {
         } else if isMedium {
             HStack(spacing: 14) {
                 picture
-                VStack(alignment: .leading, spacing: 2) {
-                    valueText(design.value, size: 40, color: valueColor, glow: glow)
-                    labelText(design.title, color: labelColor)
+                VStack(alignment: align.horizontal, spacing: 2) {
+                    valueText(design.value, size: 40 * design.clampedValueScale, color: valueColor, glow: glow)
+                    labelText(design.title, color: labelColor, size: 13 * design.clampedLabelScale)
                 }
-                .frame(maxWidth: .infinity, alignment: .leading)
+                .frame(maxWidth: .infinity, alignment: align.frame)
             }
         } else {
-            VStack(alignment: .leading, spacing: 2) {
+            VStack(alignment: align.horizontal, spacing: 2) {
                 picture
-                valueText(design.value, size: 28, color: valueColor, glow: glow)
-                labelText(design.title, color: labelColor)
+                valueText(design.value, size: 28 * design.clampedValueScale, color: valueColor, glow: glow)
+                labelText(design.title, color: labelColor, size: 13 * design.clampedLabelScale)
             }
-            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: align.frame)
         }
     }
 
@@ -79,9 +88,12 @@ public struct SlotContentView: View {
             : (design.style == .accent || (look == .bold && design.style == .custom) ? Theme.primaryText.opacity(0.85) : Theme.secondaryText)
         let valueColor: Color = darkText ? Color(hex: 0x111318) : Theme.primaryText
         let glow: Color? = look == .neon ? neonColor : nil
+        let align = Self.alignment(design.textAlignment)
+        let vs = design.clampedValueScale, ls = design.clampedLabelScale
 
         if let url = design.imageURL, let image = UIImage(contentsOfFile: url.path(percentEncoded: false)) {
             pictureView(design, image: image, labelColor: labelColor, valueColor: valueColor, glow: glow)
+                .multilineTextAlignment(align.text)
         } else if isMedium {
             HStack(spacing: 16) {
                 Image(systemName: design.symbol)
@@ -90,25 +102,27 @@ public struct SlotContentView: View {
                     .widgetAccentable()
                     .neonGlow(glow, radius: 6)
                     .frame(width: 64)
-                VStack(alignment: .leading, spacing: 2) {
-                    valueText(design.value, size: 46, color: valueColor, glow: glow)
-                    labelText(design.title, color: labelColor)
+                VStack(alignment: align.horizontal, spacing: 2) {
+                    valueText(design.value, size: 46 * vs, color: valueColor, glow: glow)
+                    labelText(design.title, color: labelColor, size: 13 * ls)
                 }
-                Spacer(minLength: 0)
+                .multilineTextAlignment(align.text)
+                .frame(maxWidth: .infinity, alignment: align.frame)
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
         } else {
-            VStack(alignment: .leading, spacing: 2) {
+            VStack(alignment: align.horizontal, spacing: 2) {
                 Image(systemName: design.symbol)
                     .font(.system(size: look == .bold ? 30 : 26, weight: .bold))
                     .foregroundStyle(iconColor)
                     .widgetAccentable()
                     .neonGlow(glow, radius: 6)
                 Spacer(minLength: 0)
-                valueText(design.value, size: 36, color: valueColor, glow: glow)
-                labelText(design.title, color: labelColor)
+                valueText(design.value, size: 36 * vs, color: valueColor, glow: glow)
+                labelText(design.title, color: labelColor, size: 13 * ls)
             }
-            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
+            .multilineTextAlignment(align.text)
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: align.frame)
         }
     }
 
@@ -144,9 +158,76 @@ public struct SlotContentView: View {
             .neonGlow(glow, radius: 6)
     }
 
-    private func labelText(_ title: String, color: Color) -> some View {
+    /// Horizontal, frame and text alignment for a custom text design.
+    static func alignment(_ value: SlotTextAlignment?) -> (horizontal: HorizontalAlignment, frame: Alignment, text: TextAlignment) {
+        switch value ?? .leading {
+        case .leading: (.leading, .leading, .leading)
+        case .center: (.center, .center, .center)
+        case .trailing: (.trailing, .trailing, .trailing)
+        }
+    }
+
+    /// Single slot with a centre picture: label on top, the picture whole in the middle, the
+    /// big value at the bottom (small). Medium: picture on the left, label and value on the right.
+    @ViewBuilder
+    private func picturedView(_ card: DataCard, image: UIImage) -> some View {
+        let compact = card.compact
+        let accent = look == .neon ? card.paint.color(.neon) : Theme.primaryText
+        let header = HStack(spacing: 5) {
+            Image(systemName: compact.symbol)
+                .font(.system(size: 15, weight: .bold))
+                .foregroundStyle(accent)
+                .widgetAccentable()
+                .neonGlow(look == .neon ? accent : nil, radius: 4)
+            Text(compact.label.uppercased())
+                .font(Theme.label(12))
+                .foregroundStyle(look == .bold ? Color.white.opacity(0.85) : Theme.secondaryText)
+                .lineLimit(1)
+                .minimumScaleFactor(0.8)
+        }
+        let picture = Image(uiImage: image)
+            .resizable()
+            .widgetAccentedRenderingMode(.fullColor)
+            .scaledToFit()
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .accessibilityHidden(true)
+        let value = compactValueText(compact.value)
+            .font(Theme.number(isMedium ? 38 : 28, weight: .heavy))
+            .foregroundStyle(compact.urgency == .ok || look == .bold ? Theme.primaryText : compact.urgency.color())
+            .lineLimit(1)
+            .minimumScaleFactor(0.45)
+            .widgetAccentable()
+            .neonGlow(look == .neon ? accent : nil, radius: 6)
+        if isMedium {
+            HStack(spacing: 12) {
+                picture
+                VStack(alignment: .leading, spacing: 4) {
+                    header
+                    Spacer(minLength: 0)
+                    value
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
+            }
+        } else {
+            VStack(spacing: 3) {
+                header.frame(maxWidth: .infinity, alignment: .leading)
+                picture
+                value.frame(maxWidth: .infinity)
+            }
+        }
+    }
+
+    private func compactValueText(_ value: CompactValue) -> Text {
+        switch value {
+        case .text(let text): Text(text)
+        case .timer(let date): Text(date, style: .timer)
+        case .relative(let date): Text(date, style: .relative)
+        }
+    }
+
+    private func labelText(_ title: String, color: Color, size: CGFloat = 13) -> some View {
         Text(title.uppercased())
-            .font(Theme.label(13))
+            .font(Theme.label(size))
             .foregroundStyle(color)
             .lineLimit(1)
             .minimumScaleFactor(0.7)

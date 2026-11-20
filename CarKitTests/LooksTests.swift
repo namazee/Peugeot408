@@ -1,4 +1,5 @@
 import Foundation
+import SwiftUI
 import Testing
 @testable import CarKit
 
@@ -23,6 +24,28 @@ struct LooksTests {
         let back = try JSONDecoder().decode(SlotDesign.self, from: JSONEncoder().encode(design))
         #expect(back.backgroundHex == 0xE6E6E2 && back.style == .custom)
         #expect(SlotContent.design(SlotDesign(value: "", title: "", symbol: "car.fill")).cardStyle == .frame)
+    }
+
+    @Test func centrePictureAlignmentAndSizes() {
+        let data = SampleData.carData(now: Date())
+        var design = SlotDesign.card(.service)
+        design.centerImageFile = SlotDesign.myCarImageFile
+        let content = SlotTimeline.content(at: .now, design: design, rotations: [], seasonal: false, data: data, studio: .empty)
+        guard case .pictured(let card, let file) = content else {
+            Issue.record("expected a pictured data card")
+            return
+        }
+        #expect(card.source == .service && file == "mycar.png")
+        #expect(content.cardStyle == .standard)
+        design.source = .map
+        let map = SlotTimeline.content(at: .now, design: design, rotations: [], seasonal: false, data: data, studio: .empty)
+        if case .pictured = map { Issue.record("map cards keep their own image") }
+
+        var text = SlotDesign(value: "408", title: "GT", symbol: "car.fill", textAlignment: .trailing, valueScale: 3, labelScale: 0.2)
+        #expect(text.clampedValueScale == 1.5 && text.clampedLabelScale == 0.7)
+        text.valueScale = nil
+        #expect(text.clampedValueScale == 1)
+        #expect(SlotContentView.alignment(.center).text == .center)
     }
 
     @Test func paintFollowsSourceAndState() {

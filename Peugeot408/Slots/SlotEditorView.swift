@@ -115,6 +115,16 @@ struct SlotEditorView: View {
             }
         }
 
+        if let source = draft.source, ![DataSource.map, .photos, .music].contains(source) {
+            Section {
+                SlotPicturePicker(imageFile: $draft.centerImageFile, allowsNone: true)
+            } header: {
+                Text("Centre picture")
+            } footer: {
+                Text("Adds your car (or any picture) in the middle of this slot, with the label on top and the value at the bottom. \"None\" keeps the normal layout.")
+            }
+        }
+
         if draft.source == nil && draft.studioDesignID == nil {
             textSections
         }
@@ -284,6 +294,12 @@ struct SlotEditorView: View {
         Section {
             TextField("Big value", text: $draft.value)
             TextField("Short label", text: $draft.title)
+            Picker("Align", selection: Binding(get: { draft.textAlignment ?? .leading }, set: { draft.textAlignment = $0 })) {
+                ForEach(SlotTextAlignment.allCases, id: \.self) { Text($0.displayName).tag($0) }
+            }
+            .pickerStyle(.segmented)
+            ScaleSlider(title: "Big value size", value: Binding(get: { draft.clampedValueScale }, set: { draft.valueScale = $0 }))
+            ScaleSlider(title: "Label size", value: Binding(get: { draft.clampedLabelScale }, set: { draft.labelScale = $0 }))
         } header: {
             Text("Text")
         } footer: {
@@ -404,5 +420,18 @@ struct SlotColourPicker: View {
             ColorPicker("Any colour", selection: Binding(get: { Color(hex: hex) }, set: { hex = $0.hexValue }), supportsOpacity: false)
         }
         .padding(.vertical, 4)
+    }
+}
+
+/// 70–150 % slider for a text line.
+struct ScaleSlider: View {
+    let title: String
+    @Binding var value: Double
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 2) {
+            LabeledContent(title, value: "\(Int((value * 100).rounded()))%")
+            Slider(value: $value, in: 0.7...1.5, step: 0.05)
+        }
     }
 }

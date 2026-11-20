@@ -58,6 +58,8 @@ enum SlotPicture {
 struct SlotPicturePicker: View {
     @Environment(StudioModel.self) private var studio
     @Binding var imageFile: String?
+    /// Centre picture: the first option is "None" instead of "Icon".
+    var allowsNone = false
     @State private var picked: PhotosPickerItem?
     @State private var message: String?
 
@@ -65,8 +67,8 @@ struct SlotPicturePicker: View {
         VStack(alignment: .leading, spacing: 8) {
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 10) {
-                    option(label: "Icon", selected: imageFile == nil) {
-                        Image(systemName: "star.square").font(.title2).foregroundStyle(Theme.secondaryText)
+                    option(label: allowsNone ? "None" : "Icon", selected: imageFile == nil) {
+                        Image(systemName: allowsNone ? "nosign" : "star.square").font(.title2).foregroundStyle(Theme.secondaryText)
                     } action: { imageFile = nil }
 
                     option(label: "My Car", selected: imageFile == SlotDesign.myCarImageFile) {

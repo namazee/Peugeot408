@@ -153,7 +153,7 @@ struct SlotCardView: View {
                     .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
             case .flashCard(let name):
                 flash(name)
-            case .data(let card):
+            case .data(let card), .pictured(let card, _):
                 values(card.compact)
             case .design(let design):
                 values(CompactCard(symbol: design.symbol, label: design.title, value: .text(design.value),
@@ -182,7 +182,7 @@ struct SlotCardView: View {
             return [card.label, value].filter { !$0.isEmpty }.joined(separator: ", ") + warning
         }
         switch content {
-        case .data(let card): return spoken(card.compact)
+        case .data(let card), .pictured(let card, _): return spoken(card.compact)
         case .design(let design):
             let text = [design.title, design.value].filter { !$0.trimmingCharacters(in: .whitespaces).isEmpty }.joined(separator: ", ")
             return text.isEmpty ? design.cardSummary : text
@@ -200,7 +200,7 @@ struct SlotCardView: View {
 
     private var paint: CardPaint {
         switch content {
-        case .data(let card): card.paint
+        case .data(let card), .pictured(let card, _): card.paint
         case .design(let design): design.paint
         default: .plain
         }

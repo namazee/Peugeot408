@@ -24,6 +24,19 @@ public enum SlotStyle: String, Codable, CaseIterable, Sendable {
     }
 }
 
+/// Text alignment for custom text slots.
+public enum SlotTextAlignment: String, Codable, Sendable, CaseIterable {
+    case leading, center, trailing
+
+    public var displayName: String {
+        switch self {
+        case .leading: "Left"
+        case .center: "Centre"
+        case .trailing: "Right"
+        }
+    }
+}
+
 public extension SlotDesign {
     /// Quick swatches: the 408's Malaysian paint colours, then a few vivid ones.
     static let colourSwatches: [UInt32] = [
@@ -104,8 +117,16 @@ public struct SlotDesign: Codable, Sendable, Equatable, Hashable {
     public var look: CardLook?
     /// Background colour when `style` is `.custom` (0xRRGGBB). Nil in older files.
     public var backgroundHex: UInt32?
+    /// Single layout with a data source: a picture in the middle of the tile (label on top,
+    /// value at the bottom). Same paths as `imageFile`. Nil = none.
+    public var centerImageFile: String?
+    /// Custom text: Left / Centre / Right (nil = left).
+    public var textAlignment: SlotTextAlignment?
+    /// Custom text: size of the big value and of the label, 0.7…1.5 (nil = 1).
+    public var valueScale: Double?
+    public var labelScale: Double?
 
-    public init(value: String, title: String, symbol: String, style: SlotStyle = .dark, source: DataSource? = nil, studioDesignID: UUID? = nil, rotations: [SlotRotation]? = nil, layout: SlotLayout? = nil, cards: [SlotDesign]? = nil, imageFile: String? = nil, look: CardLook? = nil, backgroundHex: UInt32? = nil) {
+    public init(value: String, title: String, symbol: String, style: SlotStyle = .dark, source: DataSource? = nil, studioDesignID: UUID? = nil, rotations: [SlotRotation]? = nil, layout: SlotLayout? = nil, cards: [SlotDesign]? = nil, imageFile: String? = nil, look: CardLook? = nil, backgroundHex: UInt32? = nil, centerImageFile: String? = nil, textAlignment: SlotTextAlignment? = nil, valueScale: Double? = nil, labelScale: Double? = nil) {
         self.value = value
         self.title = title
         self.symbol = symbol
@@ -118,7 +139,20 @@ public struct SlotDesign: Codable, Sendable, Equatable, Hashable {
         self.imageFile = imageFile
         self.look = look
         self.backgroundHex = backgroundHex
+        self.centerImageFile = centerImageFile
+        self.textAlignment = textAlignment
+        self.valueScale = valueScale
+        self.labelScale = labelScale
     }
+
+    /// The centre picture's file, if one is set.
+    public var centerImageURL: URL? {
+        centerImageFile.map { AppGroup.containerURL.appending(path: $0, directoryHint: .notDirectory) }
+    }
+
+    /// Size factors, clamped to 0.7…1.5.
+    public var clampedValueScale: Double { min(max(valueScale ?? 1, 0.7), 1.5) }
+    public var clampedLabelScale: Double { min(max(labelScale ?? 1, 0.7), 1.5) }
 
     /// The picture's file, if one is set.
     public var imageURL: URL? {
@@ -270,11 +304,13 @@ public enum SlotContent: Sendable, Equatable {
     indirect case cards(SlotLayout, [SlotContent])
     /// Flash label for one card, e.g. "Top" → "Slot 2 · Top ✓".
     case flashCard(String)
+    /// A data card with a picture in the middle (Single layout, "Centre picture").
+    case pictured(DataCard, String)
 
     public var cardStyle: CardStyle {
         switch self {
         case .design(let design): design.style.cardStyle
-        case .data, .studio: .standard
+        case .data, .studio, .pictured: .standard
         case .cards: .frame
         case .flash, .flashCard: .accentFill
         }
