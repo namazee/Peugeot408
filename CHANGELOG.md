@@ -2,7 +2,52 @@
 
 Fresh session? Read `docs/SPEC.md`, then this file, then continue from **Current phase**.
 
-## Current phase: 4 — done, waiting for "Continue with Phase 5"
+## Current phase: 5 — done, waiting for "Continue with Phase 6"
+
+## Phase 5 — Studio: designs, templates, builder, My Car, seasonal packs
+
+### Done
+- `CarKit/Studio`:
+  - **`CardDesign`:** a versioned Codable JSON model stored in `studio.json`.
+    - Layers: text, SF Symbol icon, sticker, My Car photo, data field, gauge arc, analogue clock, number plate.
+    - Each layer has position, size, rotation, opacity, font, weight, size, colour, alignment, shadow and lock. Positions are fractions of the canvas, so a design scales to any widget.
+    - Backgrounds: solid, gradient, texture (carbon, brushed, dots) or a Photo Frame photo.
+  - **`DesignView`:** one renderer used by the builder, the gallery, the Slots screen and the widget, so the car looks exactly like the app.
+  - **Data fields:** 25, covering every value from §4 plus clock, date, "days since" (anniversary) and "days until" (countdown). Resolved per timeline entry, with live timer and relative text where it fits; the analogue clock gets an entry every minute.
+  - **Original artwork:** drawn in code (ketupat, crescent, lantern, pelita, diya, stripes, tree, fireworks, gauge, speed lines). No image assets, nothing copied.
+  - **Glanceability linter:** warns on text under 14 pt and on WCAG contrast under 3:1. It blocks saving a small design with more than 2 data fields.
+  - Designs export and import as JSON files (an import gets fresh ids; a newer format is refused).
+- **Templates:** Sporty, Minimal, Premium, Dashboard, Photo, analogue and digital Clock, Countdown, Anniversary, My Car. The data templates can be bound to any of the 11 data sources, and the gallery previews them with your real data.
+- **Seasonal packs:** Ramadan (iftar countdown to Maghrib), Hari Raya Aidilfitri, Aidiladha, Merdeka/Malaysia Day, Chinese New Year, Deepavali, Christmas, New Year.
+  - When switched on, one chosen Car Slot shows the pack's design on the right dates, then goes back to normal.
+  - Hijri dates use iOS's Umm al-Qura calendar (windows start 1–2 days early, since JAKIM's sighting can differ). Chinese New Year uses iOS's Chinese calendar. Deepavali comes from an editable table: 2026–27 confirmed, 2028–30 estimates.
+  - Each pack can be switched off on its own.
+- **Slots:**
+  - Studio designs can be assigned to a slot.
+  - Rotation: up to 2 extra designs shown during set hours (3 per slot), done with timeline entries.
+  - Studio designs fill the widget edge to edge (`contentMarginsDisabled`; other content adds the margins back).
+  - Reloads also reach slots that show a source through a rotation or a Studio design's data field.
+- **App:**
+  - **Studio tab:** my designs (with warnings), template gallery, blank design, import, seasonal packs, My Car, data sources.
+  - **Builder:** small/medium canvas at the exact widget aspect ratio, with a safe-area overlay. Drag, pinch and twist; 1/24 snap grid with 15° rotation steps; undo/redo (one step per gesture); duplicate, delete, lock, layer order; per-layer inspector; background editor; export via the share sheet.
+  - **My Car:** Vision `VNGenerateForegroundInstanceMaskRequest` on the device, an erase/restore brush with undo on the mask, cropped and downsampled to a 600 px transparent PNG. Also the number-plate text and one-tap My Car designs.
+- **Fonts:** Orbitron, Playfair Display and Rajdhani (OFL), bundled in the app and the widget, with licences in `Resources/Licenses` and `ASSETS-LICENSES.md`.
+- **Tests:** every template (×2 sizes, plus the 8 seasonal designs) round-trips through JSON and renders from it with `ImageRenderer`; templates pass the linter; linter rules; data fields (anniversary, countdown, iftar, missing data, clock entries); seasonal dates (CNY 2027, Raya and Ramadan via Hijri, Merdeka window, Deepavali table, disabled packs); slot rotation (wrap past midnight, switching), a Studio design in a slot, seasonal takeover, old slot files. 110 tests in 20 suites.
+- CI green on run 20, uploaded as **1.1 (20)**.
+
+### Fixes during the phase
+- An edit script damaged `Templates.swift` (an empty match inserted text between every character), and another left a stray `}` in SlotsView. Both were fixed.
+- The JSON round-trip test now ignores sub-second save times, since ISO 8601 keeps whole seconds.
+
+### Decisions
+- Fonts: the user chose to bundle 3 OFL fonts from the official Google Fonts repo (downloaded 2026-11-20), rather than use built-in fonts only.
+- Analogue clocks use one entry per minute for the next hour, then reload (about 24 reloads a day, within the widget budget). The digital clock uses a timer counting up from midnight, so it ticks without reloads.
+- Seasonal artwork is drawn in SwiftUI rather than rendered in Remotion. Remotion versions can replace it in Phase 8.
+
+### Left over / open
+- [ ] You: install 1.1 (20). Make a design (gallery → builder → Save), assign it to a slot, try a rotation (e.g. Prayer Times 18:00–21:00), switch on seasonal packs, and try My Car with a photo of your 408.
+- [ ] The Vision cut-out and the font rendering can only be checked on the device.
+- [ ] Deepavali 2028–2030 dates are estimates; check them in Studio → Seasonal packs when the gazette is out.
 
 ## Phase 4 — Photo Frame, Music
 
