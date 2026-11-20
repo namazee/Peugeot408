@@ -24,6 +24,10 @@ Fresh session? Read `docs/SPEC.md`, then this file, then continue from **Current
   - Wheel-cap logos are pixelated; the grille shields and plates were already blank.
   - They're bundled as JPEGs (about 780 KB in total). When you pick one, the app removes the background on the device with Vision and keeps the mask (`mask-<id>.png` in the App Group), so later colour or plate changes only repaint.
   - The paint colour and plate work the same way; plate corners were measured for the five views that show a plate.
+- **Realism pass** (spec updated first):
+  - **Badges:** removed with a smooth fill from the surrounding pixels instead of the blocky pixelation, which showed as a grid. The checkerboard behind the thumbnails is gone too.
+  - **Body-only paint:** the hue range is now 196–235° (the cyan light glows at about 187° are skipped) and only strongly saturated colours count (pale glass reflections are skipped). Windows traced per photo and the plate area are masked out with a soft edge.
+  - **Plate:** near-black with a thin edge, a faint gloss band and raised characters (with a shadow). Its brightness follows the original plate's lighting (sunlit about 1, dark studio about 0.45), and a 0.6 px blur matches the photo's sharpness.
 - [ ] You: check the recolour and plate overlay on the phone. White paint looks flatter than real white, as expected, and the plate perspective on the front-detail photo is the steepest.
 
 ## Phase 7 — OBD2 + Live Activity (with demo mode)

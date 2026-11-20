@@ -25,8 +25,9 @@ public enum PaintRecolor {
         Preset(id: "perla-nera-black", name: "Perla Nera Black", hex: 0x16171A),
     ]
 
-    static let hueRange: ClosedRange<Double> = 185...230
-    static let hueFeather = 12.0
+    /// Body paint in the photos sits at hue ~196–232°; the cyan light glows are ~185–192°.
+    static let hueRange: ClosedRange<Double> = 196...235
+    static let hueFeather = 5.0
     /// Typical luminance of the body paint in the photos; pixels lighter than this are highlights.
     static let referenceLuminance = 0.36
 
@@ -41,7 +42,8 @@ public enum PaintRecolor {
             let distance = h < hueRange.lowerBound ? hueRange.lowerBound - h : h - hueRange.upperBound
             hueWeight = max(0, 1 - distance / hueFeather)
         }
-        let satWeight = min(max((s - 0.18) / 0.17, 0), 1)
+        // Paint is strongly saturated; glass reflections and grey trim are not.
+        let satWeight = min(max((s - 0.35) / 0.2, 0), 1)
         let darkWeight = min(max((v - 0.06) / 0.08, 0), 1)
         return hueWeight * satWeight * darkWeight
     }

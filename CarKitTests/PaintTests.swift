@@ -8,8 +8,8 @@ struct PaintTests {
 
     @Test func bluePaintCountsAsPaint() {
         #expect(PaintRecolor.weight(r: obsessionBlue.r, g: obsessionBlue.g, b: obsessionBlue.b) == 1)
-        // A darker, teal-ish shade from the rear photo still counts.
-        #expect(PaintRecolor.weight(r: 0.08, g: 0.35, b: 0.42) > 0.5)
+        // A deeper shade (hue ~202°) still counts.
+        #expect(PaintRecolor.weight(r: 0.04, g: 0.33, b: 0.50) == 1)
     }
 
     @Test func trimGlassLightsAndReflectionsAreLeftAlone() {
@@ -18,6 +18,8 @@ struct PaintTests {
         #expect(PaintRecolor.weight(r: 0.85, g: 0.12, b: 0.12) == 0)   // red tail light
         #expect(PaintRecolor.weight(r: 0.30, g: 0.55, b: 0.20) == 0)   // green tree reflection
         #expect(PaintRecolor.weight(r: 1, g: 1, b: 1) == 0)            // white highlight
+        #expect(PaintRecolor.weight(r: 0.03, g: 0.80, b: 0.90) == 0)   // cyan DRL glow (~187°)
+        #expect(PaintRecolor.weight(r: 0.55, g: 0.66, b: 0.79) == 0)   // pale sky reflection in glass
     }
 
     @Test func redTargetTurnsBlueIntoRedKeepingShading() {

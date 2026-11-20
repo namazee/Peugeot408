@@ -210,6 +210,8 @@ struct BuiltInCarPhoto: Identifiable {
     var plateQuad: PlateQuad? = nil
     /// Studio renders keep their background in the bundle; Vision removes it.
     var needsCutout = false
+    /// Window outlines (pixels), kept out of the paint recolour.
+    var glass: [[(Double, Double)]] = []
 
     var resource: String { "mycar-\(id)" }
     var fileExtension: String { needsCutout ? "jpg" : "png" }
@@ -218,17 +220,17 @@ struct BuiltInCarPhoto: Identifiable {
     static let defaultID = "side"
 
     static let all: [BuiltInCarPhoto] = [
-        BuiltInCarPhoto(id: "side", name: "Side"),
-        BuiltInCarPhoto(id: "front-three-quarter", name: "Front ¾", plateQuad: PlateQuad((575, 406), (762, 398), (762, 455), (575, 464))),
-        BuiltInCarPhoto(id: "rear-three-quarter", name: "Rear ¾", plateQuad: PlateQuad((87, 174), (186, 172), (184, 200), (82, 203))),
-        BuiltInCarPhoto(id: "front", name: "Front", plateQuad: PlateQuad((380, 555), (587, 554), (587, 631), (380, 632))),
-        BuiltInCarPhoto(id: "front-detail", name: "Front detail", plateQuad: PlateQuad((828, 377), (892, 339), (890, 413), (830, 455))),
+        BuiltInCarPhoto(id: "side", name: "Side", glass: [[(160, 52), (215, 30), (330, 20), (420, 17), (500, 28), (560, 52), (602, 88), (430, 90), (272, 84), (205, 75)]]),
+        BuiltInCarPhoto(id: "front-three-quarter", name: "Front ¾", plateQuad: PlateQuad((575, 406), (762, 398), (762, 455), (575, 464)), glass: [[(222, 30), (545, 28), (575, 50), (665, 138), (560, 145), (232, 150), (218, 90)], [(40, 75), (110, 35), (198, 28), (205, 145), (160, 140), (95, 110), (55, 98)]]),
+        BuiltInCarPhoto(id: "rear-three-quarter", name: "Rear ¾", plateQuad: PlateQuad((87, 174), (186, 172), (184, 200), (82, 203)), glass: [[(95, 72), (175, 40), (335, 38), (385, 62), (350, 92), (240, 98), (108, 98)], [(440, 62), (475, 40), (560, 30), (640, 35), (748, 102), (700, 108), (520, 112), (440, 95)]]),
+        BuiltInCarPhoto(id: "front", name: "Front", plateQuad: PlateQuad((380, 555), (587, 554), (587, 631), (380, 632)), glass: [[(215, 42), (685, 42), (740, 120), (755, 192), (140, 192), (160, 120)]]),
+        BuiltInCarPhoto(id: "front-detail", name: "Front detail", plateQuad: PlateQuad((828, 377), (892, 339), (890, 413), (830, 455)), glass: [[(0, 0), (300, 0), (345, 25), (200, 45), (60, 62), (0, 70)]]),
         // Studio renders (1024 x 1024).
-        BuiltInCarPhoto(id: "studio-front-three-quarter", name: "Studio front ¾", plateQuad: PlateQuad((262, 676), (478, 678), (478, 731), (262, 728)), needsCutout: true),
-        BuiltInCarPhoto(id: "studio-front", name: "Studio front", plateQuad: PlateQuad((378, 708), (646, 708), (646, 760), (378, 760)), needsCutout: true),
-        BuiltInCarPhoto(id: "studio-side", name: "Studio side", needsCutout: true),
-        BuiltInCarPhoto(id: "studio-rear-three-quarter", name: "Studio rear ¾", plateQuad: PlateQuad((750, 522), (874, 516), (873, 557), (749, 562)), needsCutout: true),
-        BuiltInCarPhoto(id: "studio-rear", name: "Studio rear", plateQuad: PlateQuad((383, 519), (641, 519), (641, 576), (383, 576)), needsCutout: true),
-        BuiltInCarPhoto(id: "studio-front-detail", name: "Studio detail", plateQuad: PlateQuad((826, 572), (893, 548), (894, 617), (828, 646)), needsCutout: true),
+        BuiltInCarPhoto(id: "studio-front-three-quarter", name: "Studio front ¾", plateQuad: PlateQuad((262, 676), (478, 678), (478, 731), (262, 728)), needsCutout: true, glass: [[(288, 380), (410, 260), (782, 256), (808, 300), (808, 392), (560, 384)], [(800, 255), (858, 262), (906, 345), (812, 392)]]),
+        BuiltInCarPhoto(id: "studio-front", name: "Studio front", plateQuad: PlateQuad((378, 708), (646, 708), (646, 760), (378, 760)), needsCutout: true, glass: [[(268, 222), (752, 222), (838, 366), (172, 366)]]),
+        BuiltInCarPhoto(id: "studio-side", name: "Studio side", needsCutout: true, glass: [[(158, 447), (240, 412), (330, 402), (470, 400), (585, 410), (708, 484), (500, 486), (265, 464)]]),
+        BuiltInCarPhoto(id: "studio-rear-three-quarter", name: "Studio rear ¾", plateQuad: PlateQuad((750, 522), (874, 516), (873, 557), (749, 562)), needsCutout: true, glass: [[(178, 452), (262, 378), (332, 350), (482, 350), (522, 396), (470, 422), (360, 442), (232, 455)], [(522, 362), (600, 344), (762, 350), (884, 418), (820, 428), (640, 422), (562, 398)]]),
+        BuiltInCarPhoto(id: "studio-rear", name: "Studio rear", plateQuad: PlateQuad((383, 519), (641, 519), (641, 576), (383, 576)), needsCutout: true, glass: [[(240, 243), (782, 243), (812, 362), (204, 362)]]),
+        BuiltInCarPhoto(id: "studio-front-detail", name: "Studio detail", plateQuad: PlateQuad((826, 572), (893, 548), (894, 617), (828, 646)), needsCutout: true, glass: [[(0, 98), (125, 112), (302, 236), (205, 248), (0, 268)]]),
     ]
 }

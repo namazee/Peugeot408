@@ -128,7 +128,7 @@ struct MyCarView: View {
                         .scaledToFit()
                         .frame(maxHeight: 200)
                         .frame(maxWidth: .infinity)
-                        .background(Checkerboard())
+                        .background(Theme.surface, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
                 }
                 PhotosPicker(selection: $picked, matching: .images) {
                     Label(studio.state.carPhotoFile == nil ? "Choose a photo of your car" : "Choose a different photo", systemImage: "photo")
@@ -168,7 +168,7 @@ struct MyCarView: View {
                                 VStack(spacing: 4) {
                                     BuiltInThumb(photo: photo)
                                         .frame(width: 120, height: 72)
-                                        .background(Checkerboard())
+                                        .background(Theme.surface)
                                         .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
                                         .overlay(
                                             RoundedRectangle(cornerRadius: 10, style: .continuous)
