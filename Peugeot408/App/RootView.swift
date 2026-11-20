@@ -13,6 +13,8 @@ struct RootView: View {
     @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding = false
     @State private var tab: AppTab = .slots
     @State private var editing: SlotRef?
+    @State private var carPath: [DataSource] = []
+    @State private var dailyPath: [DataSource] = []
 
     var body: some View {
         TabView(selection: $tab) {
@@ -28,20 +30,10 @@ struct RootView: View {
                 )
             }
             Tab("Car", systemImage: "car", value: AppTab.car) {
-                ComingSoonView(
-                    title: "Car",
-                    symbol: "car.side.fill",
-                    phase: 2,
-                    summary: "Service tracker, fuel log and renewals. Parking follows in Phase 3, OBD2 in Phase 7."
-                )
+                CarView(path: $carPath)
             }
             Tab("Daily", systemImage: "sun.max", value: AppTab.daily) {
-                ComingSoonView(
-                    title: "Daily",
-                    symbol: "sun.max.fill",
-                    phase: 2,
-                    summary: "Touch 'n Go balance. Prayer times, commute and weather follow in Phase 3."
-                )
+                DailyView(path: $dailyPath)
             }
             Tab("Settings", systemImage: "gearshape", value: AppTab.settings) {
                 SettingsView()
@@ -60,14 +52,27 @@ struct RootView: View {
         )
     }
 
-    /// `peugeot408://slot/3` opens the editor for slot 3 (used by the widgets' `widgetURL`).
+    /// `peugeot408://slot/3` opens the editor for slot 3; `peugeot408://data/fuel` opens the Fuel Log.
+    /// Used by the widgets' `widgetURL` on the iPhone (CarPlay may ignore taps).
     private func handle(_ url: URL) {
-        guard url.scheme == "peugeot408", url.host() == "slot",
-              let number = Int(url.lastPathComponent),
-              SlotsState.slotNumbers.contains(number)
-        else { return }
-        tab = .slots
-        editing = SlotRef(id: number)
+        guard url.scheme == "peugeot408" else { return }
+        switch url.host() {
+        case "slot":
+            guard let number = Int(url.lastPathComponent), SlotsState.slotNumbers.contains(number) else { return }
+            tab = .slots
+            editing = SlotRef(id: number)
+        case "data":
+            guard let source = DataSource(rawValue: url.lastPathComponent) else { return }
+            if source == .tng {
+                tab = .daily
+                dailyPath = [source]
+            } else {
+                tab = .car
+                carPath = [source]
+            }
+        default:
+            break
+        }
     }
 }
 

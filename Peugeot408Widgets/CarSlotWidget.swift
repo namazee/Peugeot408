@@ -27,20 +27,25 @@ struct SlotProvider: TimelineProvider {
             return
         }
         let now = Date()
-        let items = SlotTimeline.items(slot: slot, state: SlotStore.live.load(), now: now)
+        let items = SlotTimeline.items(slot: slot, state: SlotStore.live.load(), data: CarData.load(), now: now)
         let content = items.first?.content ?? .design(.starter(for: slot))
         completion(SlotEntry(date: now, slot: slot, content: content))
     }
 
     func getTimeline(in context: Context, completion: @escaping (Timeline<SlotEntry>) -> Void) {
         let now = Date()
-        let items = SlotTimeline.items(slot: slot, state: SlotStore.live.load(), now: now)
+        let state = SlotStore.live.load()
+        // Only read the data files when this slot shows a data widget.
+        let data = state.design(for: slot).source == nil ? CarData.empty : CarData.load()
+        let items = SlotTimeline.items(slot: slot, state: state, data: data, now: now)
         var entries = items.map { SlotEntry(date: $0.date, slot: slot, content: $0.content) }
         if entries.isEmpty {
             entries = [.sample(slot: slot, date: now)]
         }
-        // The app reloads this kind whenever the slot changes, so no periodic refresh is needed.
-        completion(Timeline(entries: entries, policy: .never))
+        // The app reloads this kind whenever the slot or its data changes. Data slots carry
+        // entries for the next 7 midnights, then ask again; text slots never need a refresh.
+        let isData = state.design(for: slot).source != nil
+        completion(Timeline(entries: entries, policy: isData ? .atEnd : .never))
     }
 }
 
@@ -51,7 +56,7 @@ struct SlotWidgetView: View {
     let entry: SlotEntry
 
     var body: some View {
-        WidgetCard(style: entry.content.cardStyle) {
+        WidgetCard(style: entry.content.cardStyle, tint: entry.content.tint) {
             SlotContentView(slot: entry.slot, content: entry.content, isMedium: family == .systemMedium)
         }
         .widgetURL(URL(string: "peugeot408://slot/\(entry.slot)"))

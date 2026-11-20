@@ -9,5 +9,9 @@ struct Peugeot408WidgetsBundle: WidgetBundle {
         CarSlot3()
         CarSlot4()
         CarSlot5()
+        ServiceTrackerWidget()
+        FuelLogWidget()
+        RenewalsWidget()
+        TouchNGoWidget()
     }
 }

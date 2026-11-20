@@ -61,6 +61,7 @@ struct SlotsView: View {
 /// A mock of the CarPlay widget screen showing all five slots with their current designs.
 struct MockCarPlayView: View {
     @Environment(SlotsModel.self) private var slots
+    @Environment(CarDataModel.self) private var cars
     @Binding var editing: SlotRef?
 
     var body: some View {
@@ -109,7 +110,10 @@ struct MockCarPlayView: View {
     }
 
     private func content(for slot: Int, at date: Date) -> SlotContent {
-        slots.state.isFlashing(at: date) ? .flash : .design(slots.design(for: slot))
+        if slots.state.isFlashing(at: date) { return .flash }
+        let design = slots.design(for: slot)
+        if let source = design.source { return .data(cars.card(for: source, at: date)) }
+        return .design(design)
     }
 }
 
@@ -118,18 +122,19 @@ struct SlotRow: View {
     let design: SlotDesign
 
     var body: some View {
+        let isAccent = design.source == nil && design.style == .accent
         HStack(spacing: 12) {
-            Image(systemName: design.symbol)
+            Image(systemName: design.source?.symbol ?? design.symbol)
                 .font(.title3.weight(.semibold))
-                .foregroundStyle(design.style == .accent ? Theme.primaryText : Theme.accent)
+                .foregroundStyle(isAccent ? Theme.primaryText : Theme.accent)
                 .frame(width: 44, height: 44)
                 .background(
                     RoundedRectangle(cornerRadius: 10, style: .continuous)
-                        .fill(design.style == .accent ? Theme.accent : Theme.surface)
+                        .fill(isAccent ? Theme.accent : Theme.surface)
                 )
             VStack(alignment: .leading, spacing: 2) {
-                Text(design.value).font(.headline)
-                Text("Car Slot \(number) · \(design.title)")
+                Text(design.summary).font(.headline)
+                Text(design.source == nil ? "Car Slot \(number) · \(design.title)" : "Car Slot \(number) · live data")
                     .font(.subheadline)
                     .foregroundStyle(Theme.secondaryText)
             }

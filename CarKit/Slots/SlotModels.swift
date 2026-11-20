@@ -20,18 +20,27 @@ public enum SlotStyle: String, Codable, CaseIterable, Sendable {
     }
 }
 
-/// Phase 1 slot design: one big value, a short label and an SF Symbol.
+/// A slot design: either a simple text card (one big value, a short label and an SF Symbol)
+/// or, when `source` is set, one of the live data widgets.
 public struct SlotDesign: Codable, Sendable, Equatable, Hashable {
     public var value: String
     public var title: String
     public var symbol: String
     public var style: SlotStyle
+    /// When set, the slot shows this data widget instead of the text. Missing in Phase 1 files (decodes as nil).
+    public var source: DataSource?
 
-    public init(value: String, title: String, symbol: String, style: SlotStyle = .dark) {
+    public init(value: String, title: String, symbol: String, style: SlotStyle = .dark, source: DataSource? = nil) {
         self.value = value
         self.title = title
         self.symbol = symbol
         self.style = style
+        self.source = source
+    }
+
+    /// Name shown in the app's slot list.
+    public var summary: String {
+        source?.displayName ?? value
     }
 
     /// Longest big value that still reads comfortably at a glance on the CarPlay small size.
@@ -61,12 +70,15 @@ public struct SlotDesign: Codable, Sendable, Equatable, Hashable {
 /// What a slot widget draws for one timeline entry.
 public enum SlotContent: Sendable, Equatable {
     case design(SlotDesign)
+    /// A live data widget (Service, Fuel, Renewals, Touch 'n Go).
+    case data(DataCard)
     /// Identifying "Slot N ✓" card used by the "Test: flash all slots" button.
     case flash
 
     public var cardStyle: CardStyle {
         switch self {
         case .design(let design): design.style.cardStyle
+        case .data: .standard
         case .flash: .accentFill
         }
     }
