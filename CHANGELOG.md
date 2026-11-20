@@ -2,7 +2,47 @@
 
 Fresh session? Read `docs/SPEC.md`, then this file, then continue from **Current phase**.
 
-## Current phase: 6 — done, waiting for "Continue with Phase 7"
+## Current phase: 7 — done, waiting for "Continue with Phase 8"
+
+## Phase 7 — OBD2 + Live Activity (with demo mode)
+
+### Done
+- **`CarKit/OBD` parser:** reads ELM327 replies with spaces on or off, echo, `SEARCHING...` and several ECUs answering (the first one wins).
+  - `NO DATA` and `?` mean unsupported; `UNABLE TO CO24ECT`, `CAN ERROR` and bus errors mean no connection.
+- **`CarKit/OBD` formulas:**
+  - RPM (0C) = (256A + B) / 4.
+  - Coolant (05) = A − 40 °C.
+  - MAP (0B) and barometric (33) in kPa; **boost = MAP − baro, in bar** (barometric read once per session, sea level until then).
+  - Battery voltage from `ATRV`.
+- **Demo simulator:** cruise, then a pull to about 5,500 rpm and +1.15 bar every 20 s; coolant warms from 40 to 90 °C; voltage around 14.1 V.
+- **Bluetooth UUIDs:** configurable, with presets for generic FFF0/FFF1/FFF2 (most BLE ELM327 dongles, OBDLink CX) and Vgate iCar Pro BLE.
+- `obd.json` stores the dongle, UUIDs, poll rate, last values, unsupported PIDs and session state.
+- **App: Bluetooth client** for BLE ELM327 dongles.
+  - Scan (likely dongles listed first) and connect with a timeout.
+  - Find the notify and write characteristics, run the setup (`ATZ ATE0 ATL0 ATS0 ATH0 ATSP0`), then send commands one at a time, reading each reply up to the `>` prompt.
+- **App: drive session.**
+  - Polls RPM every cycle, coolant every 3rd, MAP every cycle, barometric once, and voltage every 5th.
+  - Two `NO DATA` answers in a row mark a value as "not reported by this car" (n/a), as PSA/Stellantis ECUs may skip PIDs.
+  - Updates the Live Activity every 2 s and saves the last values every 10 s.
+- **Live Activity** (`DriveActivityAttributes`): Lock Screen layout with all 4 values; Dynamic Island with boost in compact; `.supplementalActivityFamilies([.small, .medium])` with a compact 2×2 layout for CarPlay. It goes stale after 2 minutes without updates and stays for 15 minutes after the session ends.
+- **Live OBD2** widget and data source: last-known values with the time read. It turns amber or red for coolant ≥105/110 °C or battery <12.2/11.8 V, and can be assigned to slots. Studio has 4 new data fields (boost, coolant, battery, RPM).
+- **App screens:**
+  - Car → Live OBD2 (values, status, start/stop with a demo toggle, dongle link, card preview).
+  - OBD2 dongle (scan, pick, UUID presets/custom with validation, poll rate, test connection that reads voltage and RPM), also under Settings.
+- **Info.plist:** `NSBluetoothAlwaysUsageDescription`, `bluetooth-central` background mode (keeps polling with the screen locked), `NSSupportsLiveActivities`.
+- **Tests:** parser variants, formulas, **boost conversion** (raw replies → +0.8 bar; vacuum −0.65), voltage, demo ranges, UUID validation, card urgency, value text. 129 tests in 22 suites.
+- CI green on run 24; uploaded as **1.1 (24)**.
+
+### Fixes during the phase
+- Swift 6 `sending` errors: ActivityKit's `Activity` isn't Sendable, so it's used only from nonisolated helpers. The CoreBluetooth delegate now uses a `@preconcurrency` conformance on the main actor (the manager runs on the main queue).
+
+### Decisions
+- Demo mode updates while the app is open or in the foreground. A live dongle session keeps running in the background through the `bluetooth-central` mode, because each dongle reply wakes the app.
+- Boost uses the car's barometric reading when it reports one (80–110 kPa), otherwise 101 kPa.
+
+### Left over / open
+- [ ] You: install 1.1 (24). Car → Live OBD2 → Demo mode → Start drive session; check the Live Activity on the Lock Screen and in CarPlay.
+- [ ] With a BLE dongle (when you have one): OBD2 dongle → Scan → pick it → Test connection, then a real drive session. Report which values show n/a on the 408.
 
 ## Phase 6 — Connect sound
 
