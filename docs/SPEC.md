@@ -69,6 +69,15 @@ Work in phases (below). At the end of each phase: commit, push, make sure the CI
    * The app's screens use the selected style (the Slots mock, the card previews on the Car and Daily screens, the tab tint), so the phone matches the head unit.
    * Original artwork only; no brand logos.
 
+### Panorama hero (Phase 14)
+
+* One wide "hero" design spread across Car Slots 1–3. Each slot draws its third, so the three tall columns read as one picture, e.g. my My Car photo spanning the screen with big lettering behind it. The gaps between columns stay, because CarPlay draws them.
+* A Hero template for it: a greeting, big "408 GT" (or my own text) lettering behind the car, my car photo and a weather line. No brand logos or emblems.
+* New data fields:
+   * a time-of-day greeting with my name ("Good morning, …" / "Selamat pagi, …");
+   * the weather place and condition ("Kuala Lumpur · Sunny").
+* Turning Panorama on asks before it replaces what Slots 1–3 show, and turning it off restores them.
+
 ### App icon
 
 * Source art: my own icon artwork (generated from a photo of my car), stored in `remotion/assets/icon/` as `icon-default.jpg` (plus `icon-dark.jpg` and `icon-tinted.jpg` if I provide them). This is the master art: don't redraw the car. No logos; the only text is the "GTCP" wordmark (layer 5).
@@ -239,6 +248,7 @@ Goal: I set things up once in the app, and my car's CarPlay screen reflects it a
 * Tab layout: Slots (what's on my head unit right now, as a mock CarPlay screen showing all 5 slots with live data; tap a slot to change it), Studio (templates, custom builder, seasonal packs, my car photo, connect sounds), Car (service, fuel, renewals, parking, OBD2), Daily (prayer, commute, weather, TnG), Settings (Map, Music and Photos setup live under Studio → Data sources).
 * Settings: units, theme accent colour, prayer zone, home/work locations, API keys, OBD2 dongle, data export/import as JSON (for backup), "Reload all widgets" button.
 * A "How to add to CarPlay" screen: Settings → General → CarPlay → [car] → Widgets, up to 5 widgets per stack, Smart Rotate on/off.
+   * Include a tip for Google Maps' own CarPlay ETA widget (ETA, distance and next turn while Google Maps navigates). Other apps can't read Google Maps' navigation, so don't rebuild it: add Google's widget to the same stack as a Car Slot, and Smart Rotate brings it forward while navigating.
 * Accessibility: Dynamic Type in the app and VoiceOver labels on widgets.
 
 ## 6. CI/CD: GitHub Actions → TestFlight (no Mac)
@@ -275,6 +285,7 @@ Widgets themselves are static SwiftUI, so use Remotion only for the animated ass
 11. Widget styles (§3): Bold and Neon looks for every widget, card and app screen, Settings → Appearance plus a per-slot override, both palettes in the shared tokens, the 12 new Studio templates (§4b Templates), and refreshed README snapshots.
 12. Sound packs (§4b Connect sound): engine starts from CC0 recordings, synthesised EV, luxury, arcade, pings and sci-fi packs, voice cues, normalising and the 5-second trim, and a separate disconnect sound.
 13. Synced lyrics (§4 item 13): the Lyrics widget, card and Live Activity from the Apple Music system player and LRCLIB.
+14. Panorama hero (§3): one wide design across Slots 1–3, the Hero template, and the greeting and weather-place fields.
 
 ## 9. Quality bar
 
