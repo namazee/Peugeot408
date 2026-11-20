@@ -141,6 +141,12 @@ Until the required secrets exist, CI still runs the tests and skips the upload w
 
    Siri works too: "Save parking in Peugeot408".
 
+## 11. Phase 4: Photo Frame and Music
+
+1. **MusicKit** must be ticked on the app's App ID under *App Services* (step 2). If Music says it can't load anything even after you allow access, check that, then rerun with *Regenerate provisioning profiles*.
+2. In the app: Studio → Music → **Allow Apple Music**. Recently played needs an Apple Music subscription; a featured playlist needs the playlist in your library (Sync Library on).
+3. Studio → Photo Frame → **Add photos**. To give the Photo Frame widget its own album: long-press the widget → **Edit Widget** → Album. Car Slots use the album chosen in the app.
+
 ## 12. Phase 6: Connect sound (one-time Shortcuts automation)
 
 iOS doesn't let an app play a sound by itself when CarPlay connects, so a Shortcuts automation runs the app's **Play Connect Sound** action. The app shows the same steps under Studio → Connect sounds.
@@ -152,13 +158,7 @@ iOS doesn't let an app play a sound by itself when CarPlay connects, so a Shortc
 
 Optional, when you leave the car: the same steps with **Disconnects**, adding **Play Connect Sound** (Sound: Goodbye) and then **Save Parking**. This is the same automation as §10 step 4, with a goodbye sound.
 
-## 11. Phase 4: Photo Frame and Music
-
-1. **MusicKit** must be ticked on the app's App ID under *App Services* (step 2). If Music says it can't load anything even after you allow access, check that, then rerun with *Regenerate provisioning profiles*.
-2. In the app: Studio → Music → **Allow Apple Music**. Recently played needs an Apple Music subscription; a featured playlist needs the playlist in your library (Sync Library on).
-3. Studio → Photo Frame → **Add photos**. To give the Photo Frame widget its own album: long-press the widget → **Edit Widget** → Album. Car Slots use the album chosen in the app.
-
-## 12. App icon (no Mac)
+## 13. App icon (no Mac)
 
 The icon comes from your artwork in `remotion/assets/icon/` (spec §3 App icon). To change it on Windows:
 

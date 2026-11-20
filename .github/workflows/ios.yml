@@ -35,6 +35,13 @@ jobs:
           name: CarKitTests.xcresult
           path: build/CarKitTests.xcresult
           if-no-files-found: ignore
+      - name: Upload README snapshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: readme-snapshots
+          path: build/snapshots
+          if-no-files-found: ignore
 
   testflight:
     name: Archive and upload to TestFlight

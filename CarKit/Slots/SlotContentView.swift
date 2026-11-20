@@ -20,7 +20,7 @@ public struct SlotContentView: View {
         case .design(let design):
             designView(design)
                 .accessibilityElement(children: .ignore)
-                .accessibilityLabel("Car slot \(slot): \(design.value), \(design.title)")
+                .accessibilityLabel(designLabel(design))
         case .data(let card):
             DataCardView(card: card, size: isMedium ? .medium : .small)
         case .studio(let card):
@@ -101,6 +101,13 @@ public struct SlotContentView: View {
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
         }
+    }
+
+    private func designLabel(_ design: SlotDesign) -> String {
+        let text = [design.value, design.title].filter { !$0.trimmingCharacters(in: .whitespaces).isEmpty }
+        let picture = design.imageFile == nil ? [] : [design.imageFile == SlotDesign.myCarImageFile ? "my car picture" : "picture"]
+        let parts = text + (text.isEmpty ? picture : [])
+        return "Car slot \(slot)" + (parts.isEmpty ? "" : ": " + parts.joined(separator: ", "))
     }
 
     private var flashView: some View {

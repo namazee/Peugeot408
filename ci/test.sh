@@ -24,8 +24,9 @@ if [ -z "$UDID" ]; then
 fi
 echo "Using simulator $UDID"
 
-mkdir -p build
-xcodebuild test \
+mkdir -p build/snapshots
+# README images: ReadmeSnapshots renders the widget views into build/snapshots (uploaded as an artifact).
+TEST_RUNNER_SNAPSHOT_DIR="$PWD/build/snapshots" xcodebuild test \
   -project Peugeot408.xcodeproj \
   -scheme CarKit \
   -destination "id=$UDID" \

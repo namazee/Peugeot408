@@ -2,7 +2,28 @@
 
 Fresh session? Read `docs/SPEC.md`, then this file, then continue from **Current phase**.
 
-## Current phase: 9 (Remotion) — done; Phase 8 still waiting for your car test. Next: "Continue with Phase 10" (Polish)
+## Current phase: 10 (Polish) — done. All phases built; Phase 8 split cards still waiting for your car test.
+
+## Phase 10 — Polish
+### Done
+- **Rendering modes:** tinted and clear (Liquid Glass) CarPlay drops the amber and red. So data widgets and split/quad cards that are due soon or overdue now also show a warning glyph (triangle or octagon) in the top corner, marked `widgetAccentable`. Full-colour mode is unchanged.
+- **Accessibility:**
+  - Each split/quad card is read as one sentence: label, value and "due soon" / "overdue". Timers are read as "in 1 hour, 12 minutes". Symbol names are no longer read out.
+  - Data widgets add "due soon" / "overdue" to their label.
+  - Picture slots with no text are read as "Car slot 1: my car picture" instead of an empty label.
+- **Empty states:** every widget already shows a hint when it has no data ("Add a fill-up", "Set Home and Work" and so on). Removed the leftover "arrives in Phase 9" note in Settings and the unused "coming soon" screen.
+- **JSON backup** (Settings → Backup):
+  - Export writes one readable JSON file (`Peugeot408 backup <date>.json`) for the share sheet. It holds service, fuel, renewals, TnG, parking, Home/Work, prayer zone, slots, Studio, connect sound and OBD2.
+  - Restore asks first and checks every file against its type before writing. A damaged backup changes nothing, and a newer format is refused.
+  - After a restore the app reloads its data and all widgets.
+  - Caches, photos, pictures and imported sounds are not included.
+  - Covered by `BackupTests`.
+- **README** now has:
+  - widget and head-unit snapshots, rendered by CI from the real SwiftUI views (`ReadmeSnapshots`, artifact `readme-snapshots`);
+  - frames from the Remotion videos (`docs/images/`);
+  - the feature list, backup notes and the repo layout.
+- SETUP.md section numbers fixed (Phase 4 and Phase 6 were out of order, and two sections were both numbered 12).
+
 
 ## Change before Phase 10 — built-in slot pictures keep their original colours (spec updated first)
 - Built-in photos picked as a slot picture are no longer recoloured with your My Car paint. They keep their original colours and still get your plate. The live My Car option still follows your paint.

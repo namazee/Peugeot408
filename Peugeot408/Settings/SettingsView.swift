@@ -1,5 +1,6 @@
 import CarKit
 import SwiftUI
+import UniformTypeIdentifiers
 
 struct SettingsView: View {
     @Environment(SlotsModel.self) private var slots
@@ -51,6 +52,8 @@ struct SettingsView: View {
                     }
                 }
 
+                BackupSection()
+
                 Section {
                     LabeledContent("App Group", value: AppGroup.isAvailable ? "Connected" : "Not available")
                     LabeledContent("Version", value: appVersion)
@@ -64,9 +67,6 @@ struct SettingsView: View {
                 }
 
                 Section {
-                    Text("Units, accent colour and JSON backup arrive in Phase 9.")
-                        .font(.footnote)
-                        .foregroundStyle(Theme.secondaryText)
                     Text("Personal project. Not affiliated with Peugeot or Stellantis.")
                         .font(.footnote)
                         .foregroundStyle(Theme.secondaryText)
@@ -86,6 +86,93 @@ struct SettingsView: View {
         let version = info?["CFBundleShortVersionString"] as? String ?? "?"
         let build = info?["CFBundleVersion"] as? String ?? "?"
         return "\(version) (\(build))"
+    }
+}
+
+/// Settings → Backup: export everything I entered as one JSON file, or restore one.
+struct BackupSection: View {
+    @Environment(SlotsModel.self) private var slots
+    @Environment(CarDataModel.self) private var cars
+    @Environment(StudioModel.self) private var studio
+    @State private var exportURL: URL?
+    @State private var importing = false
+    @State private var pendingImport: URL?
+    @State private var message: String?
+
+    var body: some View {
+        Section {
+            if let exportURL {
+                ShareLink(item: exportURL) {
+                    Label("Save or share the backup", systemImage: "square.and.arrow.up")
+                }
+            } else {
+                Button {
+                    makeBackup()
+                } label: {
+                    Label("Export backup", systemImage: "externaldrive.badge.plus")
+                }
+            }
+            Button {
+                importing = true
+            } label: {
+                Label("Restore from backup", systemImage: "arrow.counterclockwise")
+            }
+            if let message {
+                Text(message)
+                    .font(.footnote)
+                    .foregroundStyle(Theme.secondaryText)
+            }
+        } header: {
+            Text("Backup")
+        } footer: {
+            Text("One JSON file with your service, fuel, renewals, TnG, parking, Home and Work, prayer zone, slots, Studio designs, connect sound and OBD2 settings. Photos, pictures and imported sounds aren't included.")
+        }
+        .fileImporter(isPresented: $importing, allowedContentTypes: [.json]) { result in
+            if case .success(let url) = result { pendingImport = url }
+        }
+        .confirmationDialog("Replace your data with this backup?", isPresented: showConfirm, titleVisibility: .visible) {
+            Button("Restore", role: .destructive) {
+                if let url = pendingImport { restore(from: url) }
+                pendingImport = nil
+            }
+            Button("Cancel", role: .cancel) { pendingImport = nil }
+        } message: {
+            Text("Everything in the backup overwrites what's on this iPhone. Export a backup first if you might want today's data back.")
+        }
+    }
+
+    private var showConfirm: Binding<Bool> {
+        Binding { pendingImport != nil } set: { if !$0 { pendingImport = nil } }
+    }
+
+    private func makeBackup() {
+        do {
+            let url = FileManager.default.temporaryDirectory.appending(path: Backup.fileName(), directoryHint: .notDirectory)
+            try Backup.export().write(to: url, options: .atomic)
+            exportURL = url
+            message = "Backup ready. Save it to Files or iCloud Drive."
+        } catch {
+            message = "Couldn't make the backup: \(error.localizedDescription)"
+        }
+    }
+
+    private func restore(from url: URL) {
+        let access = url.startAccessingSecurityScopedResource()
+        defer { if access { url.stopAccessingSecurityScopedResource() } }
+        do {
+            let result = try Backup.restore(Data(contentsOf: url))
+            cars.reload()
+            slots.reload()
+            studio.reload()
+            slots.reloadAllWidgets()
+            exportURL = nil
+            let when = result.createdAt.map { " from \($0.formatted(date: .abbreviated, time: .shortened))" } ?? ""
+            message = result.restored.isEmpty
+                ? "That backup had nothing to restore."
+                : "Restored\(when): \(result.restored.joined(separator: ", ")). The widgets are redrawing."
+        } catch {
+            message = error.localizedDescription
+        }
     }
 }
 

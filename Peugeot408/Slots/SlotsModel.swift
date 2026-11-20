@@ -49,6 +49,11 @@ final class SlotsModel {
         commit(next, reloading: SlotsState.slotNumbers)
     }
 
+    /// Re-reads the file (after a backup is restored).
+    func reload() {
+        state = store.load()
+    }
+
     func reloadAllWidgets() {
         WidgetCenter.shared.reloadAllTimelines()
     }

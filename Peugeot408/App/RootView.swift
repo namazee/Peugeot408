@@ -92,25 +92,3 @@ struct RootView: View {
         }
     }
 }
-
-struct ComingSoonView: View {
-    let title: String
-    let symbol: String
-    let phase: Int
-    let summary: String
-
-    var body: some View {
-        NavigationStack {
-            ContentUnavailableView {
-                Label(title, systemImage: symbol)
-            } description: {
-                Text(summary)
-            } actions: {
-                Text("Arrives in Phase \(phase)")
-                    .font(.footnote.weight(.semibold))
-                    .foregroundStyle(Theme.secondaryText)
-            }
-            .navigationTitle(title)
-        }
-    }
-}

@@ -157,7 +157,33 @@ struct SlotCardView: View {
                 EmptyView()
             }
         }
-        .accessibilityElement(children: .combine)
+        .overlay(alignment: .topTrailing) {
+            UrgencyMark(urgency: urgency, size: compact ? 12 : 14).padding(compact ? 5 : 7)
+        }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(accessibilityText)
+    }
+
+    /// Read by VoiceOver: "Next prayer Asr 4:30 PM, 1:12:05" rather than symbol names.
+    private var accessibilityText: String {
+        func spoken(_ card: CompactCard) -> String {
+            let value: String = switch card.value {
+            case .text(let text): text
+            case .timer(let date), .relative(let date): "in " + date.formatted(.relative(presentation: .numeric))
+            }
+            let warning = card.urgency == .urgent ? ", overdue" : (card.urgency == .dueSoon ? ", due soon" : "")
+            return [card.label, value].filter { !$0.isEmpty }.joined(separator: ", ") + warning
+        }
+        switch content {
+        case .data(let card): return spoken(card.compact)
+        case .design(let design):
+            let text = [design.title, design.value].filter { !$0.trimmingCharacters(in: .whitespaces).isEmpty }.joined(separator: ", ")
+            return text.isEmpty ? design.cardSummary : text
+        case .studio(let card): return card.design.name
+        case .flashCard(let name): return name.isEmpty ? "Slot \(slot) test card" : "Slot \(slot), \(name) test card"
+        case .flash: return "Slot \(slot) test card"
+        case .cards: return ""
+        }
     }
 
     private var urgency: Urgency {

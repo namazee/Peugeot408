@@ -46,6 +46,23 @@ public enum CardSize: Sendable {
     }
 }
 
+/// Tinted / clear CarPlay drops the amber and red, so "due soon" and "overdue" also get a
+/// warning glyph in the top corner there.
+struct UrgencyMark: View {
+    @Environment(\.widgetRenderingMode) private var renderingMode
+    let urgency: Urgency
+    var size: CGFloat = 15
+
+    var body: some View {
+        if urgency != .ok, renderingMode != .fullColor {
+            Image(systemName: urgency == .urgent ? "exclamationmark.octagon.fill" : "exclamationmark.triangle.fill")
+                .font(.system(size: size, weight: .bold))
+                .widgetAccentable()
+                .accessibilityHidden(true)
+        }
+    }
+}
+
 /// Foreground of every data widget (and of a slot showing one). Shared by the app and the extension.
 public struct DataCardView: View {
     private let card: DataCard
@@ -78,6 +95,9 @@ public struct DataCardView: View {
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        .overlay(alignment: .topTrailing) {
+            if size != .accessory { UrgencyMark(urgency: card.urgency) }
+        }
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(accessibilityText)
     }
@@ -149,7 +169,12 @@ public struct DataCardView: View {
     }
 
     private var accessibilityText: String {
-        "\(card.source.displayName): " + accessoryLines.joined(separator: ", ")
+        let warning = switch card.urgency {
+        case .ok: ""
+        case .dueSoon: ", due soon"
+        case .urgent: ", overdue"
+        }
+        return "\(card.source.displayName): " + accessoryLines.joined(separator: ", ") + warning
     }
 }
 
