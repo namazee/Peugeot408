@@ -60,6 +60,11 @@ public struct DataCardView: View {
                 case .fuel(let summary): FuelCard(summary: summary, size: size)
                 case .renewals(let summary): RenewalsCard(summary: summary, size: size)
                 case .tng(let summary): TnGCard(summary: summary, size: size)
+                case .parking(let summary): ParkingCard(summary: summary, size: size)
+                case .prayer(let summary): PrayerCard(summary: summary, size: size)
+                case .commute(let summary): CommuteCard(summary: summary, size: size)
+                case .weather(let summary): WeatherCard(summary: summary, size: size)
+                case .map(let summary): MapCard(summary: summary, size: size)
                 }
             }
         }
@@ -103,6 +108,26 @@ public struct DataCardView: View {
         case .tng(let summary):
             guard let balance = summary.balance else { return ["Enter your balance"] }
             return [CarFormat.rm(balance), summary.isLow ? "Top up soon" : "Balance OK"]
+        case .parking(let summary):
+            guard let spot = summary.spot else { return ["No parking saved"] }
+            let detail = spot.detailLine
+            return [spot.title, detail.isEmpty ? "Since \(spot.savedAt.formatted(date: .omitted, time: .shortened))" : detail]
+        case .prayer(let summary):
+            guard let next = summary.next else { return ["Open the app to load times"] }
+            return ["\(next.prayer.displayName) \(next.time.formatted(date: .omitted, time: .shortened))", summary.zoneCode]
+        case .commute(let summary):
+            guard let destination = summary.destination, !summary.needsSetup else { return ["Set Home and Work"] }
+            var lines = ["\(destination.title): \(summary.travelText)"]
+            if let event = summary.nextEvent {
+                lines.append("\(event.start.formatted(date: .omitted, time: .shortened)) \(event.title)")
+            }
+            return lines
+        case .weather(let summary):
+            var lines = ["\(summary.temperatureText) \(summary.rainText ?? "")".trimmingCharacters(in: .whitespaces)]
+            if let air = summary.airText { lines.append(air) }
+            return lines
+        case .map(let summary):
+            return [summary.caption ?? "Save parking or set Home/Work"]
         }
     }
 
@@ -113,7 +138,7 @@ public struct DataCardView: View {
 
 // MARK: - Building blocks
 
-private struct CardHeader: View {
+struct CardHeader: View {
     let symbol: String
     let title: String
     let color: Color
@@ -133,7 +158,7 @@ private struct CardHeader: View {
     }
 }
 
-private struct BigValue: View {
+struct BigValue: View {
     let text: String
     var size: CGFloat = 32
     var color: Color = Theme.primaryText
@@ -148,7 +173,7 @@ private struct BigValue: View {
     }
 }
 
-private struct SmallLine: View {
+struct SmallLine: View {
     let text: String
     var color: Color = Theme.secondaryText
 
@@ -161,7 +186,7 @@ private struct SmallLine: View {
     }
 }
 
-private struct EmptyCard: View {
+struct EmptyCard: View {
     let source: DataSource
     let hint: String
 

@@ -28,6 +28,24 @@ struct SettingsView: View {
                     }
                 }
 
+                Section("Data") {
+                    NavigationLink {
+                        ZonePickerView()
+                    } label: {
+                        Label("Prayer zone", systemImage: "moon.stars")
+                    }
+                    NavigationLink {
+                        CommuteView()
+                    } label: {
+                        Label("Home and Work", systemImage: "house")
+                    }
+                    NavigationLink {
+                        APIKeysView()
+                    } label: {
+                        Label("API keys", systemImage: "key")
+                    }
+                }
+
                 Section {
                     LabeledContent("App Group", value: AppGroup.isAvailable ? "Connected" : "Not available")
                     LabeledContent("Version", value: appVersion)
@@ -41,7 +59,7 @@ struct SettingsView: View {
                 }
 
                 Section {
-                    Text("Units, accent colour, prayer zone, locations, API keys, OBD2 dongle and backup arrive with the features that use them.")
+                    Text("Units, accent colour, OBD2 dongle and backup arrive with the features that use them.")
                         .font(.footnote)
                         .foregroundStyle(Theme.secondaryText)
                     Text("Personal project. Not affiliated with Peugeot or Stellantis.")

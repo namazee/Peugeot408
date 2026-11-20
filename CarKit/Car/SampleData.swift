@@ -56,7 +56,58 @@ public enum SampleData {
 
         let tng = TnGState(balance: 42.50, threshold: 20, updatedAt: daysAgo(1))
 
-        return CarData(service: service, fuel: fuel, renewals: renewals, tng: tng)
+        let parking = ParkingState(spot: ParkingSpot(
+            point: GeoPoint(latitude: 2.9701, longitude: 101.7115),
+            savedAt: now.addingTimeInterval(-(2 * 3600 + 14 * 60)),
+            placeName: "IOI City Mall",
+            floor: "B2",
+            bay: "C14"
+        ))
+
+        let zone = PrayerZone.zone(code: PrayerZone.defaultCode) ?? PrayerZone.all[0]
+        let prayerDays = (-1...2).compactMap { offset -> PrayerDay? in
+            guard let day = calendar.date(byAdding: .day, value: offset, to: now) else { return nil }
+            var result = PrayerCalculator.jakim.day(for: day, zone: zone)
+            result?.origin = .jakim
+            return result
+        }
+
+        let commute = CommuteSettings(
+            home: SavedPlace(name: "Home", point: GeoPoint(latitude: 2.9213, longitude: 101.6559)),
+            work: SavedPlace(name: "APU", point: GeoPoint(latitude: 3.0553, longitude: 101.7005))
+        )
+        let destination = CommuteRules.destination(at: now, settings: commute, calendar: calendar) ?? .work
+        let commuteCache = CommuteCacheFile(latest: CommuteCache(destination: destination, travelSeconds: 32 * 60, computedAt: now, fromCurrentLocation: true))
+        let calendarCache = CalendarCache(events: [
+            CachedEvent(title: "Team stand-up", start: now.addingTimeInterval(80 * 60), end: now.addingTimeInterval(110 * 60), location: "Block B"),
+        ], updatedAt: now)
+
+        let hours = (0..<12).map { hour in
+            HourForecast(
+                date: now.addingTimeInterval(Double(hour) * 3600),
+                temperatureC: 31 - Double(hour) * 0.4,
+                precipitationChance: hour == 3 ? 0.6 : 0.1,
+                symbol: hour == 3 ? "cloud.rain.fill" : "cloud.sun.fill",
+                isRain: hour == 3
+            )
+        }
+        let weather = WeatherCache(
+            weather: WeatherSnapshot(observedAt: now, temperatureC: 31, symbol: "cloud.sun.fill", condition: "Partly Cloudy", isRainingNow: false, hours: hours),
+            air: AirQuality(value: 57, station: "Putrajaya", observedAt: now, dominantPollutant: "pm25", provider: "Sample"),
+            weatherFetchedAt: now,
+            airFetchedAt: now,
+            placeLabel: "Current location"
+        )
+
+        return CarData(
+            service: service, fuel: fuel, renewals: renewals, tng: tng,
+            parking: parking,
+            prayer: PrayerCache(zoneCode: zone.code, days: prayerDays, fetchedAt: now),
+            commute: commute,
+            commuteCache: commuteCache,
+            calendar: calendarCache,
+            weather: weather
+        )
     }
 
     public static func card(for source: DataSource, now: Date = .now) -> DataCard {

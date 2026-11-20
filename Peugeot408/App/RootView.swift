@@ -15,6 +15,9 @@ struct RootView: View {
     @State private var editing: SlotRef?
     @State private var carPath: [DataSource] = []
     @State private var dailyPath: [DataSource] = []
+    @State private var studioPath: [DataSource] = []
+    @Environment(\.scenePhase) private var scenePhase
+    @Environment(CarDataModel.self) private var cars
 
     var body: some View {
         TabView(selection: $tab) {
@@ -22,12 +25,7 @@ struct RootView: View {
                 SlotsView(editing: $editing)
             }
             Tab("Studio", systemImage: "paintpalette", value: AppTab.studio) {
-                ComingSoonView(
-                    title: "Studio",
-                    symbol: "paintpalette.fill",
-                    phase: 5,
-                    summary: "Templates, the custom builder, seasonal packs, your car photo and connect sounds."
-                )
+                StudioView(path: $studioPath)
             }
             Tab("Car", systemImage: "car", value: AppTab.car) {
                 CarView(path: $carPath)
@@ -43,6 +41,16 @@ struct RootView: View {
             OnboardingView { hasCompletedOnboarding = true }
         }
         .onOpenURL(perform: handle)
+        .onChange(of: scenePhase) { _, phase in
+            // Pick up changes made while away (e.g. the Save Parking shortcut), refresh the
+            // calendar copy the Commute widget uses, and keep the prayer cache topped up.
+            guard phase == .active else { return }
+            cars.reload()
+            Task {
+                await cars.refresh(.prayer)
+                await cars.refresh(.commute)
+            }
+        }
     }
 
     private var showOnboarding: Binding<Bool> {
@@ -63,10 +71,14 @@ struct RootView: View {
             editing = SlotRef(id: number)
         case "data":
             guard let source = DataSource(rawValue: url.lastPathComponent) else { return }
-            if source == .tng {
+            switch source {
+            case .tng, .prayer, .commute, .weather:
                 tab = .daily
                 dailyPath = [source]
-            } else {
+            case .map:
+                tab = .studio
+                studioPath = [source]
+            case .service, .fuel, .renewals, .parking:
                 tab = .car
                 carPath = [source]
             }

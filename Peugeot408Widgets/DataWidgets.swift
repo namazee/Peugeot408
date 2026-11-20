@@ -9,6 +9,32 @@ struct DataEntry: TimelineEntry {
     let card: DataCard
 }
 
+/// Builds the timeline for one data source. Live sources (prayer, commute, weather, map) first
+/// refresh their cached files (each throttles itself), then everything is drawn from the cache.
+enum DataTimelineBuilder {
+    static func timeline(for source: DataSource, displaySize: CGSize) async -> Timeline<DataEntry> {
+        let now = Date()
+        if source.isLive {
+            await LiveRefresher.refresh(source, now: now, mapSize: displaySize)
+        }
+        let data = CarData.load()
+        var entries = DataTimeline.dates(for: source, data: data, from: now).map { date in
+            DataEntry(date: date, card: card(source, data: data, at: date, size: displaySize))
+        }
+        if entries.isEmpty {
+            entries = [DataEntry(date: now, card: CarData.empty.card(for: source, at: now))]
+        }
+        let policy: TimelineReloadPolicy = DataTimeline.reloadDate(for: source, data: data, now: now).map { TimelineReloadPolicy.after($0) } ?? TimelineReloadPolicy.atEnd
+        return Timeline(entries: entries, policy: policy)
+    }
+
+    static func card(_ source: DataSource, data: CarData, at date: Date, size: CGSize) -> DataCard {
+        source == .map
+            ? data.mapCard(at: date, width: size.width, height: size.height)
+            : data.card(for: source, at: date)
+    }
+}
+
 struct DataProvider: TimelineProvider {
     let source: DataSource
 
@@ -22,16 +48,16 @@ struct DataProvider: TimelineProvider {
             completion(DataEntry(date: now, card: SampleData.card(for: source, now: now)))
             return
         }
-        completion(DataEntry(date: now, card: CarData.load().card(for: source, at: now)))
+        let size = context.displaySize
+        completion(DataEntry(date: now, card: DataTimelineBuilder.card(source, data: CarData.load(), at: now, size: size)))
     }
 
     func getTimeline(in context: Context, completion: @escaping (Timeline<DataEntry>) -> Void) {
-        let now = Date()
-        let entries = DataTimeline.items(for: source, data: CarData.load(), now: now)
-            .map { DataEntry(date: $0.date, card: $0.card) }
-        let safe = entries.isEmpty ? [DataEntry(date: now, card: CarData.empty.card(for: source, at: now))] : entries
-        // Entries cover the next 7 midnights; the app reloads this kind whenever the data changes.
-        completion(Timeline(entries: safe, policy: .atEnd))
+        let source = source
+        let size = context.displaySize
+        Task {
+            completion(await DataTimelineBuilder.timeline(for: source, displaySize: size))
+        }
     }
 }
 
@@ -53,17 +79,20 @@ struct DataWidgetView: View {
 
 @MainActor
 enum DataWidgetConfiguration {
-    static func make(source: DataSource, description: String) -> some WidgetConfiguration {
+    static func make(source: DataSource, description: String, lockScreen: Bool = true) -> some WidgetConfiguration {
         // Plain Strings: an interpolated literal becomes a LocalizedStringKey, which crashed
         // the extension on iOS 27 (see CHANGELOG, Phase 1 fixes).
         let name: String = source.displayName
         let details: String = description
+        let families: [WidgetFamily] = lockScreen
+            ? [.systemSmall, .systemMedium, .accessoryRectangular]
+            : [.systemSmall, .systemMedium]
         return StaticConfiguration(kind: source.widgetKind, provider: DataProvider(source: source)) { entry in
             DataWidgetView(entry: entry)
         }
         .configurationDisplayName(name)
         .description(details)
-        .supportedFamilies([.systemSmall, .systemMedium, .accessoryRectangular])
+        .supportedFamilies(families)
     }
 }
 
@@ -88,6 +117,36 @@ struct RenewalsWidget: Widget {
 struct TouchNGoWidget: Widget {
     var body: some WidgetConfiguration {
         DataWidgetConfiguration.make(source: .tng, description: "Your Touch 'n Go balance, with a top-up warning.")
+    }
+}
+
+struct ParkingWidget: Widget {
+    var body: some WidgetConfiguration {
+        DataWidgetConfiguration.make(source: .parking, description: "Where you parked, floor and bay, and how long ago.")
+    }
+}
+
+struct PrayerTimesWidget: Widget {
+    var body: some WidgetConfiguration {
+        DataWidgetConfiguration.make(source: .prayer, description: "Next prayer with a live countdown (JAKIM e-Solat).")
+    }
+}
+
+struct CommuteWidget: Widget {
+    var body: some WidgetConfiguration {
+        DataWidgetConfiguration.make(source: .commute, description: "Drive time to Work or Home, and your next event.")
+    }
+}
+
+struct WeatherHazeWidget: Widget {
+    var body: some WidgetConfiguration {
+        DataWidgetConfiguration.make(source: .weather, description: "Temperature, rain today and the haze (API) level.")
+    }
+}
+
+struct MapSnapshotWidget: Widget {
+    var body: some WidgetConfiguration {
+        DataWidgetConfiguration.make(source: .map, description: "Map of your parked car, or of your next commute.", lockScreen: false)
     }
 }
 
@@ -126,8 +185,46 @@ struct TouchNGoWidget: Widget {
     DataEntry(date: .now, card: .tng(TnGSummary(balance: 8.4, threshold: 20, isLow: true)))
 }
 
-#Preview("Lock Screen", as: .accessoryRectangular) {
-    RenewalsWidget()
+#Preview("Parking", as: .systemSmall) {
+    ParkingWidget()
 } timeline: {
-    DataEntry(date: .now, card: SampleData.card(for: .renewals))
+    DataEntry(date: .now, card: SampleData.card(for: .parking))
+    DataEntry(date: .now, card: CarData.empty.card(for: .parking, at: .now))
+}
+
+#Preview("Prayer", as: .systemSmall) {
+    PrayerTimesWidget()
+} timeline: {
+    DataEntry(date: .now, card: SampleData.card(for: .prayer))
+}
+
+#Preview("Prayer medium", as: .systemMedium) {
+    PrayerTimesWidget()
+} timeline: {
+    DataEntry(date: .now, card: SampleData.card(for: .prayer))
+}
+
+#Preview("Commute", as: .systemMedium) {
+    CommuteWidget()
+} timeline: {
+    DataEntry(date: .now, card: SampleData.card(for: .commute))
+    DataEntry(date: .now, card: CarData.empty.card(for: .commute, at: .now))
+}
+
+#Preview("Weather & Haze", as: .systemSmall) {
+    WeatherHazeWidget()
+} timeline: {
+    DataEntry(date: .now, card: SampleData.card(for: .weather))
+}
+
+#Preview("Map", as: .systemSmall) {
+    MapSnapshotWidget()
+} timeline: {
+    DataEntry(date: .now, card: SampleData.card(for: .map))
+}
+
+#Preview("Lock Screen", as: .accessoryRectangular) {
+    PrayerTimesWidget()
+} timeline: {
+    DataEntry(date: .now, card: SampleData.card(for: .prayer))
 }

@@ -6,6 +6,11 @@ public enum DataSource: String, Codable, Sendable, CaseIterable, Identifiable {
     case fuel
     case renewals
     case tng
+    case parking
+    case prayer
+    case commute
+    case weather
+    case map
 
     public var id: String { rawValue }
 
@@ -15,6 +20,11 @@ public enum DataSource: String, Codable, Sendable, CaseIterable, Identifiable {
         case .fuel: "Fuel Log"
         case .renewals: "Road Tax & Insurance"
         case .tng: "Touch 'n Go"
+        case .parking: "Parking"
+        case .prayer: "Prayer Times"
+        case .commute: "Commute"
+        case .weather: "Weather & Haze"
+        case .map: "Map Snapshot"
         }
     }
 
@@ -24,6 +34,11 @@ public enum DataSource: String, Codable, Sendable, CaseIterable, Identifiable {
         case .fuel: "fuelpump.fill"
         case .renewals: "calendar.badge.clock"
         case .tng: "creditcard.fill"
+        case .parking: "parkingsign.circle.fill"
+        case .prayer: "moon.stars.fill"
+        case .commute: "car.rear.road.lane"
+        case .weather: "cloud.sun.fill"
+        case .map: "map.fill"
         }
     }
 
@@ -34,6 +49,11 @@ public enum DataSource: String, Codable, Sendable, CaseIterable, Identifiable {
         case .fuel: "FuelLog"
         case .renewals: "Renewals"
         case .tng: "TouchNGo"
+        case .parking: "Parking"
+        case .prayer: "PrayerTimes"
+        case .commute: "Commute"
+        case .weather: "WeatherHaze"
+        case .map: "MapSnapshot"
         }
     }
 
@@ -45,7 +65,20 @@ public enum DataSource: String, Codable, Sendable, CaseIterable, Identifiable {
     /// Sources whose widgets must redraw when this source's data changes.
     /// Fill-ups carry odometer readings, so they move the service estimate too.
     public var affectedSources: [DataSource] {
-        self == .fuel ? [.fuel, .service] : [self]
+        switch self {
+        case .fuel: [.fuel, .service]
+        // The map shows the parked car, or the commute destination when there is none.
+        case .parking, .commute: [self, .map]
+        default: [self]
+        }
+    }
+
+    /// Sources whose data comes from the network or location (refreshed by `LiveRefresher`).
+    public var isLive: Bool {
+        switch self {
+        case .prayer, .commute, .weather, .map: true
+        default: false
+        }
     }
 }
 
@@ -74,22 +107,66 @@ public struct CarData: Sendable, Equatable {
     public var fuel: FuelLog
     public var renewals: RenewalLog
     public var tng: TnGState
+    // Phase 3
+    public var parking: ParkingState
+    public var prayerSettings: PrayerSettings
+    public var prayer: PrayerCache
+    public var commute: CommuteSettings
+    public var commuteCache: CommuteCacheFile
+    public var calendar: CalendarCache
+    public var weather: WeatherCache
+    public var map: MapSnapshotIndex
+    /// Folder the map PNGs live in.
+    public var directory: URL?
 
-    public init(service: ServiceLog = .empty, fuel: FuelLog = .empty, renewals: RenewalLog = .empty, tng: TnGState = .empty) {
+    public init(
+        service: ServiceLog = .empty,
+        fuel: FuelLog = .empty,
+        renewals: RenewalLog = .empty,
+        tng: TnGState = .empty,
+        parking: ParkingState = .empty,
+        prayerSettings: PrayerSettings = PrayerSettings(),
+        prayer: PrayerCache = .empty,
+        commute: CommuteSettings = .empty,
+        commuteCache: CommuteCacheFile = .empty,
+        calendar: CalendarCache = .empty,
+        weather: WeatherCache = .empty,
+        map: MapSnapshotIndex = .empty,
+        directory: URL? = nil
+    ) {
         self.service = service
         self.fuel = fuel
         self.renewals = renewals
         self.tng = tng
+        self.parking = parking
+        self.prayerSettings = prayerSettings
+        self.prayer = prayer
+        self.commute = commute
+        self.commuteCache = commuteCache
+        self.calendar = calendar
+        self.weather = weather
+        self.map = map
+        self.directory = directory
     }
 
     public static let empty = CarData()
 
     public static func load(from directory: URL = AppGroup.containerURL) -> CarData {
-        CarData(
+        let prayer = PrayerService(directory: directory)
+        return CarData(
             service: CarStores.service(in: directory).load(),
             fuel: CarStores.fuel(in: directory).load(),
             renewals: CarStores.renewals(in: directory).load(),
-            tng: CarStores.tng(in: directory).load()
+            tng: CarStores.tng(in: directory).load(),
+            parking: LiveStores.parking(in: directory).load(),
+            prayerSettings: prayer.loadSettings(),
+            prayer: prayer.loadCache(),
+            commute: LiveStores.commute(in: directory).load(),
+            commuteCache: LiveStores.commuteCache(in: directory).load(),
+            calendar: LiveStores.calendar(in: directory).load(),
+            weather: LiveStores.weather(in: directory).load(),
+            map: LiveStores.map(in: directory).load(),
+            directory: directory
         )
     }
 
@@ -140,6 +217,9 @@ public struct CarData: Sendable, Equatable {
 
         case .tng:
             return .tng(TnGSummary(balance: tng.balance, threshold: tng.threshold, isLow: tng.isLow))
+
+        case .parking, .prayer, .commute, .weather, .map:
+            return liveCard(for: source, at: date, calendar: calendar)
         }
     }
 }
@@ -263,6 +343,11 @@ public enum DataCard: Sendable, Equatable {
     case fuel(FuelSummary)
     case renewals(RenewalSummary)
     case tng(TnGSummary)
+    case parking(ParkingSummary)
+    case prayer(PrayerSummary)
+    case commute(CommuteSummary)
+    case weather(WeatherSummary)
+    case map(MapSummary)
 
     public var source: DataSource {
         switch self {
@@ -270,6 +355,11 @@ public enum DataCard: Sendable, Equatable {
         case .fuel: .fuel
         case .renewals: .renewals
         case .tng: .tng
+        case .parking: .parking
+        case .prayer: .prayer
+        case .commute: .commute
+        case .weather: .weather
+        case .map: .map
         }
     }
 
@@ -280,6 +370,8 @@ public enum DataCard: Sendable, Equatable {
         case .fuel: .ok
         case .renewals(let summary): summary.lines.first?.urgency ?? .ok
         case .tng(let summary): summary.isLow ? .dueSoon : .ok
+        case .weather(let summary): summary.air?.band.urgency ?? .ok
+        case .parking, .prayer, .commute, .map: .ok
         }
     }
 }
@@ -287,10 +379,59 @@ public enum DataCard: Sendable, Equatable {
 // MARK: - Timelines
 
 public enum DataTimeline {
-    /// Entries for now and each of the next 7 midnights (day counts and "this month" change daily).
+    /// One entry per date from `dates(for:)`.
     public static func items(for source: DataSource, data: CarData, now: Date, calendar: Calendar = .current) -> [(date: Date, card: DataCard)] {
-        DayMath.refreshDates(from: now, calendar: calendar).map { date in
+        dates(for: source, data: data, from: now, calendar: calendar).map { date in
             (date, data.card(for: source, at: date, calendar: calendar))
+        }
+    }
+
+    /// When the card's content changes on its own:
+    /// - Phase 2 cards and Parking: now and each of the next 7 midnights (day counts; parking's
+    ///   "ago" text ticks by itself).
+    /// - Prayer: every prayer time in the next 2 days (the "next prayer" moves on), plus midnights.
+    /// - Commute: the switch to the trip home, the start and end of upcoming events, midnight.
+    /// - Weather: each of the next 6 forecast hours.
+    /// - Map: a single entry (the image only changes when it's re-rendered).
+    public static func dates(for source: DataSource, data: CarData, from start: Date, calendar: Calendar = .current) -> [Date] {
+        var dates: [Date]
+        switch source {
+        case .service, .fuel, .renewals, .tng, .parking:
+            return DayMath.refreshDates(from: start, calendar: calendar)
+
+        case .prayer:
+            let horizon = start.addingTimeInterval(48 * 3600)
+            dates = PrayerSchedule.moments(in: data.prayer.days)
+                .map(\.time)
+                .filter { $0 > start && $0 <= horizon }
+            dates += DayMath.refreshDates(from: start, days: 2, calendar: calendar).dropFirst()
+
+        case .commute:
+            let horizon = start.addingTimeInterval(24 * 3600)
+            dates = [CommuteRules.nextSwitch(after: start, settings: data.commute, calendar: calendar)].compactMap { $0 }
+            dates += data.calendar.events.flatMap { [$0.start, $0.end] }.filter { $0 > start && $0 <= horizon }
+            dates += DayMath.refreshDates(from: start, days: 1, calendar: calendar).dropFirst()
+
+        case .weather:
+            dates = (data.weather.weather?.hours ?? []).map(\.date).filter { $0 > start }.prefix(6).map { $0 }
+
+        case .map:
+            return [start]
+        }
+        let unique = Set(dates.filter { $0 > start })
+        return [start] + unique.sorted().prefix(40)
+    }
+
+    /// When WidgetKit should ask for a new timeline. Nil means after the last entry (`.atEnd`).
+    /// Live data that comes from the network asks again sooner.
+    public static func reloadDate(for source: DataSource, data: CarData, now: Date) -> Date? {
+        switch source {
+        case .commute, .weather:
+            return now.addingTimeInterval(30 * 60)
+        case .map:
+            return data.parking.spot == nil ? now.addingTimeInterval(60 * 60) : nil
+        default:
+            return nil
         }
     }
 }

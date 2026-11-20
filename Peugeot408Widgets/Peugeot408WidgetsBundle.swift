@@ -13,5 +13,10 @@ struct Peugeot408WidgetsBundle: WidgetBundle {
         FuelLogWidget()
         RenewalsWidget()
         TouchNGoWidget()
+        ParkingWidget()
+        PrayerTimesWidget()
+        CommuteWidget()
+        WeatherHazeWidget()
+        MapSnapshotWidget()
     }
 }

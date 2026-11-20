@@ -1,10 +1,11 @@
 import CarKit
+import CoreGraphics
 import Foundation
 import Observation
 import UserNotifications
 import WidgetKit
 
-/// App-side owner of the Phase 2 data. Every change is saved to the App Group, then only the
+/// App-side owner of the car and daily data. Every change is saved to the App Group, then only the
 /// affected widgets are reloaded: the source's own widget plus any Car Slot showing it.
 @MainActor
 @Observable
@@ -52,6 +53,63 @@ final class CarDataModel {
         commit(value, to: CarStores.tng(in: directory), source: .tng) { $0.tng = value }
     }
 
+    // MARK: Phase 3
+
+    func updateParking(_ change: (inout ParkingState) -> Void) {
+        var value = data.parking
+        change(&value)
+        commit(value, to: LiveStores.parking(in: directory), source: .parking) { $0.parking = value }
+    }
+
+    func updateCommute(_ change: (inout CommuteSettings) -> Void) {
+        var value = data.commute
+        change(&value)
+        commit(value, to: LiveStores.commute(in: directory), source: .commute) { $0.commute = value }
+        Task { await refresh(.commute, force: true) }
+    }
+
+    func updatePrayerSettings(_ change: (inout PrayerSettings) -> Void) {
+        var value = data.prayerSettings
+        change(&value)
+        let service = PrayerService(directory: directory)
+        do {
+            try service.saveSettings(value)
+            data.prayerSettings = value
+            lastError = nil
+        } catch {
+            lastError = "Couldn't save: \(error.localizedDescription)"
+            return
+        }
+        Task { await refresh(.prayer) }
+    }
+
+    /// Re-reads every file (e.g. after the Save Parking shortcut ran in the background).
+    func reload() {
+        data = CarData.load(from: directory)
+    }
+
+    /// Fetches fresh live data (prayer, commute, weather), then redraws the affected widgets.
+    func refresh(_ source: DataSource, force: Bool = false) async {
+        isRefreshing.insert(source)
+        await LiveRefresher.refresh(source, directory: directory, force: force)
+        isRefreshing.remove(source)
+        reload()
+        reloadWidgets(for: source)
+    }
+
+    /// Renders map previews for the app at the given sizes, then reloads the map widgets.
+    func refreshMap(sizes: [CGSize], force: Bool = false) async {
+        isRefreshing.insert(.map)
+        for size in sizes {
+            await MapSnapshotRenderer.ensure(size: size, directory: directory, force: force)
+        }
+        isRefreshing.remove(.map)
+        reload()
+        reloadWidgets(for: .map)
+    }
+
+    var isRefreshing: Set<DataSource> = []
+
     private func commit<Value: Codable & Sendable>(
         _ value: Value,
         to store: JSONFileStore<Value>,
@@ -68,7 +126,7 @@ final class CarDataModel {
         }
     }
 
-    private func reloadWidgets(for source: DataSource) {
+    func reloadWidgets(for source: DataSource) {
         let slots = SlotStore(directory: directory).load()
         for affected in source.affectedSources {
             WidgetCenter.shared.reloadTimelines(ofKind: affected.widgetKind)

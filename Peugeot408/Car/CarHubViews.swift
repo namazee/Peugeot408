@@ -1,7 +1,7 @@
 import CarKit
 import SwiftUI
 
-/// Car tab: service, fuel and renewals. Parking and OBD2 come in later phases.
+/// Car tab: service, fuel, renewals and parking. OBD2 comes in Phase 7.
 struct CarView: View {
     @Environment(CarDataModel.self) private var model
     @Binding var path: [DataSource]
@@ -10,14 +10,13 @@ struct CarView: View {
         NavigationStack(path: $path) {
             List {
                 Section {
-                    ForEach([DataSource.service, .fuel, .renewals]) { source in
+                    ForEach([DataSource.service, .fuel, .renewals, .parking]) { source in
                         NavigationLink(value: source) {
                             DataSourceRow(source: source, card: model.card(for: source))
                         }
                     }
                 }
                 Section("Coming later") {
-                    Label("Parking: Phase 3", systemImage: "parkingsign.circle")
                     Label("Live OBD2: Phase 7", systemImage: "gauge.with.dots.needle.67percent")
                 }
                 .foregroundStyle(Theme.secondaryText)
@@ -35,7 +34,7 @@ struct CarView: View {
     }
 }
 
-/// Daily tab: Touch 'n Go. Prayer, commute and weather come in Phase 3.
+/// Daily tab: prayer, commute, weather and Touch 'n Go.
 struct DailyView: View {
     @Environment(CarDataModel.self) private var model
     @Binding var path: [DataSource]
@@ -44,16 +43,12 @@ struct DailyView: View {
         NavigationStack(path: $path) {
             List {
                 Section {
-                    NavigationLink(value: DataSource.tng) {
-                        DataSourceRow(source: .tng, card: model.card(for: .tng))
+                    ForEach([DataSource.prayer, .commute, .weather, .tng]) { source in
+                        NavigationLink(value: source) {
+                            DataSourceRow(source: source, card: model.card(for: source))
+                        }
                     }
                 }
-                Section("Coming in Phase 3") {
-                    Label("Prayer times", systemImage: "moon.stars")
-                    Label("Commute", systemImage: "car.rear.road.lane")
-                    Label("Weather & haze", systemImage: "cloud.sun")
-                }
-                .foregroundStyle(Theme.secondaryText)
 
                 if let error = model.lastError {
                     Section {
@@ -77,6 +72,11 @@ struct DataSourceScreen: View {
         case .fuel: FuelView()
         case .renewals: RenewalsView()
         case .tng: TnGView()
+        case .parking: ParkingView()
+        case .prayer: PrayerView()
+        case .commute: CommuteView()
+        case .weather: WeatherView()
+        case .map: MapSnapshotView()
         }
     }
 }
@@ -118,6 +118,21 @@ struct DataSourceRow: View {
         case .tng(let summary):
             guard let balance = summary.balance else { return "No balance yet" }
             return summary.isLow ? "\(CarFormat.rm(balance)) · top up soon" : CarFormat.rm(balance)
+        case .parking(let summary):
+            guard let spot = summary.spot else { return "No spot saved" }
+            return "\(spot.title) · \(spot.savedAt.formatted(.relative(presentation: .named)))"
+        case .prayer(let summary):
+            guard let next = summary.next else { return "Loading times…" }
+            return "\(next.prayer.displayName) \(next.time.formatted(date: .omitted, time: .shortened)) · \(summary.zoneCode)"
+        case .commute(let summary):
+            guard let destination = summary.destination, !summary.needsSetup else { return "Set Home and Work" }
+            return "\(destination.title): \(summary.travelText)"
+        case .weather(let summary):
+            var parts = [summary.temperatureText]
+            if let air = summary.airText { parts.append(air) }
+            return parts.joined(separator: " · ")
+        case .map(let summary):
+            return summary.caption ?? "Nothing to show yet"
         }
     }
 }

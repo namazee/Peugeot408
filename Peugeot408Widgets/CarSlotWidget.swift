@@ -33,19 +33,39 @@ struct SlotProvider: TimelineProvider {
     }
 
     func getTimeline(in context: Context, completion: @escaping (Timeline<SlotEntry>) -> Void) {
+        let slot = slot
+        let size = context.displaySize
+        Task {
+            completion(await Self.timeline(slot: slot, displaySize: size))
+        }
+    }
+
+    static func timeline(slot: Int, displaySize: CGSize) async -> Timeline<SlotEntry> {
         let now = Date()
         let state = SlotStore.live.load()
-        // Only read the data files when this slot shows a data widget.
-        let data = state.design(for: slot).source == nil ? CarData.empty : CarData.load()
+        let source = state.design(for: slot).source
+        // Live sources refresh their cache first (throttled); text slots skip the data files.
+        if let source, source.isLive {
+            await LiveRefresher.refresh(source, now: now, mapSize: displaySize)
+        }
+        let data = source == nil ? CarData.empty : CarData.load()
         let items = SlotTimeline.items(slot: slot, state: state, data: data, now: now)
-        var entries = items.map { SlotEntry(date: $0.date, slot: slot, content: $0.content) }
+        var entries = items.map { item -> SlotEntry in
+            // The map uses the PNG rendered for this slot's size.
+            if source == .map, case .data = item.content {
+                return SlotEntry(date: item.date, slot: slot, content: .data(data.mapCard(at: item.date, width: displaySize.width, height: displaySize.height)))
+            }
+            return SlotEntry(date: item.date, slot: slot, content: item.content)
+        }
         if entries.isEmpty {
             entries = [.sample(slot: slot, date: now)]
         }
-        // The app reloads this kind whenever the slot or its data changes. Data slots carry
-        // entries for the next 7 midnights, then ask again; text slots never need a refresh.
-        let isData = state.design(for: slot).source != nil
-        completion(Timeline(entries: entries, policy: isData ? .atEnd : .never))
+        // The app reloads this kind whenever the slot or its data changes. Text slots never need
+        // a refresh; data slots follow their source's policy (e.g. weather every 30 minutes).
+        guard let source else { return Timeline(entries: entries, policy: .never) }
+        let flashEnd = state.flashUntil.flatMap { $0 > now ? $0 : nil }
+        let reload = DataTimeline.reloadDate(for: source, data: data, now: flashEnd ?? now)
+        return Timeline(entries: entries, policy: reload.map { TimelineReloadPolicy.after($0) } ?? TimelineReloadPolicy.atEnd)
     }
 }
 

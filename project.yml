@@ -59,6 +59,9 @@ targets:
         CFBundleShortVersionString: $(MARKETING_VERSION)
         CFBundleVersion: $(CURRENT_PROJECT_VERSION)
         AppGroupID: $(APP_GROUP_ID)
+        AQIAPIKey: $(AQI_API_KEY)         # from Config/Secrets.xcconfig (CI writes it from the AQI_API_KEY secret)
+        NSLocationWhenInUseUsageDescription: Peugeot408 uses your location to save where you parked, find your prayer zone, and show local weather, haze and drive times.
+        NSCalendarsFullAccessUsageDescription: Peugeot408 shows your next calendar event on the Commute widget. Events stay on your phone.
         ITSAppUsesNonExemptEncryption: false
         UILaunchScreen: {}
         UIApplicationSceneManifest:
@@ -73,6 +76,7 @@ targets:
       properties:
         com.apple.security.application-groups:
           - $(APP_GROUP_ID)
+        com.apple.developer.weatherkit: true
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: $(BUNDLE_PREFIX).peugeot408
@@ -95,6 +99,10 @@ targets:
         CFBundleShortVersionString: $(MARKETING_VERSION)
         CFBundleVersion: $(CURRENT_PROJECT_VERSION)
         AppGroupID: $(APP_GROUP_ID)
+        AQIAPIKey: $(AQI_API_KEY)
+        NSWidgetWantsLocation: true       # weather and drive times from where the phone is
+        NSLocationWhenInUseUsageDescription: Peugeot408 widgets use your location for local weather, haze and drive times.
+        NSCalendarsFullAccessUsageDescription: The Commute widget shows your next calendar event.
         NSExtension:
           NSExtensionPointIdentifier: com.apple.widgetkit-extension
     entitlements:
@@ -102,6 +110,7 @@ targets:
       properties:
         com.apple.security.application-groups:
           - $(APP_GROUP_ID)
+        com.apple.developer.weatherkit: true
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: $(BUNDLE_PREFIX).peugeot408.widgets

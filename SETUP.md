@@ -125,6 +125,22 @@ Until the required secrets exist, CI still runs the tests and skips the upload w
 4. In the app: Slots → **Test: flash all slots**. Each slot shows "Slot N ✓" for 10 minutes.
 5. Change a slot in the app and check the head unit updates (Phase 1 sign-off).
 
+## 10. Phase 3: location, calendar, haze and auto-save parking
+
+1. **Haze token**: get a free token at <https://aqicn.org/data-platform/token> (email sign-up), then add it as the GitHub secret `AQI_API_KEY` (step 6). The next build has it built in. You can also paste one in the app: Settings → API keys.
+2. **Permissions** (asked the first time you use each feature):
+   - Location **While Using the App**: parking, prayer zone, weather and drive times. Widgets also use it when allowed (iPhone Settings → Peugeot408 → Location: *While Using the App or Widgets*).
+   - Calendars **Full Access**: only for the next event on the Commute widget. Optional.
+   - Notifications: renewal reminders (Phase 2).
+3. **WeatherKit** must be ticked on both App IDs (step 2). If the upload fails with a WeatherKit entitlement error, tick it and rerun with *Regenerate provisioning profiles*.
+4. **Auto-save parking when you leave the car** (iOS can't run app code on CarPlay disconnect by itself, so use a Shortcuts automation):
+   1. Open **Shortcuts** → **Automation** → **+** → **CarPlay**.
+   2. Choose **Disconnects**, then **Run Immediately** (turn off *Notify When Run*, if you like).
+   3. **Next** → **New Blank Automation** → **Add Action** → search **Save Parking** (Peugeot408) → add it. Leave Floor/Bay empty or set *Ask Each Time*.
+   4. **Done**. Test it by unplugging from the car, then check the Parking widget.
+
+   Siri works too: "Save parking in Peugeot408".
+
 ---
 
 ## Troubleshooting
@@ -138,4 +154,6 @@ Until the required secrets exist, CI still runs the tests and skips the upload w
 ## Platform limits (for later phases)
 
 - Spotify's now-playing info isn't available to third-party widgets; the Music widget uses Apple Music via MusicKit (Phase 4).
-- iOS can't run app code automatically on CarPlay connect/disconnect; Phase 6 adds Shortcuts automations for the connect sound and auto-saving parking.
+- iOS can't run app code automatically on CarPlay connect/disconnect. Auto-saving parking uses a Shortcuts automation (step 10); Phase 6 adds the connect sound the same way.
+- "Rain soon" uses WeatherKit's hourly forecast (Apple's minute-by-minute forecast doesn't cover every country).
+- WAQI reports the US EPA AQI scale; the widget colours it with the Malaysian API bands, as the spec asks.

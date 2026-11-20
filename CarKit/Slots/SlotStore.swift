@@ -47,8 +47,8 @@ public struct SlotTimelineItem: Sendable, Equatable {
 /// Pure timeline logic for a slot widget, kept here so it is unit-tested.
 public enum SlotTimeline {
     /// While a flash test is running: the flash card now, then the real design when it ends.
-    /// A text design is a single entry. A data design gets an entry now and at each of the next
-    /// 7 midnights, because its day counts change daily.
+    /// A text design is a single entry. A data design gets the same entry dates as its dedicated
+    /// widget (`DataTimeline.dates`), e.g. each midnight for day counts or each prayer time.
     public static func items(
         slot: Int,
         state: SlotsState,
@@ -65,7 +65,7 @@ public enum SlotTimeline {
             items.append(SlotTimelineItem(date: now, content: .flash))
         }
         if let source = design.source {
-            let dates = DayMath.refreshDates(from: start, calendar: calendar)
+            let dates = DataTimeline.dates(for: source, data: data, from: start, calendar: calendar)
             items += dates.map { SlotTimelineItem(date: $0, content: .data(data.card(for: source, at: $0, calendar: calendar))) }
         } else {
             items.append(SlotTimelineItem(date: start, content: .design(design)))
