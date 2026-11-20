@@ -23,7 +23,19 @@ data source, a Studio design, or custom text with a picture.
 |---|---|
 | ![Three Split slots: prayer and road tax, service and fuel, weather and parking](docs/images/carplay-split.png) | ![A Quad slot, a Split slot and a text slot](docs/images/carplay-mixed.png) |
 
-These two pictures are rendered by CI from the real SwiftUI widget views with sample data
+Two looks, picked in Settings → Appearance (or per slot):
+
+| Bold | Neon |
+|---|---|
+| ![Bold split cards](docs/images/carplay-split.png) | ![Neon split cards](docs/images/carplay-split-neon.png) |
+| ![Bold medium widgets](docs/images/widgets-medium.png) | ![Neon medium widgets](docs/images/widgets-medium-neon.png) |
+
+### Studio templates
+
+![Data templates](docs/images/templates-data.png)
+![Clock and date templates](docs/images/templates-clockDate.png)
+
+All of these pictures are rendered by CI from the real SwiftUI views with sample data
 (`CarKitTests/ReadmeSnapshots.swift`, artifact `readme-snapshots`).
 
 ### Widgets
