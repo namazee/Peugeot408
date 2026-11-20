@@ -24,6 +24,7 @@ Fresh session? Read `docs/SPEC.md`, then this file, then continue from **Current
   - A **Voice** picker lists the iPhone voices, with enhanced voices first.
 - **Separate disconnect sound:** a Connect / Disconnect switch at the top chooses what a tapped sound is for. There's a new **Play Disconnect Sound** shortcut action; the disconnect automation guide now uses it before Save Parking. The default is Goodbye.
 - Older `connect-sound.json` files still load: the new fields are optional.
+- CI: green first time on run 43 (161 tests); **1.1 (43)** is in TestFlight.
 - Tests: packs, unique ids, voice cue text in both languages (including the evening greeting), disconnect fallback, entity ids for voice cues.
 
 
