@@ -49,6 +49,22 @@ Work in phases (below). At the end of each phase: commit, push, make sure the CI
 * Build a shared `WidgetCard` style in `CarKit` so all widgets look like one family.
 * Every widget gets an Xcode `#Preview` with sample data (useful later even though I can't run previews now), and the same sample data powers the placeholder and snapshot states.
 
+### App icon
+
+* Source art: my own icon artwork (generated from a photo of my car), stored in `remotion/assets/icon/` as `icon-default.jpg` (plus `icon-dark.jpg` and `icon-tinted.jpg` if I provide them). This is the master art: don't redraw the car. No text, no logos.
+* Remotion composition `AppIcon` (1024×1024), prop `variant: "default" | "dark" | "tinted"`, built in layers:
+   1. Background `#05070D` with a soft radial blue glow (`#1F4FD8` at ~25% opacity) behind the car.
+   2. The source image, scaled/cropped so the headlights, light strips and grille sit inside the central 80% safe area.
+   3. Glow boost: duplicate the brightest areas (luminance threshold), blur, tint `#7FD4FF`, screen-blend at ~40%, so the lights pop at small sizes.
+   4. A subtle vignette and a faint Liquid Glass highlight along the top edge.
+   * If the dark/tinted source images aren't provided, generate them: dark = pure-black background and the car at −15% brightness, lights unchanged; tinted = grayscale with strong contrast, lights brightest.
+* `IconPreview` (1920×1080): each variant at 1024, 180, 120, 60 and 40 px on a mock iPhone home screen (light and dark wallpaper) and on a CarPlay-style dark dashboard mock, to judge it at real sizes.
+* `IconReveal` (3.5 s; 1080×1080 and 1080×1920): starts black, the light strips draw on top to bottom, the headlights flash on with a bloom, a glow sweeps across, then it settles on the final icon. Used on the app's first-run screen and for sharing.
+* `npm run icon` (in `/remotion`) renders `AppIcon-1024.png`, `AppIcon-1024-dark.png`, `AppIcon-1024-tinted.png` (`npx remotion still`), `IconPreview.png` and the `IconReveal` MP4s into `/remotion/out`, and copies the three PNGs into the app's `Assets.xcassets/AppIcon.appiconset/` with a `Contents.json` for a single 1024 iOS icon with Any, Dark and Tinted appearances.
+* The default PNG must have no alpha channel: a check script fails the build if it has one.
+* The icon render runs in the Remotion GitHub Actions job, which uploads the outputs as artifacts.
+* `SETUP.md` notes that a full Icon Composer `.icon` file needs a Mac; these PNG appearances are the no-Mac route and work on iOS 26.
+
 ## 4. The widgets
 
 For each widget: an app screen to enter or configure the data, a timeline provider, `.systemSmall` CarPlay layout first, plus empty/placeholder and error states.
@@ -176,7 +192,7 @@ Widgets themselves are static SwiftUI, so use Remotion only for the animated ass
 1. Skeleton + slots: XcodeGen project, three targets, App Group, theme, `WidgetCard`, Car Slot 1–5 widgets with a simple text design I can change from the app, and the "flash all slots" test. Get CI green and upload the first TestFlight build. Stop and let me install it, add the slots in CarPlay, and confirm that changing a slot in the app updates the head unit before continuing.
 2. Service Tracker, Fuel Log, Road Tax & Insurance, Touch 'n Go (all local data), each assignable to a slot.
 3. Parking + Map Snapshot, Prayer Times, Commute, Weather & Haze.
-4. Photo Frame, Music.
+4. Photo Frame, Music. App icon from my artwork (§3 App icon): `AppIcon`, `IconPreview` and `IconReveal` in `/remotion`, the three icon appearances in the asset catalog, the alpha check, and the CI render job.
 5. Studio: design JSON model + renderer, template gallery, custom builder, My Car photo with background removal, seasonal packs.
 6. Connect sound: App Intent, sound library, Speech greeting, guided Shortcuts automation, disconnect → Save Parking.
 7. OBD2 + Live Activity (with demo mode).
