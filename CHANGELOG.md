@@ -28,6 +28,8 @@ Fresh session? Read `docs/SPEC.md`, then this file, then continue from **Current
   - **Badges:** removed with a smooth fill from the surrounding pixels instead of the blocky pixelation, which showed as a grid. The checkerboard behind the thumbnails is gone too.
   - **Body-only paint:** the hue range is now 196–235° (the cyan light glows at about 187° are skipped) and only strongly saturated colours count (pale glass reflections are skipped). Windows traced per photo and the plate area are masked out with a soft edge.
   - **Plate:** near-black with a thin edge, a faint gloss band and raised characters (with a shadow). Its brightness follows the original plate's lighting (sunlit about 1, dark studio about 0.45), and a 0.6 px blur matches the photo's sharpness.
+- CI green on run 28 (137 tests); the studio photos and realism pass are in **1.1 (28)**.
+- [ ] You: check on the phone that the paint stays off the windows and lights in each view, and that the plate looks natural. Window outlines are hand-traced, so tell me if an edge is off on any photo.
 - [ ] You: check the recolour and plate overlay on the phone. White paint looks flatter than real white, as expected, and the plate perspective on the front-detail photo is the steepest.
 
 ## Phase 7 — OBD2 + Live Activity (with demo mode)
