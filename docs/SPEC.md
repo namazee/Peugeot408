@@ -127,6 +127,15 @@ Goal: I set things up once in the app, and my car's CarPlay screen reflects it a
 * Assignments live in the App Group. Saving a slot calls `WidgetCenter.shared.reloadTimelines(ofKind:)` for that slot, so the head unit changes within seconds the next time CarPlay draws it.
 * Each slot can optionally rotate between up to 3 assigned designs on a schedule (e.g. prayer times at dawn and dusk, service tracker otherwise) or by time-of-day rules. Use timeline entries for this, not reloads.
 * Keep the dedicated widgets from section 4 too, for people who'd rather add them individually. The slots are the main path.
+* Split-card slot layouts. My 408's head unit shows 3 columns of tall widgets (Slot 1–3 visible), and the car controls the column count, so each slot can be split into several cards for more information:
+   * Each Car Slot has a layout setting: "Single" (1 card, the original behaviour), "Split" (2 cards stacked top/bottom, the default), or "Quad" (2×2, icon + value only).
+   * Each card in a layout is assigned its own data source or design (any widget from section 4 or the Studio), so 3 visible slots in Split = 6 cards on screen.
+   * Split card design: icon + short label + one large value, with minimum font sizes so it stays readable on the car screen; a thin divider or gap between cards; the "due soon/overdue" colours still apply per card.
+   * Quad: icon + value only, no labels; the app warns that it's harder to read while driving.
+   * The Slots tab mock CarPlay screen shows the real 3-column layout with split cards, and I can tap any card to change it.
+   * Default setup: Slot 1 = Next prayer / Road tax, Slot 2 = Service tracker / Fuel log, Slot 3 = Weather & haze / Parking.
+   * Slots 4 and 5 stay available for stacking behind the visible columns (Smart Rotate).
+   * The "flash all slots" test labels each card, e.g. "Slot 2 · Top ✓" / "Slot 2 · Bottom ✓".
 * First-run onboarding walks me through the one-time step (add Car Slot 1–5 in Settings → General → CarPlay → [car] → Widgets, 5 per stack) with screenshots, plus a "Test: flash all slots" button that pushes an identifying design ("Slot 3 ✓") to each slot so I can check which is which in the car.
 
 ### Templates (ready-made styles)
@@ -202,8 +211,9 @@ Widgets themselves are static SwiftUI, so use Remotion only for the animated ass
 5. Studio: design JSON model + renderer, template gallery, custom builder, My Car photo with background removal, seasonal packs.
 6. Connect sound: App Intent, sound library, Speech greeting, guided Shortcuts automation, disconnect → Save Parking.
 7. OBD2 + Live Activity (with demo mode).
-8. Remotion assets (also use Remotion to render seasonal pack artwork and the onboarding clip showing the slot setup).
-9. Polish: rendering modes, accessibility, empty states, JSON backup, README with screenshots/video frames.
+8. Split-card slot layouts (§4b): Single / Split / Quad per slot, a data source or design per card, the 3-column mock with tap-to-change cards, the new default setup, and per-card flash labels. Stop and let me test it in the car.
+9. Remotion assets (also use Remotion to render seasonal pack artwork and the onboarding clip showing the slot setup).
+10. Polish: rendering modes, accessibility, empty states, JSON backup, README with screenshots/video frames.
 
 ## 9. Quality bar
 
