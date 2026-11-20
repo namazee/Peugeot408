@@ -68,18 +68,9 @@ struct SlotEditorView: View {
                     singleSections
                 }
 
-                    if draft.studioDesignID != nil {
-                        Text("A design from the Studio. Edit it there; the slot follows.")
-                    } else if draft.source != nil {
-                        Text("Live data from the Car and Daily tabs. The slot updates by itself when the data changes.")
-                    }
-                }
-
-
-
                 Section {
                     Button("Reset to default", role: .destructive) {
-                        draft = .starter(for: slot)
+                        draft = SlotDesign.splitDefault(for: slot) ?? .starter(for: slot)
                     }
                 }
             }
