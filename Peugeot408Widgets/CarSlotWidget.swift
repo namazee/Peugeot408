@@ -35,8 +35,9 @@ struct SlotProvider: TimelineProvider {
     func getTimeline(in context: Context, completion: @escaping (Timeline<SlotEntry>) -> Void) {
         let slot = slot
         let size = context.displaySize
+        let reply = CompletionBox(completion)
         Task {
-            completion(await Self.timeline(slot: slot, displaySize: size))
+            reply.call(await Self.timeline(slot: slot, displaySize: size))
         }
     }
 

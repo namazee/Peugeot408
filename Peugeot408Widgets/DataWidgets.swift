@@ -4,6 +4,20 @@ import WidgetKit
 
 // MARK: - Timeline
 
+/// WidgetKit's completion handlers aren't marked Sendable, but WidgetKit expects them to be
+/// called from any thread. This box lets the async timeline work call it from a Task.
+struct CompletionBox<Value>: @unchecked Sendable {
+    private let handler: (Value) -> Void
+
+    init(_ handler: @escaping (Value) -> Void) {
+        self.handler = handler
+    }
+
+    func call(_ value: Value) {
+        handler(value)
+    }
+}
+
 struct DataEntry: TimelineEntry {
     let date: Date
     let card: DataCard
@@ -55,8 +69,9 @@ struct DataProvider: TimelineProvider {
     func getTimeline(in context: Context, completion: @escaping (Timeline<DataEntry>) -> Void) {
         let source = source
         let size = context.displaySize
+        let reply = CompletionBox(completion)
         Task {
-            completion(await DataTimelineBuilder.timeline(for: source, displaySize: size))
+            reply.call(await DataTimelineBuilder.timeline(for: source, displaySize: size))
         }
     }
 }
