@@ -12,7 +12,11 @@ private func at(_ year: Int, _ month: Int, _ day: Int, _ hour: Int = 12) -> Date
 private func roundTrip(_ design: CardDesign) throws -> CardDesign {
     let decoder = JSONDecoder()
     decoder.dateDecodingStrategy = .iso8601
-    return try decoder.decode(CardDesign.self, from: design.exportData())
+    var decoded = try decoder.decode(CardDesign.self, from: design.exportData())
+    // ISO 8601 keeps whole seconds; the save time is the only value that loses precision.
+    #expect(abs(decoded.updatedAt.timeIntervalSince(design.updatedAt)) < 1)
+    decoded.updatedAt = design.updatedAt
+    return decoded
 }
 
 private var allTemplates: [CardDesign] {
