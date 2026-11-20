@@ -22,6 +22,8 @@ public struct SlotContentView: View {
                 .accessibilityLabel("Car slot \(slot): \(design.value), \(design.title)")
         case .data(let card):
             DataCardView(card: card, size: isMedium ? .medium : .small)
+        case .studio(let card):
+            DesignView(card: card)
         case .flash:
             flashView
                 .accessibilityElement(children: .ignore)
@@ -108,10 +110,17 @@ public struct SlotTile: View {
     }
 
     public var body: some View {
-        SlotContentView(slot: slot, content: content, isMedium: isMedium)
-            .padding(14)
-            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-            .background(WidgetCardBackground(style: content.cardStyle, tint: content.tint))
-            .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
+        Group {
+            if case .studio(let card) = content {
+                // Studio designs fill the whole tile, edge to edge, like in the car.
+                DesignView(card: card)
+            } else {
+                SlotContentView(slot: slot, content: content, isMedium: isMedium)
+                    .padding(14)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+                    .background(WidgetCardBackground(style: content.cardStyle, tint: content.tint))
+            }
+        }
+        .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
     }
 }

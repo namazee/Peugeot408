@@ -60,38 +60,3 @@ struct MapSnapshotView: View {
         .task { await model.refreshMap(sizes: [Self.smallSize, Self.mediumSize]) }
     }
 }
-
-/// Studio tab. Data sources (Map, Photo Frame, Music) are here; templates and the builder arrive in Phase 5.
-struct StudioView: View {
-    @Binding var path: [DataSource]
-
-    var body: some View {
-        NavigationStack(path: $path) {
-            List {
-                Section("Data sources") {
-                    NavigationLink(value: DataSource.map) {
-                        Label("Map Snapshot", systemImage: DataSource.map.symbol)
-                    }
-                    NavigationLink(value: DataSource.photos) {
-                        Label("Photo Frame", systemImage: DataSource.photos.symbol)
-                    }
-                    NavigationLink(value: DataSource.music) {
-                        Label("Music", systemImage: DataSource.music.symbol)
-                    }
-                }
-                Section("Coming in Phase 5") {
-                    Label("Templates and seasonal packs", systemImage: "square.grid.2x2")
-                    Label("Custom builder", systemImage: "paintbrush.pointed")
-                    Label("My Car photo", systemImage: "car.side")
-                }
-                .foregroundStyle(Theme.secondaryText)
-                Section("Coming in Phase 6") {
-                    Label("Connect sounds", systemImage: "speaker.wave.2")
-                }
-                .foregroundStyle(Theme.secondaryText)
-            }
-            .navigationTitle("Studio")
-            .navigationDestination(for: DataSource.self) { DataSourceScreen(source: $0) }
-        }
-    }
-}

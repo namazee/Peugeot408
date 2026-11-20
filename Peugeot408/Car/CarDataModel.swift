@@ -194,9 +194,11 @@ final class CarDataModel {
 
     func reloadWidgets(for source: DataSource) {
         let slots = SlotStore(directory: directory).load()
+        let studio = StudioStores.studio(in: directory).load()
         for affected in source.affectedSources {
             WidgetCenter.shared.reloadTimelines(ofKind: affected.widgetKind)
-            for slot in SlotsState.slotNumbers where slots.design(for: slot).source == affected {
+            // Slots showing it directly, in a rotation, or through a Studio design's data field.
+            for slot in SlotsState.slotNumbers where SlotTimeline.sources(slot: slot, state: slots, studio: studio).contains(affected) {
                 WidgetCenter.shared.reloadTimelines(ofKind: SlotKind.kind(for: slot))
             }
         }

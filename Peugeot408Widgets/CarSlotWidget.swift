@@ -27,7 +27,7 @@ struct SlotProvider: TimelineProvider {
             return
         }
         let now = Date()
-        let items = SlotTimeline.items(slot: slot, state: SlotStore.live.load(), data: CarData.load(), now: now)
+        let items = SlotTimeline.items(slot: slot, state: SlotStore.live.load(), data: CarData.load(), studio: StudioStores.studio().load(), now: now)
         let content = items.first?.content ?? .design(.starter(for: slot))
         completion(SlotEntry(date: now, slot: slot, content: content))
     }
@@ -44,16 +44,18 @@ struct SlotProvider: TimelineProvider {
     static func timeline(slot: Int, displaySize: CGSize) async -> Timeline<SlotEntry> {
         let now = Date()
         let state = SlotStore.live.load()
-        let source = state.design(for: slot).source
-        // Live sources refresh their cache first (throttled); text slots skip the data files.
-        if let source, source.isLive {
+        let studio = StudioStores.studio().load()
+        let sources = SlotTimeline.sources(slot: slot, state: state, studio: studio)
+        // Live sources refresh their cache first (each throttles itself); text slots skip the data files.
+        for source in sources where source.isLive {
             await LiveRefresher.refresh(source, now: now, mapSize: displaySize)
         }
-        let data = source == nil ? CarData.empty : CarData.load()
-        let items = SlotTimeline.items(slot: slot, state: state, data: data, now: now)
+        let needsData = SlotTimeline.needsData(slot: slot, state: state, studio: studio)
+        let data = needsData ? CarData.load() : CarData.empty
+        let items = SlotTimeline.items(slot: slot, state: state, data: data, studio: studio, now: now)
         var entries = items.map { item -> SlotEntry in
             // The map uses the PNG rendered for this slot's size.
-            if source == .map, case .data = item.content {
+            if case .data(let card) = item.content, card.source == .map {
                 return SlotEntry(date: item.date, slot: slot, content: .data(data.mapCard(at: item.date, width: displaySize.width, height: displaySize.height)))
             }
             return SlotEntry(date: item.date, slot: slot, content: item.content)
@@ -61,11 +63,11 @@ struct SlotProvider: TimelineProvider {
         if entries.isEmpty {
             entries = [.sample(slot: slot, date: now)]
         }
-        // The app reloads this kind whenever the slot or its data changes. Text slots never need
-        // a refresh; data slots follow their source's policy (e.g. weather every 30 minutes).
-        guard let source else { return Timeline(entries: entries, policy: .never) }
+        // The app reloads this kind whenever the slot, its designs or its data change. Text slots
+        // never need a refresh; otherwise ask again after the soonest source policy, or at the end.
+        guard needsData else { return Timeline(entries: entries, policy: .never) }
         let flashEnd = state.flashUntil.flatMap { $0 > now ? $0 : nil }
-        let reload = DataTimeline.reloadDate(for: source, data: data, now: flashEnd ?? now)
+        let reload = sources.compactMap { DataTimeline.reloadDate(for: $0, data: data, now: flashEnd ?? now) }.min()
         return Timeline(entries: entries, policy: reload.map { TimelineReloadPolicy.after($0) } ?? TimelineReloadPolicy.atEnd)
     }
 }
@@ -74,13 +76,27 @@ struct SlotProvider: TimelineProvider {
 
 struct SlotWidgetView: View {
     @Environment(\.widgetFamily) private var family
+    @Environment(\.widgetContentMargins) private var margins
     let entry: SlotEntry
 
     var body: some View {
-        WidgetCard(style: entry.content.cardStyle, tint: entry.content.tint) {
-            SlotContentView(slot: entry.slot, content: entry.content, isMedium: family == .systemMedium)
+        content
+            .widgetURL(URL(string: "peugeot408://slot/\(entry.slot)"))
+    }
+
+    @ViewBuilder
+    private var content: some View {
+        if case .studio(let card) = entry.content {
+            DesignView(card: card, showsBackground: false)
+                .containerBackground(for: .widget) {
+                    DesignBackgroundView(background: card.design.background, card: card)
+                }
+        } else {
+            WidgetCard(style: entry.content.cardStyle, tint: entry.content.tint) {
+                SlotContentView(slot: entry.slot, content: entry.content, isMedium: family == .systemMedium)
+                    .padding(margins)
+            }
         }
-        .widgetURL(URL(string: "peugeot408://slot/\(entry.slot)"))
     }
 }
 
@@ -100,6 +116,8 @@ enum CarSlotConfiguration {
         .configurationDisplayName(name)
         .description(details)
         .supportedFamilies([.systemSmall, .systemMedium])
+        // Studio designs fill the whole widget; other content adds the margins back itself.
+        .contentMarginsDisabled()
     }
 }
 

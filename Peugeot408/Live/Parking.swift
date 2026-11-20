@@ -53,9 +53,10 @@ enum ParkingSaver {
 
     static func reloadWidgets(directory: URL = AppGroup.containerURL) {
         let slots = SlotStore(directory: directory).load()
+        let studio = StudioStores.studio(in: directory).load()
         for source in DataSource.parking.affectedSources {
             WidgetCenter.shared.reloadTimelines(ofKind: source.widgetKind)
-            for slot in SlotsState.slotNumbers where slots.design(for: slot).source == source {
+            for slot in SlotsState.slotNumbers where SlotTimeline.sources(slot: slot, state: slots, studio: studio).contains(source) {
                 WidgetCenter.shared.reloadTimelines(ofKind: SlotKind.kind(for: slot))
             }
         }

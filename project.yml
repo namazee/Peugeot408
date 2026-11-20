@@ -47,7 +47,7 @@ targets:
   Peugeot408:
     type: application
     platform: iOS
-    sources: [Peugeot408, Shared]
+    sources: [Peugeot408, Shared, Resources/Fonts]
     dependencies:
       - target: CarKit
         embed: false
@@ -59,6 +59,7 @@ targets:
         CFBundleShortVersionString: $(MARKETING_VERSION)
         CFBundleVersion: $(CURRENT_PROJECT_VERSION)
         AppGroupID: $(APP_GROUP_ID)
+        UIAppFonts: [Orbitron.ttf, PlayfairDisplay.ttf, Rajdhani-SemiBold.ttf, Rajdhani-Bold.ttf]   # OFL, see ASSETS-LICENSES.md
         AQIAPIKey: $(AQI_API_KEY)         # from Config/Secrets.xcconfig (CI writes it from the AQI_API_KEY secret)
         NSLocationWhenInUseUsageDescription: Peugeot408 uses your location to save where you parked, find your prayer zone, and show local weather, haze and drive times.
         NSCalendarsFullAccessUsageDescription: Peugeot408 shows your next calendar event on the Commute widget. Events stay on your phone.
@@ -87,7 +88,7 @@ targets:
   Peugeot408Widgets:
     type: app-extension
     platform: iOS
-    sources: [Peugeot408Widgets, Shared]
+    sources: [Peugeot408Widgets, Shared, Resources/Fonts]
     dependencies:
       - target: CarKit
         embed: false
@@ -100,6 +101,7 @@ targets:
         CFBundleShortVersionString: $(MARKETING_VERSION)
         CFBundleVersion: $(CURRENT_PROJECT_VERSION)
         AppGroupID: $(APP_GROUP_ID)
+        UIAppFonts: [Orbitron.ttf, PlayfairDisplay.ttf, Rajdhani-SemiBold.ttf, Rajdhani-Bold.ttf]   # OFL, see ASSETS-LICENSES.md
         AQIAPIKey: $(AQI_API_KEY)
         NSWidgetWantsLocation: true       # weather and drive times from where the phone is
         NSLocationWhenInUseUsageDescription: Peugeot408 widgets use your location for local weather, haze and drive times.

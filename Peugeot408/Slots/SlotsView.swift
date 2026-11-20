@@ -3,6 +3,7 @@ import SwiftUI
 
 struct SlotsView: View {
     @Environment(SlotsModel.self) private var slots
+    @Environment(StudioModel.self) private var studio
     @Binding var editing: SlotRef?
 
     var body: some View {
@@ -21,7 +22,7 @@ struct SlotsView: View {
                         Button {
                             editing = SlotRef(id: number)
                         } label: {
-                            SlotRow(number: number, design: slots.design(for: number))
+                            SlotRow(number: number, design: slots.design(for: number), studioName: studio.design(slots.design(for: number).studioDesignID)?.name)
                         }
                         .buttonStyle(.plain)
                     }
@@ -62,6 +63,7 @@ struct SlotsView: View {
 struct MockCarPlayView: View {
     @Environment(SlotsModel.self) private var slots
     @Environment(CarDataModel.self) private var cars
+    @Environment(StudioModel.self) private var studio
     @Binding var editing: SlotRef?
 
     var body: some View {
@@ -112,19 +114,26 @@ struct MockCarPlayView: View {
     private func content(for slot: Int, at date: Date) -> SlotContent {
         if slots.state.isFlashing(at: date) { return .flash }
         let design = slots.design(for: slot)
-        if let source = design.source { return .data(cars.card(for: source, at: date)) }
-        return .design(design)
+        return SlotTimeline.content(
+            at: date,
+            design: design,
+            rotations: Array((design.rotations ?? []).prefix(SlotDesign.maxRotations)),
+            seasonal: studio.state.seasonal.enabled && studio.state.seasonal.slot == slot,
+            data: cars.data,
+            studio: studio.state
+        )
     }
 }
 
 struct SlotRow: View {
     let number: Int
     let design: SlotDesign
+    var studioName: String?
 
     var body: some View {
         let isAccent = design.source == nil && design.style == .accent
         HStack(spacing: 12) {
-            Image(systemName: design.source?.symbol ?? design.symbol)
+            Image(systemName: design.studioDesignID != nil ? "paintpalette.fill" : design.source?.symbol ?? design.symbol)
                 .font(.title3.weight(.semibold))
                 .foregroundStyle(isAccent ? Theme.primaryText : Theme.accent)
                 .frame(width: 44, height: 44)
@@ -133,8 +142,8 @@ struct SlotRow: View {
                         .fill(isAccent ? Theme.accent : Theme.surface)
                 )
             VStack(alignment: .leading, spacing: 2) {
-                Text(design.summary).font(.headline)
-                Text(design.source == nil ? "Car Slot \(number) · \(design.title)" : "Car Slot \(number) · live data")
+                Text(studioName ?? design.summary).font(.headline)
+                Text(subtitle)
                     .font(.subheadline)
                     .foregroundStyle(Theme.secondaryText)
             }
@@ -145,6 +154,16 @@ struct SlotRow: View {
         }
         .contentShape(Rectangle())
     }
+    private var subtitle: String {
+        var text = "Car Slot \(number)"
+        if design.studioDesignID != nil { text += " · Studio" }
+        else if design.source != nil { text += " · live data" }
+        else { text += " · \(design.title)" }
+        let rotations = design.rotations?.count ?? 0
+        if rotations > 0 { text += " · +\(rotations) by time" }
+        return text
+    }
+}
 }
 
 struct FlashControls: View {

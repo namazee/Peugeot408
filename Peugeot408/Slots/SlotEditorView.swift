@@ -5,6 +5,7 @@ import SwiftUI
 struct SlotEditorView: View {
     @Environment(SlotsModel.self) private var slots
     @Environment(CarDataModel.self) private var cars
+    @Environment(StudioModel.self) private var studio
     @Environment(\.dismiss) private var dismiss
 
     let slot: Int
@@ -20,12 +21,11 @@ struct SlotEditorView: View {
     }
 
     private var canSave: Bool {
-        draft.source != nil || !draft.value.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        draft.source != nil || draft.studioDesignID != nil || !draft.value.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
     }
 
     private var previewContent: SlotContent {
-        if let source = draft.source { return .data(cars.card(for: source)) }
-        return .design(draft)
+        SlotTimeline.content(at: .now, design: draft, rotations: [], seasonal: false, data: cars.data, studio: studio.state)
     }
 
     var body: some View {
@@ -43,21 +43,20 @@ struct SlotEditorView: View {
                 }
 
                 Section {
-                    Picker("Shows", selection: $draft.source) {
-                        Text("Custom text").tag(DataSource?.none)
-                        ForEach(DataSource.allCases) { source in
-                            Label(source.displayName, systemImage: source.symbol).tag(DataSource?.some(source))
-                        }
-                    }
+                    ChoicePicker(title: "Shows", choice: primaryChoice, allowsText: true, designs: studio.state.designs)
                 } footer: {
-                    if draft.source != nil {
+                    if draft.studioDesignID != nil {
+                        Text("A design from the Studio. Edit it there; the slot follows.")
+                    } else if draft.source != nil {
                         Text("Live data from the Car and Daily tabs. The slot updates by itself when the data changes.")
                     }
                 }
 
-                if draft.source == nil {
+                if draft.source == nil && draft.studioDesignID == nil {
                     textSections
                 }
+
+                rotationSection
 
                 Section {
                     Button("Reset to default", role: .destructive) {
@@ -80,6 +79,72 @@ struct SlotEditorView: View {
                 }
             }
         }
+    }
+
+    /// The main choice: text (both nil), a data source, or a Studio design.
+    private var primaryChoice: Binding<SlotChoice?> {
+        Binding(
+            get: { draft.source == nil && draft.studioDesignID == nil ? nil : draft.primaryChoice },
+            set: { choice in
+                draft.source = choice?.source
+                draft.studioDesignID = choice?.studioDesignID
+            }
+        )
+    }
+
+    private var rotations: [SlotRotation] { draft.rotations ?? [] }
+
+    @ViewBuilder
+    private var rotationSection: some View {
+        Section {
+            ForEach(Array(rotations.enumerated()), id: \.element.id) { index, _ in
+                VStack(alignment: .leading, spacing: 6) {
+                    ChoicePicker(title: "Show", choice: rotationChoice(index), allowsText: false, designs: studio.state.designs)
+                    Stepper(value: rotationHour(index, from: true), in: 0...23) {
+                        LabeledContent("From", value: String(format: "%02d:00", rotations[index].fromHour))
+                    }
+                    Stepper(value: rotationHour(index, from: false), in: 0...23) {
+                        LabeledContent("Until", value: String(format: "%02d:00", rotations[index].toHour))
+                    }
+                }
+                .swipeActions {
+                    Button("Remove", role: .destructive) { draft.rotations?.remove(at: index) }
+                }
+            }
+            if rotations.count < SlotDesign.maxRotations {
+                Button {
+                    var list = rotations
+                    list.append(SlotRotation(choice: SlotChoice(source: .prayer), fromHour: 18, toHour: 21))
+                    draft.rotations = list
+                } label: {
+                    Label("Add a timed design", systemImage: "clock.arrow.2.circlepath")
+                }
+            }
+        } header: {
+            Text("Rotate by time of day")
+        } footer: {
+            Text("Up to 3 designs per slot: this one, plus up to 2 shown during set hours (e.g. Prayer Times 05:00–07:00 and 18:00–21:00). Changes happen through timeline entries, so no reloads are needed.")
+        }
+    }
+
+    private func rotationChoice(_ index: Int) -> Binding<SlotChoice?> {
+        Binding(
+            get: { rotations.indices.contains(index) ? rotations[index].choice : nil },
+            set: { choice in
+                guard let choice, draft.rotations?.indices.contains(index) == true else { return }
+                draft.rotations?[index].choice = choice
+            }
+        )
+    }
+
+    private func rotationHour(_ index: Int, from: Bool) -> Binding<Int> {
+        Binding(
+            get: { rotations.indices.contains(index) ? (from ? rotations[index].fromHour : rotations[index].toHour) : 0 },
+            set: { value in
+                guard draft.rotations?.indices.contains(index) == true else { return }
+                if from { draft.rotations?[index].fromHour = value } else { draft.rotations?[index].toHour = value }
+            }
+        )
     }
 
     @ViewBuilder
@@ -127,6 +192,41 @@ struct SlotEditorView: View {
                 }
             }
             .padding(.vertical, 6)
+        }
+    }
+}
+
+/// Picks a data widget or a Studio design (and, for the main choice, "Custom text").
+struct ChoicePicker: View {
+    let title: String
+    @Binding var choice: SlotChoice?
+    let allowsText: Bool
+    let designs: [CardDesign]
+
+    init(title: String, choice: Binding<SlotChoice?>, allowsText: Bool, designs: [CardDesign]) {
+        self.title = title
+        self._choice = choice
+        self.allowsText = allowsText
+        self.designs = designs
+    }
+
+    var body: some View {
+        Picker(title, selection: $choice) {
+            if allowsText {
+                Text("Custom text").tag(SlotChoice?.none)
+            }
+            Section("Data widgets") {
+                ForEach(DataSource.allCases) { source in
+                    Label(source.displayName, systemImage: source.symbol).tag(SlotChoice?.some(SlotChoice(source: source)))
+                }
+            }
+            if !designs.isEmpty {
+                Section("Studio designs") {
+                    ForEach(designs) { design in
+                        Label(design.name, systemImage: "paintpalette").tag(SlotChoice?.some(SlotChoice(studioDesignID: design.id)))
+                    }
+                }
+            }
         }
     }
 }

@@ -47,29 +47,113 @@ public struct SlotTimelineItem: Sendable, Equatable {
 /// Pure timeline logic for a slot widget, kept here so it is unit-tested.
 public enum SlotTimeline {
     /// While a flash test is running: the flash card now, then the real design when it ends.
-    /// A text design is a single entry. A data design gets the same entry dates as its dedicated
-    /// widget (`DataTimeline.dates`), e.g. each midnight for day counts or each prayer time.
+    /// Otherwise one entry per date on which the slot's content can change:
+    /// - a text design: a single entry;
+    /// - a data widget: the same dates as its dedicated widget (`DataTimeline.dates`);
+    /// - a Studio design: its fields' dates (`DesignResolver.dates`);
+    /// - rotations add their hour boundaries, and the seasonal takeover adds midnights.
     public static func items(
         slot: Int,
         state: SlotsState,
         data: CarData = .empty,
+        studio: StudioState = .empty,
         now: Date,
         calendar: Calendar = .current
     ) -> [SlotTimelineItem] {
         let design = state.design(for: slot)
         let flashUntil = state.flashUntil.flatMap { $0 > now ? $0 : nil }
         let start = flashUntil ?? now
+        let rotations = Array((design.rotations ?? []).prefix(SlotDesign.maxRotations))
+        let seasonal = studio.seasonal.enabled && studio.seasonal.slot == slot
+
+        var dates = Set(choiceDates(design.primaryChoice, data: data, studio: studio, from: start, calendar: calendar))
+        for rotation in rotations {
+            dates.formUnion(choiceDates(rotation.choice, data: data, studio: studio, from: start, calendar: calendar))
+            dates.formUnion(hourBoundaries([rotation.fromHour, rotation.toHour], from: start, calendar: calendar))
+        }
+        if seasonal {
+            dates.formUnion(DayMath.refreshDates(from: start, days: 2, calendar: calendar))
+            if let occasion = SeasonalCalendar.active(at: start, settings: studio.seasonal) {
+                dates.formUnion(DesignResolver.dates(for: Templates.seasonal(occasion), data: data, from: start, calendar: calendar))
+            }
+        }
+        let ordered = [start] + dates.filter { $0 > start }.sorted().prefix(70)
 
         var items: [SlotTimelineItem] = []
         if flashUntil != nil {
             items.append(SlotTimelineItem(date: now, content: .flash))
         }
-        if let source = design.source {
-            let dates = DataTimeline.dates(for: source, data: data, from: start, calendar: calendar)
-            items += dates.map { SlotTimelineItem(date: $0, content: .data(data.card(for: source, at: $0, calendar: calendar))) }
-        } else {
-            items.append(SlotTimelineItem(date: start, content: .design(design)))
+        for date in ordered {
+            let entryContent = content(at: date, design: design, rotations: rotations, seasonal: seasonal, data: data, studio: studio, calendar: calendar)
+            items.append(SlotTimelineItem(date: date, content: entryContent))
         }
         return items
+    }
+
+    /// The content at `date`: the seasonal design, else a rotation whose hours match, else the main design.
+    public static func content(at date: Date, design: SlotDesign, rotations: [SlotRotation], seasonal: Bool, data: CarData, studio: StudioState, calendar: Calendar = .current) -> SlotContent {
+        if seasonal, let occasion = SeasonalCalendar.active(at: date, settings: studio.seasonal) {
+            return .studio(DesignResolver.card(for: Templates.seasonal(occasion), data: data, studio: studio, at: date, calendar: calendar))
+        }
+        let hour = calendar.component(.hour, from: date)
+        if let rotation = rotations.first(where: { $0.contains(hour: hour) }),
+           let content = choiceContent(rotation.choice, data: data, studio: studio, at: date, calendar: calendar) {
+            return content
+        }
+        return choiceContent(design.primaryChoice, data: data, studio: studio, at: date, calendar: calendar) ?? .design(design)
+    }
+
+    static func choiceContent(_ choice: SlotChoice, data: CarData, studio: StudioState, at date: Date, calendar: Calendar) -> SlotContent? {
+        if let id = choice.studioDesignID, let studioDesign = studio.design(id) {
+            return .studio(DesignResolver.card(for: studioDesign, data: data, studio: studio, at: date, calendar: calendar))
+        }
+        if let source = choice.source {
+            return .data(data.card(for: source, at: date, calendar: calendar))
+        }
+        return nil
+    }
+
+    static func choiceDates(_ choice: SlotChoice, data: CarData, studio: StudioState, from start: Date, calendar: Calendar) -> [Date] {
+        if let id = choice.studioDesignID, let design = studio.design(id) {
+            return DesignResolver.dates(for: design, data: data, from: start, calendar: calendar)
+        }
+        if let source = choice.source {
+            return DataTimeline.dates(for: source, data: data, from: start, calendar: calendar)
+        }
+        return [start]
+    }
+
+    /// The next occurrences (within 24 h) of the given hours.
+    static func hourBoundaries(_ hours: [Int], from start: Date, calendar: Calendar) -> [Date] {
+        let today = calendar.startOfDay(for: start)
+        var result: [Date] = []
+        for hour in hours {
+            for day in 0...1 {
+                guard let base = calendar.date(byAdding: .day, value: day, to: today),
+                      let date = calendar.date(bySettingHour: hour % 24, minute: 0, second: 0, of: base) else { continue }
+                if date > start && date <= start.addingTimeInterval(24 * 3600) { result.append(date) }
+            }
+        }
+        return result
+    }
+
+    /// Every source a slot can show (main, rotations, Studio fields, seasonal), for live refreshes.
+    public static func sources(slot: Int, state: SlotsState, studio: StudioState) -> Set<DataSource> {
+        let design = state.design(for: slot)
+        var result = Set<DataSource>()
+        let choices = [design.primaryChoice] + (design.rotations ?? []).map { $0.choice }
+        for choice in choices {
+            if let source = choice.source { result.insert(source) }
+            if let studioDesign = studio.design(choice.studioDesignID) { result.formUnion(studioDesign.sources) }
+        }
+        if studio.seasonal.enabled && studio.seasonal.slot == slot { result.insert(.prayer) }
+        return result
+    }
+
+    /// True when the slot needs data files at all (a pure text slot doesn't).
+    public static func needsData(slot: Int, state: SlotsState, studio: StudioState) -> Bool {
+        let design = state.design(for: slot)
+        return design.source != nil || design.studioDesignID != nil || !(design.rotations ?? []).isEmpty
+            || (studio.seasonal.enabled && studio.seasonal.slot == slot)
     }
 }

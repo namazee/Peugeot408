@@ -29,19 +29,33 @@ public struct SlotDesign: Codable, Sendable, Equatable, Hashable {
     public var style: SlotStyle
     /// When set, the slot shows this data widget instead of the text. Missing in Phase 1 files (decodes as nil).
     public var source: DataSource?
+    /// When set, the slot shows this Studio design (Phase 5). Takes priority over `source`.
+    public var studioDesignID: UUID?
+    /// Up to 2 more designs shown during set hours (3 in total with this one). Nil in older files.
+    public var rotations: [SlotRotation]?
 
-    public init(value: String, title: String, symbol: String, style: SlotStyle = .dark, source: DataSource? = nil) {
+    public init(value: String, title: String, symbol: String, style: SlotStyle = .dark, source: DataSource? = nil, studioDesignID: UUID? = nil, rotations: [SlotRotation]? = nil) {
         self.value = value
         self.title = title
         self.symbol = symbol
         self.style = style
         self.source = source
+        self.studioDesignID = studioDesignID
+        self.rotations = rotations
     }
 
-    /// Name shown in the app's slot list.
+    /// Name shown in the app's slot list (Studio design names are looked up by the app).
     public var summary: String {
-        source?.displayName ?? value
+        if studioDesignID != nil { return "Studio design" }
+        return source?.displayName ?? value
     }
+
+    /// This design without its rotations: what shows outside the rotation hours.
+    public var primaryChoice: SlotChoice {
+        SlotChoice(source: source, studioDesignID: studioDesignID)
+    }
+
+    public static let maxRotations = 2
 
     /// Longest big value that still reads comfortably at a glance on the CarPlay small size.
     public static let maxGlanceableValueLength = 10
@@ -67,18 +81,55 @@ public struct SlotDesign: Codable, Sendable, Equatable, Hashable {
     ]
 }
 
+/// What a rotation shows: a data widget or a Studio design.
+public struct SlotChoice: Codable, Sendable, Equatable, Hashable {
+    public var source: DataSource?
+    public var studioDesignID: UUID?
+
+    public init(source: DataSource? = nil, studioDesignID: UUID? = nil) {
+        self.source = source
+        self.studioDesignID = studioDesignID
+    }
+}
+
+/// "Show this between `fromHour` and `toHour`" (24 h clock, `toHour` exclusive; wraps past midnight,
+/// e.g. 18 to 6). Example: Prayer Times 5-7 and 18-21, Service Tracker the rest of the day.
+public struct SlotRotation: Codable, Sendable, Equatable, Hashable, Identifiable {
+    public var id: UUID
+    public var choice: SlotChoice
+    public var fromHour: Int
+    public var toHour: Int
+
+    public init(id: UUID = UUID(), choice: SlotChoice, fromHour: Int, toHour: Int) {
+        self.id = id
+        self.choice = choice
+        self.fromHour = fromHour
+        self.toHour = toHour
+    }
+
+    public func contains(hour: Int) -> Bool {
+        if fromHour == toHour { return true }
+        if fromHour < toHour { return hour >= fromHour && hour < toHour }
+        return hour >= fromHour || hour < toHour
+    }
+
+    public var label: String { String(format: "%02d:00-%02d:00", fromHour, toHour) }
+}
+
 /// What a slot widget draws for one timeline entry.
 public enum SlotContent: Sendable, Equatable {
     case design(SlotDesign)
     /// A live data widget (Service, Fuel, Renewals, Touch 'n Go).
     case data(DataCard)
+    /// A Studio design with its data resolved.
+    case studio(StudioCard)
     /// Identifying "Slot N ✓" card used by the "Test: flash all slots" button.
     case flash
 
     public var cardStyle: CardStyle {
         switch self {
         case .design(let design): design.style.cardStyle
-        case .data: .standard
+        case .data, .studio: .standard
         case .flash: .accentFill
         }
     }
