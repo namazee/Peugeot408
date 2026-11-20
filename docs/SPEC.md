@@ -163,6 +163,26 @@ Goal: I set things up once in the app, and my car's CarPlay screen reflects it a
 
 * A template gallery with live previews using my real data. Styles: Sporty (carbon texture, red/blue accents, gauge-like arcs), Minimal (big number, thin label), Premium (dark glass, fine serif accents), Dashboard (multi-value grid), Photo (full-bleed image with a caption), Clock (analogue and digital variants), Countdown, and Anniversary ("Married 9 years, 213 days" / days until an event).
 * Every template can be bound to any data source (e.g. Sporty + Fuel Log, Minimal + Prayer Times).
+* More eye-catching templates, added to the ones above:
+   * **Bold Tile:** a solid, vivid colour that follows the bound source's state, with one huge centred number and a caps label.
+   * **Neon Ring:** black, a glowing progress ring and a glowing value.
+   * **Twin Gauges:** two arc gauges side by side (the primary and secondary values).
+   * **Aurora:** a vivid multi-colour gradient behind a huge value.
+   * **Sunset Drive:** an orange-to-purple sky with a sun and an open road.
+   * **Night Drive:** a deep navy glow, my My Car photo and a glowing value.
+   * **Showroom:** a spotlight behind my My Car photo, with my plate.
+   * **Racing Stripes:** a bold colour with diagonal stripes and the value in Orbitron.
+   * **Starry Night:** a starfield with a crescent and the prayer countdown.
+   * **Big Date:** a calendar page with the weekday, a giant day number and the month.
+   * **Year Progress:** this year's percentage, with a progress bar.
+   * **Retro LED:** an amber digital clock with a soft glow on black.
+  To draw these, the design model gains:
+   * a multi-colour (aurora) gradient and a radial spotlight background;
+   * a progress ring and a progress bar layer;
+   * an optional glow on any layer;
+   * calendar fields (weekday, day of month, month, year progress);
+   * new original stickers (sun, road, starfield).
+  All of these are optional fields, so saved designs still load. The gallery groups templates (Data, Car, Clock & Date, Special) so the new ones are easy to find, and every new template is also available in the builder.
 * Seasonal packs for Malaysia that the app can switch to automatically on the right dates: Hari Raya Aidilfitri, Ramadan (with an iftar countdown using the prayer module's Maghrib time), Aidiladha, Merdeka/Malaysia Day, Chinese New Year, Deepavali, Christmas, New Year. All original artwork, drawn in SwiftUI shapes/SF Symbols or as bundled assets generated in Remotion; nothing copied from other apps.
 
 ### Custom builder
@@ -235,7 +255,7 @@ Widgets themselves are static SwiftUI, so use Remotion only for the animated ass
 8. Split-card slot layouts (§4b): Single / Split / Quad per slot, a data source or design per card, the 3-column mock with tap-to-change cards, the new default setup, and per-card flash labels. Stop and let me test it in the car.
 9. Remotion assets (also use Remotion to render seasonal pack artwork and the onboarding clip showing the slot setup).
 10. Polish: rendering modes, accessibility, empty states, JSON backup, README with screenshots/video frames.
-11. Widget styles (§3): Bold and Neon looks for every widget, card and app screen, Settings → Appearance plus a per-slot override, both palettes in the shared tokens, and refreshed README snapshots.
+11. Widget styles (§3): Bold and Neon looks for every widget, card and app screen, Settings → Appearance plus a per-slot override, both palettes in the shared tokens, the 12 new Studio templates (§4b Templates), and refreshed README snapshots.
 
 ## 9. Quality bar
 
