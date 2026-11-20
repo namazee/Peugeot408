@@ -31,14 +31,16 @@ public struct StudioCard: Sendable, Equatable {
     public var directory: URL?
     public var carPhotoFile: String?
     public var plateText: String
+    public var plateFont: PlateFont
 
-    public init(design: CardDesign, date: Date, values: [DataField: ResolvedField], directory: URL?, carPhotoFile: String?, plateText: String) {
+    public init(design: CardDesign, date: Date, values: [DataField: ResolvedField], directory: URL?, carPhotoFile: String?, plateText: String, plateFont: PlateFont = .classic) {
         self.design = design
         self.date = date
         self.values = values
         self.directory = directory
         self.carPhotoFile = carPhotoFile
         self.plateText = plateText
+        self.plateFont = plateFont
     }
 
     public var carPhotoPath: String? {
@@ -57,7 +59,7 @@ public enum DesignResolver {
         for field in Set(design.dataFields) {
             values[field] = resolve(field, data: data, design: design, at: date, calendar: calendar)
         }
-        return StudioCard(design: design, date: date, values: values, directory: data.directory, carPhotoFile: studio.carPhotoFile, plateText: studio.plateText)
+        return StudioCard(design: design, date: date, values: values, directory: data.directory, carPhotoFile: studio.carPhotoFile, plateText: studio.plateText, plateFont: studio.plateFont ?? .classic)
     }
 
     /// Entry dates for a design: its fields' sources, plus every minute for the next hour if it has an analogue clock.

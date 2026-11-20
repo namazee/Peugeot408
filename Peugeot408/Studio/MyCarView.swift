@@ -183,6 +183,34 @@ struct MyCarView: View {
                     }
                     .padding(.vertical, 4)
                 }
+                if studio.state.builtInCarPhoto != nil {
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Paint colour").font(.subheadline.weight(.semibold))
+                        HStack(spacing: 12) {
+                            ForEach(PaintRecolor.presets) { preset in
+                                Button {
+                                    studio.setPaint(preset.hex)
+                                } label: {
+                                    Circle()
+                                        .fill(Color(hex: preset.hex ?? 0x1A6FB5))
+                                        .frame(width: 32, height: 32)
+                                        .overlay(Circle().strokeBorder(.white.opacity(0.5), lineWidth: 1))
+                                        .overlay(
+                                            Circle().strokeBorder(Theme.accent, lineWidth: studio.state.carPaintHex == preset.hex ? 3 : 0).padding(-4)
+                                        )
+                                }
+                                .buttonStyle(.plain)
+                                .accessibilityLabel(preset.name)
+                            }
+                            ColorPicker("Any colour", selection: customPaint, supportsOpacity: false)
+                                .labelsHidden()
+                        }
+                        Text(PaintRecolor.presets.first { $0.hex == studio.state.carPaintHex }?.name ?? "Custom colour")
+                            .font(.caption)
+                            .foregroundStyle(Theme.secondaryText)
+                    }
+                    .padding(.vertical, 4)
+                }
             } header: {
                 Text("Built-in photos")
             } footer: {
@@ -195,10 +223,29 @@ struct MyCarView: View {
                     .onSubmit { studio.setPlate(plate) }
                 Button("Save plate") { studio.setPlate(plate) }
                     .disabled(plate == studio.state.plateText)
+                Picker("Plate font", selection: Binding(get: { studio.state.plateFont ?? .classic }, set: { studio.setPlateFont($0) })) {
+                    ForEach(PlateFont.allCases) { font in
+                        Text(font.displayName).font(font.font(size: 17)).tag(font)
+                    }
+                }
+                HStack {
+                    Spacer()
+                    Text(plate.isEmpty ? "ABC 408" : plate.uppercased())
+                        .font((studio.state.plateFont ?? .classic).font(size: 26))
+                        .foregroundStyle(.white)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.5)
+                        .padding(.horizontal, 18)
+                        .padding(.vertical, 8)
+                        .background(RoundedRectangle(cornerRadius: 6).fill(.black))
+                        .overlay(RoundedRectangle(cornerRadius: 6).strokeBorder(.white.opacity(0.8), lineWidth: 2))
+                    Spacer()
+                }
+                .listRowBackground(Color.clear)
             } header: {
                 Text("Number-plate label")
             } footer: {
-                Text("Optional. Shown by the My Car template's plate layer.")
+                Text("Optional. Drawn as a black plate with white characters on the built-in photos (front, front ¾, rear ¾, front detail) and in plate layers. Leave empty to keep the original \"408\" plate.")
             }
 
             Section {
@@ -219,6 +266,13 @@ struct MyCarView: View {
             guard let item else { return }
             Task { await load(item) }
         }
+    }
+
+    private var customPaint: Binding<Color> {
+        Binding(
+            get: { Color(hex: studio.state.carPaintHex ?? 0x1A6FB5) },
+            set: { studio.setPaint($0.hexValue) }
+        )
     }
 
     private var savedPath: String? {

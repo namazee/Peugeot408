@@ -22,15 +22,17 @@ final class StudioModel {
         }
     }
 
-    /// Copies a bundled photo into the App Group as the My Car photo.
+    /// Renders a bundled photo (with the chosen paint colour and plate) into the App Group as the My Car photo.
     func useBuiltInCarPhoto(_ id: String) {
         guard let photo = BuiltInCarPhoto.all.first(where: { $0.id == id }),
-              let url = Bundle.main.url(forResource: photo.resource, withExtension: "png") else { return }
+              let png = CarPhotoRenderer.render(photo, paintHex: state.carPaintHex, plate: state.plateText, font: state.plateFont ?? .classic) else {
+            lastError = "Couldn't prepare that photo."
+            return
+        }
         do {
             try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
             let target = directory.appending(path: StudioState.carPhotoFileName, directoryHint: .notDirectory)
-            try? FileManager.default.removeItem(at: target)
-            try FileManager.default.copyItem(at: url, to: target)
+            try png.write(to: target, options: .atomic)
             var next = state
             next.builtInCarPhoto = id
             next.carPhotoFile = StudioState.carPhotoFileName
@@ -88,10 +90,30 @@ final class StudioModel {
         commit(next, reloadSlotsShowing: Set(next.designs.filter { $0.layers.contains { $0.content == .carPhoto || $0.content == .plate("") } }.map(\.id)))
     }
 
+    /// Paint colour of the built-in photos (nil = original blue). Re-renders the photo in use.
+    func setPaint(_ hex: UInt32?) {
+        var next = state
+        next.carPaintHex = hex
+        commit(next, reloadSlotsShowing: [])
+        rerenderBuiltIn()
+    }
+
+    func setPlateFont(_ font: PlateFont) {
+        var next = state
+        next.plateFont = font
+        commit(next, reloadSlotsShowing: Set(next.designs.map(\.id)))
+        rerenderBuiltIn()
+    }
+
+    private func rerenderBuiltIn() {
+        if let id = state.builtInCarPhoto { useBuiltInCarPhoto(id) }
+    }
+
     func setPlate(_ text: String) {
         var next = state
         next.plateText = text
         commit(next, reloadSlotsShowing: Set(next.designs.map(\.id)))
+        rerenderBuiltIn()
     }
 
     /// Imports a design file (fresh id).
@@ -149,6 +171,8 @@ final class StudioModel {
 struct BuiltInCarPhoto: Identifiable {
     let id: String
     let name: String
+    /// Corners of the white show plate, measured from the photo; nil when no plate is visible.
+    var plateQuad: PlateQuad? = nil
 
     var resource: String { "mycar-\(id)" }
 
@@ -156,9 +180,9 @@ struct BuiltInCarPhoto: Identifiable {
 
     static let all: [BuiltInCarPhoto] = [
         BuiltInCarPhoto(id: "side", name: "Side"),
-        BuiltInCarPhoto(id: "front-three-quarter", name: "Front ¾"),
-        BuiltInCarPhoto(id: "rear-three-quarter", name: "Rear ¾"),
-        BuiltInCarPhoto(id: "front", name: "Front"),
-        BuiltInCarPhoto(id: "front-detail", name: "Front detail"),
+        BuiltInCarPhoto(id: "front-three-quarter", name: "Front ¾", plateQuad: PlateQuad((575, 406), (762, 398), (762, 455), (575, 464))),
+        BuiltInCarPhoto(id: "rear-three-quarter", name: "Rear ¾", plateQuad: PlateQuad((87, 174), (186, 172), (184, 200), (82, 203))),
+        BuiltInCarPhoto(id: "front", name: "Front", plateQuad: PlateQuad((380, 555), (587, 554), (587, 631), (380, 632))),
+        BuiltInCarPhoto(id: "front-detail", name: "Front detail", plateQuad: PlateQuad((828, 377), (892, 339), (890, 413), (830, 455))),
     ]
 }

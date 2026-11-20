@@ -95,7 +95,7 @@ private struct LayerView: View {
         case .plate(let text):
             let plate = text.isEmpty ? card.plateText : text
             Text(plate.isEmpty ? "ABC 408" : plate.uppercased())
-                .font(.system(size: layer.fontSize * scale, weight: .heavy, design: .monospaced))
+                .font(card.plateFont.font(size: layer.fontSize * scale))
                 .foregroundStyle(.white)
                 .lineLimit(1)
                 .minimumScaleFactor(0.4)
@@ -244,5 +244,19 @@ private struct AnalogClock: View {
             .frame(width: s * width, height: s * length)
             .offset(y: -s * length / 2)
             .rotationEffect(.degrees(angle))
+    }
+}
+
+public extension PlateFont {
+    /// SwiftUI font for plate text.
+    func font(size: CGFloat) -> Font {
+        switch self {
+        case .classic: .system(size: size, weight: .heavy)
+        case .condensed: .system(size: size, weight: .bold).width(.condensed)
+        case .mono: .system(size: size, weight: .bold, design: .monospaced)
+        case .rounded: .system(size: size, weight: .heavy, design: .rounded)
+        case .orbitron: .custom("Orbitron", size: size).weight(.heavy)
+        case .rajdhani: .custom("Rajdhani", size: size).weight(.bold)
+        }
     }
 }

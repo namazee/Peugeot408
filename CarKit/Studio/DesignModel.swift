@@ -278,6 +278,29 @@ public enum DesignBackground: Codable, Sendable, Equatable, Hashable {
     }
 }
 
+/// Number-plate fonts (bundled OFL or system fonts only).
+public enum PlateFont: String, Codable, Sendable, CaseIterable, Identifiable {
+    case classic
+    case condensed
+    case mono
+    case rounded
+    case orbitron
+    case rajdhani
+
+    public var id: String { rawValue }
+
+    public var displayName: String {
+        switch self {
+        case .classic: "Classic bold"
+        case .condensed: "Condensed"
+        case .mono: "Monospaced"
+        case .rounded: "Rounded"
+        case .orbitron: "Orbitron"
+        case .rajdhani: "Rajdhani"
+        }
+    }
+}
+
 /// Occasions for the Malaysian seasonal packs (see `Seasonal.swift`).
 public enum SeasonalOccasion: String, Codable, Sendable, CaseIterable, Identifiable {
     case ramadan
@@ -411,6 +434,10 @@ public struct StudioState: Codable, Sendable, Equatable {
     public var plateText: String
     /// Which built-in photo is in use ("side", "front", …), or nil for your own photo. Nil in older files.
     public var builtInCarPhoto: String?
+    /// Paint colour for the built-in photos (0xRRGGBB); nil = original Obsession Blue.
+    public var carPaintHex: UInt32?
+    /// Font of the number plate (built-in photos and plate layers). Nil in older files = classic.
+    public var plateFont: PlateFont?
 
     public init(version: Int = StudioState.currentVersion, designs: [CardDesign] = [], seasonal: SeasonalSettings = SeasonalSettings(), carPhotoFile: String? = nil, plateText: String = "") {
         self.version = version

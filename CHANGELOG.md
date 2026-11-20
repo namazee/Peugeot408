@@ -9,6 +9,16 @@ Fresh session? Read `docs/SPEC.md`, then this file, then continue from **Current
 - The lion badges (grille, tailgate, fender, wheel caps) are pixelated, so the "no lion emblem" rule still holds. The straight rear view was left out because it had a third-party watermark.
 - Studio → My Car photo has a "Built-in photos" row. The side view is used until you choose, and choosing your own photo (Vision cut-out) still works and replaces it.
 - `StudioState.builtInCarPhoto` (optional, so older files still load) records which built-in photo is in use.
+- **Paint colour** (built-in photos only, spec updated first):
+  - Swatches for Obsession Blue (original), Elixir Red, Okenite White, Selenium Grey and Perla Nera Black, plus a free colour picker.
+  - `PaintRecolor` gives each colour a "paint weight" (hue 185–230°, saturated, not too dark), then maps paint to the target colour while keeping shading. Trim, glass, grey plate, red lights and green reflections are left alone.
+  - The mapping is baked into a 32³ `CIColorCubeWithColorSpace`, applied on the device.
+- **Number plate** (built-in photos only):
+  - Your plate text is drawn as a black plate with white characters, warped onto the measured corners of the "408" show plate with `CIPerspectiveTransform`.
+  - It appears on the front, front ¾, rear ¾ and front detail photos; the side view has no visible plate.
+  - Leaving the text empty keeps the original plate.
+- **Plate font:** classic bold, condensed, monospaced, rounded, Orbitron or Rajdhani (bundled or system fonts only, nothing new downloaded). The same font is used by plate layers in Studio designs.
+- Tests: paint weight (paint vs trim, plate, lights, reflections, highlights), the red recolour keeping shading, unchanged non-paint pixels, cube size, presets, plate quad aspect and growth, older studio files decoding.
 
 ## Phase 7 — OBD2 + Live Activity (with demo mode)
 
