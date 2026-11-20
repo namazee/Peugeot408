@@ -19,7 +19,9 @@ final class DriveSession {
     let link = OBDLink()
 
     @ObservationIgnored private var task: Task<Void, Never>?
-    @ObservationIgnored private var activity: Activity<DriveActivityAttributes>?
+    /// `Activity` isn't Sendable, so it is only touched from the nonisolated helpers below
+    /// (and assigned on the main actor before any of them run).
+    @ObservationIgnored nonisolated(unsafe) private var activity: Activity<DriveActivityAttributes>?
     @ObservationIgnored private let directory: URL
     @ObservationIgnored private var lastActivityUpdate = Date.distantPast
     @ObservationIgnored private var lastSave = Date.distantPast
@@ -92,11 +94,8 @@ final class DriveSession {
         isRunning = false
         status = "Stopped"
         save(force: true, sessionActive: false)
-        if let activity {
-            let final = DriveActivityAttributes.ContentState(reading: reading ?? OBDReading(date: .now), status: "Ended")
-            await activity.end(ActivityContent(state: final, staleDate: nil), dismissalPolicy: .after(.now.addingTimeInterval(15 * 60)))
-        }
-        activity = nil
+        let final = DriveActivityAttributes.ContentState(reading: reading ?? OBDReading(date: .now), status: "Ended")
+        await endActivity(final)
         reloadWidgets()
     }
 
@@ -198,11 +197,22 @@ final class DriveSession {
     }
 
     private func pushActivity() async {
-        guard let activity, let reading, Date().timeIntervalSince(lastActivityUpdate) >= Self.activityInterval else { return }
+        guard activity != nil, let reading, Date().timeIntervalSince(lastActivityUpdate) >= Self.activityInterval else { return }
         lastActivityUpdate = .now
         let content = DriveActivityAttributes.ContentState(reading: reading, status: status)
-        // Stale after 2 minutes without updates (e.g. the app was suspended).
-        await activity.update(ActivityContent(state: content, staleDate: .now.addingTimeInterval(120)))
+        await updateActivity(content)
+    }
+
+    /// Stale after 2 minutes without updates (e.g. the app was suspended).
+    nonisolated private func updateActivity(_ state: DriveActivityAttributes.ContentState) async {
+        await activity?.update(ActivityContent(state: state, staleDate: .now.addingTimeInterval(120)))
+    }
+
+    /// Ends the Live Activity; it stays on the Lock Screen for 15 minutes with the final values.
+    nonisolated private func endActivity(_ state: DriveActivityAttributes.ContentState) async {
+        let current = activity
+        activity = nil
+        await current?.end(ActivityContent(state: state, staleDate: nil), dismissalPolicy: .after(.now.addingTimeInterval(15 * 60)))
     }
 
     /// Saves the last values (every 10 s while running) so the OBD2 widget shows them with a time.
