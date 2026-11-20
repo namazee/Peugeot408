@@ -2,7 +2,37 @@
 
 Fresh session? Read `docs/SPEC.md`, then this file, then continue from **Current phase**.
 
-## Current phase: 5 — done, waiting for "Continue with Phase 6"
+## Current phase: 6 — done, waiting for "Continue with Phase 7"
+
+## Phase 6 — Connect sound
+
+### Done
+- **Sound library:** 6 original sounds synthesised from scratch by `tools/make-sounds.py` (Python standard library; sine, saw and noise oscillators, no samples), saved in `Resources/Sounds/`.
+  - Bright chime, soft chime, welcome tone, sporty rev (idle → 6,000 rpm blip), double blip, and goodbye.
+  - Recorded in `ASSETS-LICENSES.md`.
+- `CarKit/Sound`: settings in `connect-sound.json`.
+  - Default sound, volume, greeting name and language (English or Malay), and imported clips.
+  - Stable entity ids for the shortcut, a fallback to the welcome tone when a sound is gone, and the ≤5 s trim range.
+- **Play Connect Sound** App Intent (an `AudioPlaybackIntent` that doesn't open the app).
+  - It has an optional *Sound* parameter (bundled, imported, or the spoken greeting) and the Siri phrase "Play connect sound in Peugeot408".
+  - It plays through the current audio route (the car speakers in CarPlay) at the set volume. `AVAudioSession` `.playback` with `.duckOthers` lowers other audio, which comes back when the sound ends.
+  - The greeting ("Welcome back, <name>." / "Selamat kembali, <name>.") is spoken on the device by `AVSpeechSynthesizer`, falling back to English if no Malay voice is installed.
+  - `UIBackgroundModes: audio` lets it run from an automation.
+- **App:** Studio → Connect sounds.
+  - Pick the default sound and play any sound; volume; test button; greeting name and language.
+  - Import an audio file and trim it to ≤5 s with a preview; it's saved as AAC in the App Group and can be swiped to delete.
+  - Step-by-step guides with drawn phone screens for *When CarPlay connects → Play Connect Sound* and *When CarPlay disconnects → Play Connect Sound (Goodbye) + Save Parking*.
+- SETUP.md §12 has the same steps.
+- **Tests:** greeting text in both languages, entity id round-trip, fallback, picker list, volume clamp, trim range, settings round-trip. 117 tests in 21 suites.
+- CI green on run 21; uploaded as **1.1 (21)**.
+
+### Decisions
+- Guide "screenshots" are drawn phone screens, because there's no way to capture real Shortcuts screenshots without a Mac or device here. Real ones can come with the Phase 8 onboarding clip.
+- Volume is relative to the phone's volume. iOS doesn't let apps set the system volume.
+
+### Left over / open
+- [ ] You: install 1.1 (21), go to Studio → Connect sounds, pick a sound or the greeting, set it up with the guide (or SETUP.md §12), and test it in the car.
+- [ ] Not verifiable on CI: whether the automation plays through the car speakers without opening the app, and whether a Malay voice is installed.
 
 ## Phase 5 — Studio: designs, templates, builder, My Car, seasonal packs
 
