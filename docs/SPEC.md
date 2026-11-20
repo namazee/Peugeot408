@@ -134,6 +134,16 @@ CarPlay widgets can't play audio or run navigation (those need Apple CarPlay ent
 
 10. Map Snapshot: `MKMapSnapshotter` image rendered in the timeline provider. Show the parked-car location when a parking spot is saved, otherwise the route/area to the next commute destination. Dark map style, with a pin in the accent colour.
 11. Music: an Apple Music card via MusicKit (ask for authorisation in the app): a featured playlist or recently played item with artwork and title. Add interactive App Intent buttons (play/pause/next for the system music player) only if they work; it must still look complete without them. Note in `SETUP.md` that Spotify's now-playing info isn't available to third-party widgets.
+13. Synced lyrics (Phase 13):
+   * A Lyrics widget, a Lyrics card for slots, and a Live Activity version.
+   * It shows the current song's lines: 1, 3 or 5 at once, with the active line big and bright, the previous line faded, and the next line dimmer.
+   * The song and playback position come from the Apple Music system player (MusicKit / `MPMusicPlayerController.systemMusicPlayer`).
+   * Time-coded lyrics come from the free LRCLIB service (no key). They are cached in the App Group and fetched only for songs I play.
+   * Each line becomes a pre-scheduled timeline entry (or Live Activity update), so lines change without the app running. Sync is approximate and is re-anchored whenever the app sees the player.
+   * Settings: number of lines, text size, accent colour, an optional translation line when LRCLIB has one.
+   * Spotify isn't supported: other apps can't read its now-playing data. Say so in the app and in `SETUP.md`.
+   * When a song has no synced lyrics, show the title and artist instead (or plain lyrics if that's all there is).
+   * Personal use; lyrics are fetched on demand and never bundled.
 12. Photo Frame: pick photos in the app (PhotosPicker, e.g. family photos), downsample them into the App Group, and have the widget rotate through them every 30–60 minutes using timeline entries. Allow a configurable album/selection via an App Intent widget configuration.
 
 ## 4b. Customisation studio (design it in the app → the head unit updates by itself)
@@ -211,6 +221,13 @@ Goal: I set things up once in the app, and my car's CarPlay screen reflects it a
 * A bundled library of original sounds (generate them yourself or use clearly licensed free sounds and record the licence in `ASSETS-LICENSES.md`): clean chimes, a soft "welcome" tone, sporty engine-style revs, and a spoken "Welcome back" made with on-device `AVSpeechSynthesizer` in English or Malay with my name.
 * Let me import my own audio file (trim to ≤5 seconds in-app).
 * Optional matching "disconnect" automation that also triggers Save Parking (ties into the Parking widget).
+* Sound packs (Phase 12). The library grows into packs, each with several sounds and a preview button:
+   * **Engine starts:** real recordings (V8, V12, flat-six, turbo four, rotary or similar, and EV whine) taken only from public-domain (CC0) sources such as Freesound. Each file's source, author and licence goes in `ASSETS-LICENSES.md`. Ask me before downloading.
+   * **EV whoosh, Luxury, Retro arcade, Minimal pings, Sci-fi:** original sounds synthesised by `tools/make-sounds.py`.
+   * **Voice cues:** short spoken lines ("Drive safe", "Welcome back", "CarPlay connected", Malay versions too), made on-device with `AVSpeechSynthesizer` and a choice of voices.
+   * Every sound is trimmed to at most 5 seconds and loudness-normalised, so none is much louder than the others. Imported clips are normalised the same way.
+   * A separate sound choice for disconnect, as well as for connect.
+   * No sounds are copied from other apps or websites.
 
 ### Sync behaviour
 
@@ -256,6 +273,8 @@ Widgets themselves are static SwiftUI, so use Remotion only for the animated ass
 9. Remotion assets (also use Remotion to render seasonal pack artwork and the onboarding clip showing the slot setup).
 10. Polish: rendering modes, accessibility, empty states, JSON backup, README with screenshots/video frames.
 11. Widget styles (§3): Bold and Neon looks for every widget, card and app screen, Settings → Appearance plus a per-slot override, both palettes in the shared tokens, the 12 new Studio templates (§4b Templates), and refreshed README snapshots.
+12. Sound packs (§4b Connect sound): engine starts from CC0 recordings, synthesised EV, luxury, arcade, pings and sci-fi packs, voice cues, normalising and the 5-second trim, and a separate disconnect sound.
+13. Synced lyrics (§4 item 13): the Lyrics widget, card and Live Activity from the Apple Music system player and LRCLIB.
 
 ## 9. Quality bar
 
