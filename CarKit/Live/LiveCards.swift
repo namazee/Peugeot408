@@ -185,7 +185,7 @@ extension CarData {
                 parkedAt: target?.isParking == true ? parking.spot?.savedAt : nil
             ))
 
-        case .service, .fuel, .renewals, .tng, .photos, .music:
+        case .service, .fuel, .renewals, .tng, .photos, .music, .obd:
             return card(for: source, at: date, calendar: calendar)
         }
     }

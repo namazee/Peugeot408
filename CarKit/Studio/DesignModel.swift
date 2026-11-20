@@ -75,6 +75,10 @@ public enum DataField: String, Codable, Sendable, CaseIterable, Identifiable {
     case dayCounter
     case countdownDays
     case musicTitle
+    case boost
+    case coolantTemp
+    case batteryVoltage
+    case engineRPM
 
     public var id: String { rawValue }
 
@@ -105,6 +109,10 @@ public enum DataField: String, Codable, Sendable, CaseIterable, Identifiable {
         case .dayCounter: "Days since (anniversary)"
         case .countdownDays: "Days until (event)"
         case .musicTitle: "Music title"
+        case .boost: "Boost (OBD2)"
+        case .coolantTemp: "Coolant (OBD2)"
+        case .batteryVoltage: "Battery voltage (OBD2)"
+        case .engineRPM: "RPM (OBD2)"
         }
     }
 
@@ -120,6 +128,7 @@ public enum DataField: String, Codable, Sendable, CaseIterable, Identifiable {
         case .temperature, .rainToday, .airQuality: .weather
         case .commuteTime, .nextEvent: .commute
         case .musicTitle: .music
+        case .boost, .coolantTemp, .batteryVoltage, .engineRPM: .obd
         case .clock, .date, .dayCounter, .countdownDays: nil
         }
     }

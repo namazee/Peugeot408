@@ -79,7 +79,7 @@ struct RootView: View {
             case .map, .photos, .music:
                 tab = .studio
                 studioPath = [source]
-            case .service, .fuel, .renewals, .parking:
+            case .service, .fuel, .renewals, .parking, .obd:
                 tab = .car
                 carPath = [source]
             }

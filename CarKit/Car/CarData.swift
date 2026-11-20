@@ -13,6 +13,7 @@ public enum DataSource: String, Codable, Sendable, CaseIterable, Identifiable {
     case map
     case photos
     case music
+    case obd
 
     public var id: String { rawValue }
 
@@ -29,6 +30,7 @@ public enum DataSource: String, Codable, Sendable, CaseIterable, Identifiable {
         case .map: "Map Snapshot"
         case .photos: "Photo Frame"
         case .music: "Music"
+        case .obd: "Live OBD2"
         }
     }
 
@@ -45,6 +47,7 @@ public enum DataSource: String, Codable, Sendable, CaseIterable, Identifiable {
         case .map: "map.fill"
         case .photos: "photo.on.rectangle.angled"
         case .music: "music.note"
+        case .obd: "gauge.with.dots.needle.67percent"
         }
     }
 
@@ -62,6 +65,7 @@ public enum DataSource: String, Codable, Sendable, CaseIterable, Identifiable {
         case .map: "MapSnapshot"
         case .photos: "PhotoFrame"
         case .music: "Music"
+        case .obd: "LiveOBD2"
         }
     }
 
@@ -127,6 +131,8 @@ public struct CarData: Sendable, Equatable {
     // Phase 4
     public var photos: PhotoLibraryState
     public var music: MusicCache
+    // Phase 7
+    public var obd: OBDState
     /// Folder the map PNGs, photos and artwork live in.
     public var directory: URL?
 
@@ -145,6 +151,7 @@ public struct CarData: Sendable, Equatable {
         map: MapSnapshotIndex = .empty,
         photos: PhotoLibraryState = .empty,
         music: MusicCache = .empty,
+        obd: OBDState = .empty,
         directory: URL? = nil
     ) {
         self.service = service
@@ -161,6 +168,7 @@ public struct CarData: Sendable, Equatable {
         self.map = map
         self.photos = photos
         self.music = music
+        self.obd = obd
         self.directory = directory
     }
 
@@ -183,6 +191,7 @@ public struct CarData: Sendable, Equatable {
             map: LiveStores.map(in: directory).load(),
             photos: MediaStores.photos(in: directory).load(),
             music: MediaStores.music(in: directory).load(),
+            obd: OBDStores.state(in: directory).load(),
             directory: directory
         )
     }
@@ -243,6 +252,9 @@ public struct CarData: Sendable, Equatable {
 
         case .music:
             return musicCard()
+
+        case .obd:
+            return .obd(OBDSummary(reading: obd.last, isDemo: obd.lastWasDemo, sessionActive: obd.sessionActive, unsupported: obd.unsupported))
         }
     }
 }
@@ -373,6 +385,7 @@ public enum DataCard: Sendable, Equatable {
     case map(MapSummary)
     case photos(PhotoSummary)
     case music(MusicSummary)
+    case obd(OBDSummary)
 
     public var source: DataSource {
         switch self {
@@ -387,6 +400,7 @@ public enum DataCard: Sendable, Equatable {
         case .map: .map
         case .photos: .photos
         case .music: .music
+        case .obd: .obd
         }
     }
 
@@ -398,6 +412,7 @@ public enum DataCard: Sendable, Equatable {
         case .renewals(let summary): summary.lines.first?.urgency ?? .ok
         case .tng(let summary): summary.isLow ? .dueSoon : .ok
         case .weather(let summary): summary.air?.band.urgency ?? .ok
+        case .obd(let summary): summary.urgency
         case .parking, .prayer, .commute, .map, .photos, .music: .ok
         }
     }
@@ -442,7 +457,7 @@ public enum DataTimeline {
         case .weather:
             dates = (data.weather.weather?.hours ?? []).map(\.date).filter { $0 > start }.prefix(6).map { $0 }
 
-        case .map, .music:
+        case .map, .music, .obd:
             return [start]
 
         case .photos:

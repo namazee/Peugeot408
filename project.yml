@@ -63,7 +63,9 @@ targets:
         AQIAPIKey: $(AQI_API_KEY)         # from Config/Secrets.xcconfig (CI writes it from the AQI_API_KEY secret)
         NSLocationWhenInUseUsageDescription: Peugeot408 uses your location to save where you parked, find your prayer zone, and show local weather, haze and drive times.
         NSCalendarsFullAccessUsageDescription: Peugeot408 shows your next calendar event on the Commute widget. Events stay on your phone.
-        UIBackgroundModes: [audio]        # Play Connect Sound runs from a Shortcuts automation without opening the app
+        UIBackgroundModes: [audio, bluetooth-central]   # connect sound from an automation; OBD2 dongle while the screen is locked
+        NSSupportsLiveActivities: true
+        NSBluetoothAlwaysUsageDescription: Peugeot408 connects to your OBD2 Bluetooth dongle to show boost, coolant temperature, battery voltage and RPM.
         NSAppleMusicUsageDescription: Peugeot408 shows your recently played or featured Apple Music item on the Music widget.
         ITSAppUsesNonExemptEncryption: false
         UILaunchScreen: {}

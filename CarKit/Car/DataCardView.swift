@@ -67,6 +67,7 @@ public struct DataCardView: View {
                 case .map(let summary): MapCard(summary: summary, size: size)
                 case .photos(let summary): PhotoCard(summary: summary, size: size)
                 case .music(let summary): MusicCardView(summary: summary, size: size)
+                case .obd(let summary): OBDCard(summary: summary, size: size)
                 }
             }
         }
@@ -135,6 +136,9 @@ public struct DataCardView: View {
         case .music(let summary):
             guard let title = summary.title else { return ["Open Music in the app"] }
             return [title, summary.subtitle ?? summary.kindLabel]
+        case .obd(let summary):
+            guard let reading = summary.reading else { return ["No drive session yet"] }
+            return ["\(reading.text(.boost)) · \(reading.text(.coolant))", "\(reading.text(.voltage)) · \(reading.date.formatted(date: .omitted, time: .shortened))"]
         }
     }
 

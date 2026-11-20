@@ -10,16 +10,12 @@ struct CarView: View {
         NavigationStack(path: $path) {
             List {
                 Section {
-                    ForEach([DataSource.service, .fuel, .renewals, .parking]) { source in
+                    ForEach([DataSource.service, .fuel, .renewals, .parking, .obd]) { source in
                         NavigationLink(value: source) {
                             DataSourceRow(source: source, card: model.card(for: source))
                         }
                     }
                 }
-                Section("Coming later") {
-                    Label("Live OBD2: Phase 7", systemImage: "gauge.with.dots.needle.67percent")
-                }
-                .foregroundStyle(Theme.secondaryText)
 
                 if let error = model.lastError {
                     Section {
@@ -79,6 +75,7 @@ struct DataSourceScreen: View {
         case .map: MapSnapshotView()
         case .photos: PhotoFrameView()
         case .music: MusicView()
+        case .obd: OBDView()
         }
     }
 }
@@ -139,6 +136,9 @@ struct DataSourceRow: View {
             return summary.photoCount == 0 ? "No photos yet" : "\(summary.photoCount) photos"
         case .music(let summary):
             return summary.title ?? "Not set up"
+        case .obd(let summary):
+            guard let reading = summary.reading else { return "No drive session yet" }
+            return "\(reading.text(.boost)) · \(reading.text(.coolant))\(summary.sessionActive ? " · live" : "")"
         }
     }
 }

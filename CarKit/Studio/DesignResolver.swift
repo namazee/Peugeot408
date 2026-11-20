@@ -170,6 +170,19 @@ public enum DesignResolver {
         case .musicTitle:
             guard case .music(let s) = card(.music) else { return ResolvedField(text: "--") }
             return ResolvedField(text: s.title ?? "--")
+
+        case .boost, .coolantTemp, .batteryVoltage, .engineRPM:
+            guard let reading = data.obd.last else { return ResolvedField(text: "--") }
+            switch field {
+            case .boost:
+                return ResolvedField(text: reading.text(.boost), progress: reading.boostBar.map { min(max(($0 + 1) / 2.5, 0), 1) })
+            case .coolantTemp:
+                return ResolvedField(text: reading.text(.coolant), progress: reading.coolantC.map { min(max(Double($0 - 40) / 80, 0), 1) })
+            case .batteryVoltage:
+                return ResolvedField(text: reading.text(.voltage), progress: reading.voltage.map { min(max(($0 - 11) / 4, 0), 1) })
+            default:
+                return ResolvedField(text: reading.text(.rpm), progress: reading.rpm.map { min(Double($0) / 6_500, 1) })
+            }
         }
     }
 

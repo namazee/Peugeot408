@@ -44,6 +44,11 @@ struct SettingsView: View {
                     } label: {
                         Label("API keys", systemImage: "key")
                     }
+                    NavigationLink {
+                        DongleView()
+                    } label: {
+                        Label("OBD2 dongle", systemImage: "antenna.radiowaves.left.and.right")
+                    }
                 }
 
                 Section {
@@ -59,7 +64,7 @@ struct SettingsView: View {
                 }
 
                 Section {
-                    Text("Units, accent colour, OBD2 dongle and backup arrive with the features that use them.")
+                    Text("Units, accent colour and JSON backup arrive in Phase 9.")
                         .font(.footnote)
                         .foregroundStyle(Theme.secondaryText)
                     Text("Personal project. Not affiliated with Peugeot or Stellantis.")
