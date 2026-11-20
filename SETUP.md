@@ -141,6 +141,17 @@ Until the required secrets exist, CI still runs the tests and skips the upload w
 
    Siri works too: "Save parking in Peugeot408".
 
+## 12. Phase 6: Connect sound (one-time Shortcuts automation)
+
+iOS doesn't let an app play a sound by itself when CarPlay connects, so a Shortcuts automation runs the app's **Play Connect Sound** action. The app shows the same steps under Studio → Connect sounds.
+
+1. In the app: Studio → **Connect sounds**. Pick a sound (or the spoken greeting with your name), set the volume, and tap **Test sound**.
+2. **Shortcuts** → **Automation** → **+** → **CarPlay** → tick **Connects** only → **Run Immediately**.
+3. **Next** → **New Blank Automation** → **Add Action** → search **Play Connect Sound** (Peugeot408). Leave *Sound* empty to use the app's choice.
+4. **Done**.
+
+Optional, when you leave the car: the same steps with **Disconnects**, adding **Play Connect Sound** (Sound: Goodbye) and then **Save Parking**. This is the same automation as §10 step 4, with a goodbye sound.
+
 ## 11. Phase 4: Photo Frame and Music
 
 1. **MusicKit** must be ticked on the app's App ID under *App Services* (step 2). If Music says it can't load anything even after you allow access, check that, then rerun with *Regenerate provisioning profiles*.

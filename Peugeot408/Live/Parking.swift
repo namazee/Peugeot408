@@ -99,6 +99,15 @@ struct Peugeot408Shortcuts: AppShortcutsProvider {
             shortTitle: "Save Parking",
             systemImageName: "parkingsign.circle.fill"
         )
+        AppShortcut(
+            intent: PlayConnectSoundIntent(),
+            phrases: [
+                "Play connect sound in \(.applicationName)",
+                "Play my welcome sound with \(.applicationName)",
+            ],
+            shortTitle: "Play Connect Sound",
+            systemImageName: "speaker.wave.2.fill"
+        )
     }
 }
 

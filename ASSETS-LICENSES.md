@@ -22,3 +22,11 @@ The files are renamed only (no glyph or table changes), so they are not "Modifie
 ## Studio artwork (Phase 5)
 
 All seasonal artwork and stickers are original: drawn in code with SwiftUI shapes and SF Symbols (`CarKit/Studio/Artwork.swift`). No Peugeot logos or lion emblem, nothing copied from other apps.
+
+## Connect sounds (Phase 6)
+
+| Asset | Source | Licence |
+|---|---|---|
+| `Resources/Sounds/*.wav` (chime-bright, chime-soft, welcome-tone, rev-sport, rev-blip, goodbye) | Synthesised from scratch by `tools/make-sounds.py` (sine, saw and noise oscillators; no samples) on 2026-11-20 | Owned by the project author |
+| Spoken greeting | Generated on the device at run time by Apple's `AVSpeechSynthesizer` | Apple system voices (on-device use) |
+| Imported clips | Chosen by the user on their own phone; not part of the repo | The user's own |

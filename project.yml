@@ -47,7 +47,7 @@ targets:
   Peugeot408:
     type: application
     platform: iOS
-    sources: [Peugeot408, Shared, Resources/Fonts]
+    sources: [Peugeot408, Shared, Resources/Fonts, Resources/Sounds]
     dependencies:
       - target: CarKit
         embed: false
@@ -63,6 +63,7 @@ targets:
         AQIAPIKey: $(AQI_API_KEY)         # from Config/Secrets.xcconfig (CI writes it from the AQI_API_KEY secret)
         NSLocationWhenInUseUsageDescription: Peugeot408 uses your location to save where you parked, find your prayer zone, and show local weather, haze and drive times.
         NSCalendarsFullAccessUsageDescription: Peugeot408 shows your next calendar event on the Commute widget. Events stay on your phone.
+        UIBackgroundModes: [audio]        # Play Connect Sound runs from a Shortcuts automation without opening the app
         NSAppleMusicUsageDescription: Peugeot408 shows your recently played or featured Apple Music item on the Music widget.
         ITSAppUsesNonExemptEncryption: false
         UILaunchScreen: {}

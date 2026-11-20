@@ -74,10 +74,13 @@ struct StudioView: View {
                     }
                 }
 
-                Section("Coming in Phase 6") {
-                    Label("Connect sounds", systemImage: "speaker.wave.2")
+                Section("Sound") {
+                    NavigationLink {
+                        ConnectSoundView()
+                    } label: {
+                        Label("Connect sounds", systemImage: "speaker.wave.2.fill")
+                    }
                 }
-                .foregroundStyle(Theme.secondaryText)
 
                 if let error = studio.lastError {
                     Section { Text(error).foregroundStyle(Theme.overdue) }
