@@ -2,7 +2,33 @@
 
 Fresh session? Read `docs/SPEC.md`, then this file, then continue from **Current phase**.
 
-## Current phase: 10 (Polish) — done. All phases built; Phase 8 split cards still waiting for your car test.
+## Current phase: 11 (Widget styles) — built. Next: "Continue with Phase 12" (Sound packs), then 13 (Lyrics), 14 (Panorama hero). Phase 8 split cards still waiting for your car test.
+
+## Phase 11 — Widget styles and new templates
+### Done
+- **Two looks:** Bold and Neon (spec §3), for every data widget, split/quad card, text slot and app preview.
+  - **Bold:** a full-colour gradient tile per source, with a sheen and a fine dot texture. The colour turns amber or red when something is due, or the AQI band colour for haze. One huge centred number, a caps label and a progress bar.
+  - **Neon:** near-black with a pool of glow colour, and a glowing ring (what's left) or a 240° gauge (fuel against your best tank, boost) around a glowing number. Split cards get a glowing outline.
+  - Medium widgets add a list on the right (service items, today's prayers, fuel figures and so on).
+  - Every data card is drawn from one `CardFace` model by `FaceView`; map, photos and music keep their image layouts.
+- **Palettes** in `theme/tokens.json` (`bold` and `neon` per source). `gen-theme.py` now writes them into `ThemeTokens`.
+- **Settings → Appearance:** choose Bold or Neon, with previews of your own data. It's saved in the App Group (`appearance.json`) and reloads every widget.
+  - Each Car Slot editor has a **Look** picker (App / Bold / Neon), and the Slots mock shows each slot in its own look.
+  - The app tint follows the look (Neon is cyan).
+  - The backup includes appearance.
+- **12 new Studio templates:** Bold Tile, Neon Ring, Twin Gauges, Aurora, Sunset Drive, Night Drive, Showroom, Racing Stripes, Starry Night, Big Date, Year Progress and Retro LED.
+  - The gallery is grouped into Data, Car, Clock & Date and Special, with a NEW badge on the new ones.
+- **Design model additions** (all optional, so saved designs still load):
+  - backgrounds: aurora, spotlight, and a state colour that follows the first data field;
+  - progress ring and progress bar layers;
+  - a neon glow toggle on any layer;
+  - weekday, day, month and year-progress fields;
+  - sun, road and starfield stickers.
+  - The builder has all of these too.
+- **How to add to CarPlay:** a Google Maps ETA tip (add Google's own widget to a slot's stack). Also in SETUP.md step 9.6.
+- Sample data now has an OBD reading, so the OBD widget's preview shows a gauge.
+- Tests: `LooksTests` (palettes, faces, the new templates pass the glanceability checks, calendar fields, JSON round trip). README snapshots now render both looks and the template gallery.
+
 
 ## Phase 10 — Polish
 ### Done

@@ -111,7 +111,8 @@ public enum SampleData {
             commuteCache: commuteCache,
             calendar: calendarCache,
             weather: weather,
-            music: MusicCache(item: MusicItemCard(title: "Drive Mix", subtitle: "Apple Music", kindLabel: "Playlist", artworkFile: nil, updatedAt: now))
+            music: MusicCache(item: MusicItemCard(title: "Drive Mix", subtitle: "Apple Music", kindLabel: "Playlist", artworkFile: nil, updatedAt: now)),
+            obd: OBDState(last: OBDReading(rpm: 2_400, coolantC: 88, boostBar: 0.82, voltage: 14.1, date: now), lastWasDemo: true)
         )
     }
 
