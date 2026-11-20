@@ -31,7 +31,7 @@ Fresh session? Read `docs/SPEC.md`, then this file, then continue from **Current
 - [ ] You: install 1.1 (14), add photos, allow Apple Music, and try the play buttons on the medium Music widget on the iPhone. If they do nothing, turn them off in Studio → Music and tell me; per the spec they then get removed.
 - [ ] MusicKit must be enabled on the App ID (App Services). SETUP.md §11.
 
-## Phase 4 — App icon (spec §3 App icon; built, not committed — waiting for your check of IconPreview.png)
+## Phase 4 — App icon (spec §3 App icon; IconPreview.png approved 2026-11-20)
 
 ### Done
 - `remotion/` project (Remotion 4.0.540): `AppIcon` (1024, `variant` default/dark/tinted, 4 layers), `IconPreview` (1920×1080: every variant at 1024/180/120/60/40, light and dark home screens, CarPlay mock), `IconReveal` (3.5 s, `format` square 1080×1080 or vertical 1080×1920).
