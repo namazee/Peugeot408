@@ -2,7 +2,66 @@
 
 Fresh session? Read `docs/SPEC.md`, then this file, then continue from **Current phase**.
 
-## Current phase: 2 — done, waiting for "Continue with Phase 3"
+## Current phase: 3 — done, waiting for "Continue with Phase 4"
+
+## Phase 3 — Parking + Map Snapshot, Prayer Times, Commute, Weather & Haze
+
+### Done
+- `CarKit/PrayerTimes` (self-contained, Foundation only, reusable in another app):
+  - JAKIM e-Solat client. Format checked on 2026-11-20: Malay month names in dates ("Mac", "Ogos", "Dis"); "NO_RECORD!" replies; `period=duration` stops at 31 December, so ranges are split per year.
+  - Offline fallback calculator with JAKIM-style parameters (Subuh 18°, Isyak 18°, Shafi'i Asar, +1 min ihtiyat). Tuned against JAKIM's 2026 tables for 7 zones: within about 2 minutes. Shown as "est." on the widget.
+  - All 60 zones. "Pick zone from my location" matches the geocoded district within the state (Cyberjaya → Sepang → SGR01, Bukit Jalil → WLY01), else the nearest zone town.
+  - Caches 35 days ahead (`prayer-cache.json`), refreshes weekly, retries failures hourly, and fills gaps by calculation (e.g. next year before JAKIM publishes it).
+- `CarKit/Live`:
+  - Models and caches: parking, commute, calendar, weather/haze, map index, last location.
+  - One-shot location service (app and widget, with `NSWidgetWantsLocation`).
+  - WeatherKit: current conditions and 24 h hourly.
+  - Swappable air-quality provider (WAQI). The token comes from the `AQI_API_KEY` secret via Info.plist, or from a Settings override kept in the Keychain (App Group access group).
+  - MapKit drive-time ETA and EventKit next event.
+  - `MKMapSnapshotter` renderer: dark map, blue pin, one PNG per widget size.
+  - `LiveRefresher` with per-source throttles: weather and haze 30 min, commute 15 min, map on target change or 6 h.
+- Widgets: Parking ("Parked 2 hr, 14 min ago" ticks live), Prayer Times (next prayer plus live countdown; medium lists all 5), Commute (drive time, arrival, next event), Weather & Haze (temperature, rain today, API colour band,  Weather mark), and Map Snapshot (parked car, else the commute area).
+  - Small and medium sizes, plus Lock Screen for all but Map.
+  - All are assignable to Car Slots. Slots use the same entry dates and reload policy as the dedicated widget.
+- Timelines per source:
+  - prayer: an entry at each prayer time for 48 h, plus midnights;
+  - weather: the next 6 forecast hours, reloaded after 30 min;
+  - commute: the 16:00 switch and event start/end times, reloaded after 30 min;
+  - parking: midnights only (the relative text ticks by itself);
+  - map: a single entry.
+- App:
+  - Car → Parking: save here, edit floor/bay/note, Maps directions, clear.
+  - Save Parking App Intent and Siri phrase "Save parking in Peugeot408". SETUP.md §10 has the CarPlay-disconnect automation.
+  - Daily → Prayer Times (zone picker, auto zone, today's times, source line), Commute (Home/Work search, switch hour, calendar access), and Weather & Haze (sources, API bands, Apple Weather attribution and legal link).
+  - Studio → Data sources → Map Snapshot.
+  - Settings → Data: prayer zone, Home and Work, API keys.
+  - Returning to the app reloads files (e.g. after the shortcut ran) and tops up prayer and calendar caches.
+- Deep links `peugeot408://data/<parking|prayer|commute|weather|map>`.
+- Tests:
+  - prayer: JAKIM parsing, next prayer across midnight, the calculator within 3 min of JAKIM, gap filling, prayer timeline;
+  - zone lookup;
+  - commute: switch rules, stale ETA, next event;
+  - weather and haze: rain text, API band edges, WAQI parsing;
+  - parking and map: map target choice, map index;
+  - slots: a slot showing prayer uses the prayer dates;
+  - every source gives a valid card with no data.
+
+### Decisions
+- Prayer fallback is our own calculator in `CarKit/PrayerTimes` instead of the Adhan library (the spec says "e.g."). This keeps the module dependency-free, and it is tested against JAKIM's tables.
+- Commute origin is the phone's location when allowed, otherwise the other saved place.
+- The calendar is read directly by the widget when full access is granted; otherwise the app's cached copy is used.
+- WAQI reports the US EPA AQI scale; it is coloured with the Malaysian API bands, as the spec asks.
+- Map Snapshot's setup lives under Studio → Data sources (spec §5). The other Studio items still name their phase.
+
+### Fixes during the phase
+- The first CI runs failed on three things: a sample-data expression too slow to type-check (split up); the Phase 2 storage test comparing the whole `CarData` (it now checks the four Phase 2 stores); and a Swift 6 `sending` error when calling the widget completion handler from a `Task` (now wrapped in `CompletionBox`).
+- CI green on run 12: 74 tests in 13 suites. Signing with the WeatherKit entitlement worked without regenerating profiles. Uploaded as **1.1 (12)**.
+
+### Left over / open
+- [ ] You: install the new build, allow location (and calendar if you want the next event), set Home and Work, check your prayer zone, save a parking spot, and assign e.g. Prayer Times or Commute to a slot.
+- [ ] You: add the `AQI_API_KEY` secret (free WAQI token) so haze shows; until then the card says "add token".
+- [ ] You: optional Shortcuts automation "When CarPlay disconnects → Save Parking" (SETUP.md §10).
+- [ ] Not verifiable on CI: WeatherKit and WAQI responses, widget location access and map rendering on the device.
 
 ## Phase 2 — Service Tracker, Fuel Log, Road Tax & Insurance, Touch 'n Go
 
@@ -27,7 +86,7 @@ Fresh session? Read `docs/SPEC.md`, then this file, then continue from **Current
 - Slot rotation (up to 3 designs per slot) stays in Phase 5, together with the Studio designs.
 
 ### Left over / open
-- [ ] You: install the new TestFlight build, enter some real data, assign e.g. Service to a slot, and check it in the car.
+- [ ] You: install the new TestFlight build, enter some real data, assign e.g. Service to a slot, and check it in the car. (Not confirmed before Phase 3 started.)
 - [ ] Notification permission is asked the first time a renewal is saved.
 
 ## Phase 1 — Skeleton + slots
