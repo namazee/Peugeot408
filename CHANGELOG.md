@@ -4,6 +4,12 @@ Fresh session? Read `docs/SPEC.md`, then this file, then continue from **Current
 
 ## Current phase: 7 — done, waiting for "Continue with Phase 8"
 
+## Change after Phase 7 — built-in My Car photos (spec §4b)
+- Spec updated first (`spec:` commit): five photos of the 408 that you supplied, already cut out, are bundled as built-in My Car photos.
+- The lion badges (grille, tailgate, fender, wheel caps) are pixelated, so the "no lion emblem" rule still holds. The straight rear view was left out because it had a third-party watermark.
+- Studio → My Car photo has a "Built-in photos" row. The side view is used until you choose, and choosing your own photo (Vision cut-out) still works and replaces it.
+- `StudioState.builtInCarPhoto` (optional, so older files still load) records which built-in photo is in use.
+
 ## Phase 7 — OBD2 + Live Activity (with demo mode)
 
 ### Done

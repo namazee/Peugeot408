@@ -409,6 +409,8 @@ public struct StudioState: Codable, Sendable, Equatable {
     public var carPhotoFile: String?
     /// Number-plate text for the My Car template, e.g. "VKL 408".
     public var plateText: String
+    /// Which built-in photo is in use ("side", "front", …), or nil for your own photo. Nil in older files.
+    public var builtInCarPhoto: String?
 
     public init(version: Int = StudioState.currentVersion, designs: [CardDesign] = [], seasonal: SeasonalSettings = SeasonalSettings(), carPhotoFile: String? = nil, plateText: String = "") {
         self.version = version

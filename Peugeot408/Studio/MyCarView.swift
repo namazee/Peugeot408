@@ -158,6 +158,38 @@ struct MyCarView: View {
             }
 
             Section {
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 10) {
+                        ForEach(BuiltInCarPhoto.all) { photo in
+                            Button {
+                                studio.useBuiltInCarPhoto(photo.id)
+                                message = "Using the built-in \(photo.name.lowercased()) photo."
+                            } label: {
+                                VStack(spacing: 4) {
+                                    BuiltInThumb(resource: photo.resource)
+                                        .frame(width: 120, height: 72)
+                                        .background(Checkerboard())
+                                        .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                                        .overlay(
+                                            RoundedRectangle(cornerRadius: 10, style: .continuous)
+                                                .strokeBorder(studio.state.builtInCarPhoto == photo.id ? Theme.accent : .clear, lineWidth: 2)
+                                        )
+                                    Text(photo.name).font(.caption)
+                                }
+                            }
+                            .buttonStyle(.plain)
+                            .accessibilityLabel("Use the built-in \(photo.name) photo")
+                        }
+                    }
+                    .padding(.vertical, 4)
+                }
+            } header: {
+                Text("Built-in photos")
+            } footer: {
+                Text(studio.state.builtInCarPhoto == nil ? "You're using your own photo. Tap one of these to switch back." : "Badges are blurred. Choose your own photo above to replace these.")
+            }
+
+            Section {
                 TextField("e.g. VKL 408", text: $plate)
                     .textInputAutocapitalization(.characters)
                     .onSubmit { studio.setPlate(plate) }
@@ -287,7 +319,7 @@ struct MyCarView: View {
         }
         do {
             try png.write(to: studio.directory.appending(path: StudioState.carPhotoFileName, directoryHint: .notDirectory), options: .atomic)
-            studio.setCarPhoto(file: StudioState.carPhotoFileName)
+            studio.setCustomCarPhoto()
             self.preview = nil
             self.image = nil
             self.mask = nil
@@ -314,6 +346,18 @@ struct Checkerboard: View {
                 y += cell
                 row += 1
             }
+        }
+    }
+}
+
+private struct BuiltInThumb: View {
+    let resource: String
+
+    var body: some View {
+        if let url = Bundle.main.url(forResource: resource, withExtension: "png"), let image = UIImage(contentsOfFile: url.path(percentEncoded: false)) {
+            Image(uiImage: image).resizable().scaledToFit().padding(4)
+        } else {
+            Image(systemName: "car.side").foregroundStyle(Theme.secondaryText)
         }
     }
 }

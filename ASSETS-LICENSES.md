@@ -30,3 +30,9 @@ All seasonal artwork and stickers are original: drawn in code with SwiftUI shape
 | `Resources/Sounds/*.wav` (chime-bright, chime-soft, welcome-tone, rev-sport, rev-blip, goodbye) | Synthesised from scratch by `tools/make-sounds.py` (sine, saw and noise oscillators; no samples) on 2026-11-20 | Owned by the project author |
 | Spoken greeting | Generated on the device at run time by Apple's `AVSpeechSynthesizer` | Apple system voices (on-device use) |
 | Imported clips | Chosen by the user on their own phone; not part of the repo | The user's own |
+
+## My Car built-in photos
+
+| Asset | Source | Licence |
+|---|---|---|
+| `Resources/MyCar/mycar-{side,front-three-quarter,rear-three-quarter,front,front-detail}.png` | Supplied by the project author on 2026-11-20 as their own photos (backgrounds already removed). The lion badges (grille, tailgate, fender, wheel caps) were pixelated here, and the photos were cropped and scaled to 900 px wide. A sixth (straight rear) photo was left out because it still showed a third-party watermark. | The project author, who stated they hold the rights |

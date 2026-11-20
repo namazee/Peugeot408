@@ -16,6 +16,29 @@ final class StudioModel {
     init(directory: URL = AppGroup.containerURL) {
         self.directory = directory
         self.state = StudioStores.studio(in: directory).load()
+        // Spec: the side view is used until a photo is chosen.
+        if state.carPhotoFile == nil {
+            useBuiltInCarPhoto(BuiltInCarPhoto.defaultID)
+        }
+    }
+
+    /// Copies a bundled photo into the App Group as the My Car photo.
+    func useBuiltInCarPhoto(_ id: String) {
+        guard let photo = BuiltInCarPhoto.all.first(where: { $0.id == id }),
+              let url = Bundle.main.url(forResource: photo.resource, withExtension: "png") else { return }
+        do {
+            try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+            let target = directory.appending(path: StudioState.carPhotoFileName, directoryHint: .notDirectory)
+            try? FileManager.default.removeItem(at: target)
+            try FileManager.default.copyItem(at: url, to: target)
+            var next = state
+            next.builtInCarPhoto = id
+            next.carPhotoFile = StudioState.carPhotoFileName
+            state = next
+            setCarPhoto(file: StudioState.carPhotoFileName)
+        } catch {
+            lastError = "Couldn't use that photo: \(error.localizedDescription)"
+        }
     }
 
     func reload() {
@@ -48,6 +71,14 @@ final class StudioModel {
         change(&next.seasonal)
         commit(next, reloadSlotsShowing: [])
         reloadSlots([oldSlot, next.seasonal.slot])
+    }
+
+    /// Your own cut-out photo replaces the built-in one.
+    func setCustomCarPhoto() {
+        var next = state
+        next.builtInCarPhoto = nil
+        state = next
+        setCarPhoto(file: StudioState.carPhotoFileName)
     }
 
     func setCarPhoto(file: String?, plate: String? = nil) {
@@ -111,4 +142,23 @@ final class StudioModel {
             WidgetCenter.shared.reloadTimelines(ofKind: SlotKind.kind(for: slot))
         }
     }
+}
+
+/// Built-in My Car photos (spec §4b): supplied by the owner, cut out, lion badges pixelated.
+/// Files: `Resources/MyCar/mycar-<id>.png`.
+struct BuiltInCarPhoto: Identifiable {
+    let id: String
+    let name: String
+
+    var resource: String { "mycar-\(id)" }
+
+    static let defaultID = "side"
+
+    static let all: [BuiltInCarPhoto] = [
+        BuiltInCarPhoto(id: "side", name: "Side"),
+        BuiltInCarPhoto(id: "front-three-quarter", name: "Front ¾"),
+        BuiltInCarPhoto(id: "rear-three-quarter", name: "Rear ¾"),
+        BuiltInCarPhoto(id: "front", name: "Front"),
+        BuiltInCarPhoto(id: "front-detail", name: "Front detail"),
+    ]
 }
