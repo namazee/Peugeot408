@@ -124,6 +124,7 @@ Until the required secrets exist, CI still runs the tests and skips the upload w
 3. Add **Car Slot 1, 2, 3, 4, 5** (up to 5 widgets per stack). Turn Smart Rotate off if you want a stack to stay put.
 4. In the app: Slots → **Test: flash all slots**. Each slot shows "Slot N ✓" for 10 minutes.
 5. Change a slot in the app and check the head unit updates (Phase 1 sign-off).
+6. Optional, Google Maps ETA: update the Google Maps app, then add its **Google Maps** widget to the same stack as a Car Slot, with Smart Rotate on. It shows ETA, distance and the next turn while Google Maps navigates. Peugeot408 can't show this itself, because iOS doesn't let apps read another app's navigation.
 
 ## 10. Phase 3: location, calendar, haze and auto-save parking
 
