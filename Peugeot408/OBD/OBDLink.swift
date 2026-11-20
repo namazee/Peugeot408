@@ -7,7 +7,7 @@ import Observation
 /// and read replies up to the `>` prompt. All CoreBluetooth callbacks arrive on the main queue.
 @MainActor
 @Observable
-final class OBDLink: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
+final class OBDLink: NSObject {
     enum State: Equatable {
         case idle
         case bluetoothOff
@@ -189,91 +189,75 @@ final class OBDLink: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
         }
     }
 
-    // MARK: CBCentralManagerDelegate (main queue)
+    // MARK: CBCentralManagerDelegate / CBPeripheralDelegate
+    // The manager uses the main queue, so these run on the main actor (`@preconcurrency`
+    // conformance below checks that at run time).
 
-    nonisolated func centralManagerDidUpdateState(_ central: CBCentralManager) {
-        MainActor.assumeIsolated {
-            let waiters = poweredOnWaiters
-            poweredOnWaiters = []
-            waiters.forEach { $0.resume() }
-            if central.state != .poweredOn, state == .ready || state == .connecting { state = .bluetoothOff }
+    func centralManagerDidUpdateState(_ central: CBCentralManager) {
+        let waiters = poweredOnWaiters
+        poweredOnWaiters = []
+        waiters.forEach { $0.resume() }
+        if central.state != .poweredOn, state == .ready || state == .connecting { state = .bluetoothOff }
+    }
+
+    func centralManager(_ central: CBCentralManager, didDiscover peripheral: CBPeripheral, advertisementData: [String: Any], rssi RSSI: NSNumber) {
+        let name = (advertisementData[CBAdvertisementDataLocalNameKey] as? String) ?? peripheral.name
+        // Unnamed devices are almost never OBD dongles; skip them to keep the list short.
+        guard let name, !name.isEmpty else { return }
+        peripherals[peripheral.identifier] = peripheral
+        if let index = found.firstIndex(where: { $0.id == peripheral.identifier }) {
+            found[index].rssi = RSSI.intValue
+        } else {
+            found.append(Found(id: peripheral.identifier, name: name, rssi: RSSI.intValue))
+            found.sort { Self.likelyDongle($0.name) && !Self.likelyDongle($1.name) }
         }
     }
 
-    nonisolated func centralManager(_ central: CBCentralManager, didDiscover peripheral: CBPeripheral, advertisementData: [String: Any], rssi RSSI: NSNumber) {
-        let advertisedName = advertisementData[CBAdvertisementDataLocalNameKey] as? String
-        let rssi = RSSI.intValue
-        MainActor.assumeIsolated {
-            let name = advertisedName ?? peripheral.name
-            // Unnamed devices are almost never OBD dongles; skip them to keep the list short.
-            guard let name, !name.isEmpty else { return }
-            peripherals[peripheral.identifier] = peripheral
-            if let index = found.firstIndex(where: { $0.id == peripheral.identifier }) {
-                found[index].rssi = rssi
-            } else {
-                found.append(Found(id: peripheral.identifier, name: name, rssi: rssi))
-                found.sort { Self.likelyDongle($0.name) && !Self.likelyDongle($1.name) }
+    func centralManager(_ central: CBCentralManager, didConnect peripheral: CBPeripheral) {
+        let services = profile.isValid ? [CBUUID(string: profile.serviceUUID)] : nil
+        peripheral.discoverServices(services)
+    }
+
+    func centralManager(_ central: CBCentralManager, didFailToConnect peripheral: CBPeripheral, error: (any Error)?) {
+        resolveConnect(false, message: error?.localizedDescription ?? "Couldn't connect.")
+    }
+
+    func centralManager(_ central: CBCentralManager, didDisconnectPeripheral peripheral: CBPeripheral, error: (any Error)?) {
+        failPending(LinkError.notReady)
+        resolveConnect(false, message: "Disconnected.")
+        if state == .ready { state = .failed("The dongle disconnected.") }
+    }
+
+    func peripheral(_ peripheral: CBPeripheral, didDiscoverServices error: (any Error)?) {
+        guard let services = peripheral.services, !services.isEmpty else {
+            resolveConnect(false, message: "The dongle doesn't have the service \(profile.serviceUUID). Try another UUID preset.")
+            return
+        }
+        services.forEach { peripheral.discoverCharacteristics(nil, for: $0) }
+    }
+
+    func peripheral(_ peripheral: CBPeripheral, didDiscoverCharacteristicsFor service: CBService, error: (any Error)?) {
+        for characteristic in service.characteristics ?? [] {
+            let uuid = characteristic.uuid.uuidString.uppercased()
+            if uuid == profile.notifyUUID.uppercased() || (notifyCharacteristic == nil && characteristic.properties.contains(.notify)) {
+                notifyCharacteristic = characteristic
+            }
+            if uuid == profile.writeUUID.uppercased() || (writeCharacteristic == nil && (characteristic.properties.contains(.write) || characteristic.properties.contains(.writeWithoutResponse))) {
+                writeCharacteristic = characteristic
             }
         }
-    }
-
-    nonisolated func centralManager(_ central: CBCentralManager, didConnect peripheral: CBPeripheral) {
-        MainActor.assumeIsolated {
-            let services = profile.isValid ? [CBUUID(string: profile.serviceUUID)] : nil
-            peripheral.discoverServices(services)
+        if let notifyCharacteristic, writeCharacteristic != nil {
+            peripheral.setNotifyValue(true, for: notifyCharacteristic)
         }
     }
 
-    nonisolated func centralManager(_ central: CBCentralManager, didFailToConnect peripheral: CBPeripheral, error: (any Error)?) {
-        let message = error?.localizedDescription ?? "Couldn't connect."
-        MainActor.assumeIsolated { resolveConnect(false, message: message) }
+    func peripheral(_ peripheral: CBPeripheral, didUpdateNotificationStateFor characteristic: CBCharacteristic, error: (any Error)?) {
+        resolveConnect(error == nil && characteristic.isNotifying, message: "Couldn't subscribe to the dongle's replies.")
     }
 
-    nonisolated func centralManager(_ central: CBCentralManager, didDisconnectPeripheral peripheral: CBPeripheral, error: (any Error)?) {
-        MainActor.assumeIsolated {
-            failPending(LinkError.notReady)
-            resolveConnect(false, message: "Disconnected.")
-            if state == .ready { state = .failed("The dongle disconnected.") }
-        }
-    }
-
-    // MARK: CBPeripheralDelegate (main queue)
-
-    nonisolated func peripheral(_ peripheral: CBPeripheral, didDiscoverServices error: (any Error)?) {
-        MainActor.assumeIsolated {
-            guard let services = peripheral.services, !services.isEmpty else {
-                resolveConnect(false, message: "The dongle doesn't have the service \(profile.serviceUUID). Try another UUID preset.")
-                return
-            }
-            services.forEach { peripheral.discoverCharacteristics(nil, for: $0) }
-        }
-    }
-
-    nonisolated func peripheral(_ peripheral: CBPeripheral, didDiscoverCharacteristicsFor service: CBService, error: (any Error)?) {
-        MainActor.assumeIsolated {
-            for characteristic in service.characteristics ?? [] {
-                let uuid = characteristic.uuid.uuidString.uppercased()
-                if uuid == profile.notifyUUID.uppercased() || (notifyCharacteristic == nil && characteristic.properties.contains(.notify)) {
-                    notifyCharacteristic = characteristic
-                }
-                if uuid == profile.writeUUID.uppercased() || (writeCharacteristic == nil && (characteristic.properties.contains(.write) || characteristic.properties.contains(.writeWithoutResponse))) {
-                    writeCharacteristic = characteristic
-                }
-            }
-            if let notifyCharacteristic, writeCharacteristic != nil {
-                peripheral.setNotifyValue(true, for: notifyCharacteristic)
-            }
-        }
-    }
-
-    nonisolated func peripheral(_ peripheral: CBPeripheral, didUpdateNotificationStateFor characteristic: CBCharacteristic, error: (any Error)?) {
-        let ok = error == nil && characteristic.isNotifying
-        MainActor.assumeIsolated { resolveConnect(ok, message: "Couldn't subscribe to the dongle's replies.") }
-    }
-
-    nonisolated func peripheral(_ peripheral: CBPeripheral, didUpdateValueFor characteristic: CBCharacteristic, error: (any Error)?) {
+    func peripheral(_ peripheral: CBPeripheral, didUpdateValueFor characteristic: CBCharacteristic, error: (any Error)?) {
         guard let data = characteristic.value, let text = String(data: data, encoding: .ascii) else { return }
-        MainActor.assumeIsolated { received(text) }
+        received(text)
     }
 
     static func likelyDongle(_ name: String) -> Bool {
@@ -281,3 +265,5 @@ final class OBDLink: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
         return ["obd", "elm", "vgate", "icar", "vlink", "obdlink", "v-link", "konnwei", "veepeak"].contains { lower.contains($0) }
     }
 }
+
+extension OBDLink: @preconcurrency CBCentralManagerDelegate, @preconcurrency CBPeripheralDelegate {}
