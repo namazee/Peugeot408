@@ -11,6 +11,8 @@ public enum DataSource: String, Codable, Sendable, CaseIterable, Identifiable {
     case commute
     case weather
     case map
+    case photos
+    case music
 
     public var id: String { rawValue }
 
@@ -25,6 +27,8 @@ public enum DataSource: String, Codable, Sendable, CaseIterable, Identifiable {
         case .commute: "Commute"
         case .weather: "Weather & Haze"
         case .map: "Map Snapshot"
+        case .photos: "Photo Frame"
+        case .music: "Music"
         }
     }
 
@@ -39,6 +43,8 @@ public enum DataSource: String, Codable, Sendable, CaseIterable, Identifiable {
         case .commute: "car.rear.road.lane"
         case .weather: "cloud.sun.fill"
         case .map: "map.fill"
+        case .photos: "photo.on.rectangle.angled"
+        case .music: "music.note"
         }
     }
 
@@ -54,6 +60,8 @@ public enum DataSource: String, Codable, Sendable, CaseIterable, Identifiable {
         case .commute: "Commute"
         case .weather: "WeatherHaze"
         case .map: "MapSnapshot"
+        case .photos: "PhotoFrame"
+        case .music: "Music"
         }
     }
 
@@ -116,7 +124,10 @@ public struct CarData: Sendable, Equatable {
     public var calendar: CalendarCache
     public var weather: WeatherCache
     public var map: MapSnapshotIndex
-    /// Folder the map PNGs live in.
+    // Phase 4
+    public var photos: PhotoLibraryState
+    public var music: MusicCache
+    /// Folder the map PNGs, photos and artwork live in.
     public var directory: URL?
 
     public init(
@@ -132,6 +143,8 @@ public struct CarData: Sendable, Equatable {
         calendar: CalendarCache = .empty,
         weather: WeatherCache = .empty,
         map: MapSnapshotIndex = .empty,
+        photos: PhotoLibraryState = .empty,
+        music: MusicCache = .empty,
         directory: URL? = nil
     ) {
         self.service = service
@@ -146,6 +159,8 @@ public struct CarData: Sendable, Equatable {
         self.calendar = calendar
         self.weather = weather
         self.map = map
+        self.photos = photos
+        self.music = music
         self.directory = directory
     }
 
@@ -166,6 +181,8 @@ public struct CarData: Sendable, Equatable {
             calendar: LiveStores.calendar(in: directory).load(),
             weather: LiveStores.weather(in: directory).load(),
             map: LiveStores.map(in: directory).load(),
+            photos: MediaStores.photos(in: directory).load(),
+            music: MediaStores.music(in: directory).load(),
             directory: directory
         )
     }
@@ -220,6 +237,12 @@ public struct CarData: Sendable, Equatable {
 
         case .parking, .prayer, .commute, .weather, .map:
             return liveCard(for: source, at: date, calendar: calendar)
+
+        case .photos:
+            return photoCard(at: date, albumID: photos.slotAlbumID)
+
+        case .music:
+            return musicCard()
         }
     }
 }
@@ -348,6 +371,8 @@ public enum DataCard: Sendable, Equatable {
     case commute(CommuteSummary)
     case weather(WeatherSummary)
     case map(MapSummary)
+    case photos(PhotoSummary)
+    case music(MusicSummary)
 
     public var source: DataSource {
         switch self {
@@ -360,6 +385,8 @@ public enum DataCard: Sendable, Equatable {
         case .commute: .commute
         case .weather: .weather
         case .map: .map
+        case .photos: .photos
+        case .music: .music
         }
     }
 
@@ -371,7 +398,7 @@ public enum DataCard: Sendable, Equatable {
         case .renewals(let summary): summary.lines.first?.urgency ?? .ok
         case .tng(let summary): summary.isLow ? .dueSoon : .ok
         case .weather(let summary): summary.air?.band.urgency ?? .ok
-        case .parking, .prayer, .commute, .map: .ok
+        case .parking, .prayer, .commute, .map, .photos, .music: .ok
         }
     }
 }
@@ -415,8 +442,12 @@ public enum DataTimeline {
         case .weather:
             dates = (data.weather.weather?.hours ?? []).map(\.date).filter { $0 > start }.prefix(6).map { $0 }
 
-        case .map:
+        case .map, .music:
             return [start]
+
+        case .photos:
+            guard !data.photos.photos.isEmpty else { return [start] }
+            dates = PhotoRotation.dates(after: start, minutes: data.photos.clampedRotationMinutes)
         }
         let unique = Set(dates.filter { $0 > start })
         return [start] + unique.sorted().prefix(40)

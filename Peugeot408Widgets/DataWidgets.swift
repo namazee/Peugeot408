@@ -85,8 +85,31 @@ struct DataWidgetView: View {
     var body: some View {
         WidgetCard(style: .standard, tint: entry.card.tint) {
             DataCardView(card: entry.card, size: CardSize(family))
+                .overlay(alignment: .bottomTrailing) { musicControls }
         }
         .widgetURL(entry.card.source.deepLink)
+    }
+
+    /// Play/pause and next on the medium Music widget (iPhone; CarPlay may ignore taps).
+    @ViewBuilder
+    private var musicControls: some View {
+        if family == .systemMedium, case .music(let summary) = entry.card, summary.showControls, summary.title != nil {
+            HStack(spacing: 8) {
+                Button(intent: MusicPlayPauseIntent()) {
+                    Image(systemName: "playpause.fill")
+                        .frame(width: 34, height: 30)
+                }
+                .accessibilityLabel("Play or pause")
+                Button(intent: MusicNextIntent()) {
+                    Image(systemName: "forward.fill")
+                        .frame(width: 34, height: 30)
+                }
+                .accessibilityLabel("Next track")
+            }
+            .font(.system(size: 15, weight: .semibold))
+            .buttonStyle(.bordered)
+            .tint(Theme.accent)
+        }
     }
 }
 
@@ -156,6 +179,12 @@ struct CommuteWidget: Widget {
 struct WeatherHazeWidget: Widget {
     var body: some WidgetConfiguration {
         DataWidgetConfiguration.make(source: .weather, description: "Temperature, rain today and the haze (API) level.")
+    }
+}
+
+struct MusicWidget: Widget {
+    var body: some WidgetConfiguration {
+        DataWidgetConfiguration.make(source: .music, description: "Your recently played or featured Apple Music item.", lockScreen: false)
     }
 }
 
@@ -236,6 +265,13 @@ struct MapSnapshotWidget: Widget {
     MapSnapshotWidget()
 } timeline: {
     DataEntry(date: .now, card: SampleData.card(for: .map))
+}
+
+#Preview("Music", as: .systemMedium) {
+    MusicWidget()
+} timeline: {
+    DataEntry(date: .now, card: SampleData.card(for: .music))
+    DataEntry(date: .now, card: CarData.empty.card(for: .music, at: .now))
 }
 
 #Preview("Lock Screen", as: .accessoryRectangular) {

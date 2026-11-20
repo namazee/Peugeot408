@@ -61,7 +61,7 @@ struct MapSnapshotView: View {
     }
 }
 
-/// Studio tab. Phase 3 adds Data sources → Map; the rest of the Studio arrives in Phases 4–5.
+/// Studio tab. Data sources (Map, Photo Frame, Music) are here; templates and the builder arrive in Phase 5.
 struct StudioView: View {
     @Binding var path: [DataSource]
 
@@ -72,10 +72,12 @@ struct StudioView: View {
                     NavigationLink(value: DataSource.map) {
                         Label("Map Snapshot", systemImage: DataSource.map.symbol)
                     }
-                    Label("Music: Phase 4", systemImage: "music.note")
-                        .foregroundStyle(Theme.secondaryText)
-                    Label("Photo Frame: Phase 4", systemImage: "photo.on.rectangle")
-                        .foregroundStyle(Theme.secondaryText)
+                    NavigationLink(value: DataSource.photos) {
+                        Label("Photo Frame", systemImage: DataSource.photos.symbol)
+                    }
+                    NavigationLink(value: DataSource.music) {
+                        Label("Music", systemImage: DataSource.music.symbol)
+                    }
                 }
                 Section("Coming in Phase 5") {
                     Label("Templates and seasonal packs", systemImage: "square.grid.2x2")

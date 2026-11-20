@@ -110,7 +110,8 @@ public enum SampleData {
             commute: commute,
             commuteCache: commuteCache,
             calendar: calendarCache,
-            weather: weather
+            weather: weather,
+            music: MusicCache(item: MusicItemCard(title: "Drive Mix", subtitle: "Apple Music", kindLabel: "Playlist", artworkFile: nil, updatedAt: now))
         )
     }
 

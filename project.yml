@@ -47,7 +47,7 @@ targets:
   Peugeot408:
     type: application
     platform: iOS
-    sources: [Peugeot408]
+    sources: [Peugeot408, Shared]
     dependencies:
       - target: CarKit
         embed: false
@@ -62,6 +62,7 @@ targets:
         AQIAPIKey: $(AQI_API_KEY)         # from Config/Secrets.xcconfig (CI writes it from the AQI_API_KEY secret)
         NSLocationWhenInUseUsageDescription: Peugeot408 uses your location to save where you parked, find your prayer zone, and show local weather, haze and drive times.
         NSCalendarsFullAccessUsageDescription: Peugeot408 shows your next calendar event on the Commute widget. Events stay on your phone.
+        NSAppleMusicUsageDescription: Peugeot408 shows your recently played or featured Apple Music item on the Music widget.
         ITSAppUsesNonExemptEncryption: false
         UILaunchScreen: {}
         UIApplicationSceneManifest:
@@ -86,7 +87,7 @@ targets:
   Peugeot408Widgets:
     type: app-extension
     platform: iOS
-    sources: [Peugeot408Widgets]
+    sources: [Peugeot408Widgets, Shared]
     dependencies:
       - target: CarKit
         embed: false
@@ -116,6 +117,7 @@ targets:
         PRODUCT_BUNDLE_IDENTIFIER: $(BUNDLE_PREFIX).peugeot408.widgets
         TARGETED_DEVICE_FAMILY: "1"
         SKIP_INSTALL: YES
+        SWIFT_ACTIVE_COMPILATION_CONDITIONS: $(inherited) WIDGET_EXTENSION   # Shared/ code that only runs in the app
 
   CarKitTests:
     type: bundle.unit-test

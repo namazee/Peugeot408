@@ -110,6 +110,72 @@ final class CarDataModel {
 
     var isRefreshing: Set<DataSource> = []
 
+    // MARK: Phase 4
+
+    func updatePhotos(_ change: (inout PhotoLibraryState) -> Void) {
+        var value = data.photos
+        change(&value)
+        commit(value, to: MediaStores.photos(in: directory), source: .photos) { $0.photos = value }
+    }
+
+    func updateMusic(_ change: (inout MusicCache) -> Void) {
+        var value = data.music
+        change(&value)
+        commit(value, to: MediaStores.music(in: directory), source: .music) { $0.music = value }
+    }
+
+    /// Downsamples and adds picked photos. Returns how many were added.
+    func addPhotos(_ images: [Data], toAlbum albumID: UUID?) -> Int {
+        let folder = MediaStores.photosFolder(in: directory)
+        var added: [PhotoItem] = []
+        let room = max(0, PhotoLibraryState.maxPhotos - data.photos.photos.count)
+        for imageData in images.prefix(room) {
+            guard let jpeg = ImageDownsampler.jpeg(from: imageData, maxPixelSize: 1_000) else { continue }
+            let item = PhotoItem(fileName: "\(UUID().uuidString).jpg", addedAt: .now)
+            do {
+                try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+                try jpeg.write(to: folder.appending(path: item.fileName, directoryHint: .notDirectory), options: .atomic)
+                added.append(item)
+            } catch {
+                lastError = "Couldn't save a photo: \(error.localizedDescription)"
+            }
+        }
+        guard !added.isEmpty else { return 0 }
+        updatePhotos { library in
+            library.photos += added
+            if let albumID, let index = library.albums.firstIndex(where: { $0.id == albumID }) {
+                library.albums[index].photoIDs += added.map(\.id)
+            }
+        }
+        return added.count
+    }
+
+    func deletePhotos(_ ids: Set<UUID>) {
+        var files: [String] = []
+        updatePhotos { files = $0.remove(photoIDs: ids) }
+        let folder = MediaStores.photosFolder(in: directory)
+        for file in files {
+            try? FileManager.default.removeItem(at: folder.appending(path: file, directoryHint: .notDirectory))
+        }
+    }
+
+    /// Refreshes the cached Music card (only when Apple Music access was granted).
+    func refreshMusic() async {
+        guard MusicLoader.isAuthorized else { return }
+        isRefreshing.insert(.music)
+        let result = await MusicLoader.load(cache: data.music, directory: directory)
+        isRefreshing.remove(.music)
+        updateMusic { cache in
+            switch result {
+            case .success(let item):
+                cache.item = item
+                cache.lastError = nil
+            case .failure(let error):
+                cache.lastError = error.localizedDescription
+            }
+        }
+    }
+
     private func commit<Value: Codable & Sendable>(
         _ value: Value,
         to store: JSONFileStore<Value>,

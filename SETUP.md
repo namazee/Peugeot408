@@ -141,6 +141,12 @@ Until the required secrets exist, CI still runs the tests and skips the upload w
 
    Siri works too: "Save parking in Peugeot408".
 
+## 11. Phase 4: Photo Frame and Music
+
+1. **MusicKit** must be ticked on the app's App ID under *App Services* (step 2). If Music says it can't load anything even after you allow access, check that, then rerun with *Regenerate provisioning profiles*.
+2. In the app: Studio → Music → **Allow Apple Music**. Recently played needs an Apple Music subscription; a featured playlist needs the playlist in your library (Sync Library on).
+3. Studio → Photo Frame → **Add photos**. To give the Photo Frame widget its own album: long-press the widget → **Edit Widget** → Album. Car Slots use the album chosen in the app.
+
 ---
 
 ## Troubleshooting

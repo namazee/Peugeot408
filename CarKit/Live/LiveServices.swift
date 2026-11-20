@@ -95,7 +95,7 @@ public enum LiveRefresher {
             if let mapSize {
                 await MapSnapshotRenderer.ensure(size: mapSize, directory: directory, now: now, force: force)
             }
-        case .service, .fuel, .renewals, .tng, .parking:
+        case .service, .fuel, .renewals, .tng, .parking, .photos, .music:
             break
         }
     }

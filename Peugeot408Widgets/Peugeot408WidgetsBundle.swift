@@ -18,5 +18,7 @@ struct Peugeot408WidgetsBundle: WidgetBundle {
         CommuteWidget()
         WeatherHazeWidget()
         MapSnapshotWidget()
+        PhotoFrameWidget()
+        MusicWidget()
     }
 }

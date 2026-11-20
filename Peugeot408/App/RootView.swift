@@ -49,6 +49,7 @@ struct RootView: View {
             Task {
                 await cars.refresh(.prayer)
                 await cars.refresh(.commute)
+                await cars.refreshMusic()
             }
         }
     }
@@ -75,7 +76,7 @@ struct RootView: View {
             case .tng, .prayer, .commute, .weather:
                 tab = .daily
                 dailyPath = [source]
-            case .map:
+            case .map, .photos, .music:
                 tab = .studio
                 studioPath = [source]
             case .service, .fuel, .renewals, .parking:

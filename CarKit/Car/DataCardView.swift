@@ -65,6 +65,8 @@ public struct DataCardView: View {
                 case .commute(let summary): CommuteCard(summary: summary, size: size)
                 case .weather(let summary): WeatherCard(summary: summary, size: size)
                 case .map(let summary): MapCard(summary: summary, size: size)
+                case .photos(let summary): PhotoCard(summary: summary, size: size)
+                case .music(let summary): MusicCardView(summary: summary, size: size)
                 }
             }
         }
@@ -128,6 +130,11 @@ public struct DataCardView: View {
             return lines
         case .map(let summary):
             return [summary.caption ?? "Save parking or set Home/Work"]
+        case .photos(let summary):
+            return [summary.photoCount == 0 ? "Add photos in the app" : "\(summary.photoCount) photos"]
+        case .music(let summary):
+            guard let title = summary.title else { return ["Open Music in the app"] }
+            return [title, summary.subtitle ?? summary.kindLabel]
         }
     }
 

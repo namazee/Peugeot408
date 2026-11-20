@@ -77,6 +77,8 @@ struct DataSourceScreen: View {
         case .commute: CommuteView()
         case .weather: WeatherView()
         case .map: MapSnapshotView()
+        case .photos: PhotoFrameView()
+        case .music: MusicView()
         }
     }
 }
@@ -133,6 +135,10 @@ struct DataSourceRow: View {
             return parts.joined(separator: " · ")
         case .map(let summary):
             return summary.caption ?? "Nothing to show yet"
+        case .photos(let summary):
+            return summary.photoCount == 0 ? "No photos yet" : "\(summary.photoCount) photos"
+        case .music(let summary):
+            return summary.title ?? "Not set up"
         }
     }
 }
