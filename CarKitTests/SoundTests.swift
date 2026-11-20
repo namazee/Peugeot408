@@ -16,7 +16,7 @@ struct ConnectSoundTests {
 
     @Test func entityIDsRoundTrip() {
         let id = UUID()
-        for sound in [ConnectSoundKind.bundled("chime-soft"), .imported(id), .greeting] {
+        for sound in [ConnectSoundKind.bundled("chime-soft"), .imported(id), .greeting, .voice("drive-safe")] {
             #expect(ConnectSoundSettings.sound(entityID: ConnectSoundSettings.entityID(sound)) == sound)
         }
         #expect(ConnectSoundSettings.sound(entityID: "nonsense") == nil)
@@ -33,10 +33,36 @@ struct ConnectSoundTests {
     @Test func pickerListsBundledGreetingAndImported() {
         let clip = ImportedSound(name: "Horn", fileName: "a.m4a", duration: 2)
         let settings = ConnectSoundSettings(imported: [clip])
-        #expect(settings.allSounds.count == BundledSound.all.count + 2)
+        #expect(settings.allSounds.count == BundledSound.all.count + VoiceCue.all.count + 2)
         #expect(settings.allSounds.last == .imported(clip.id))
         #expect(settings.name(of: .imported(clip.id)) == "Horn")
-        #expect(settings.name(of: .bundled("rev-sport")) == "Sporty rev")
+        #expect(settings.name(of: .bundled("rev-sport")) == "Sporty rev (synth)")
+    }
+
+    @Test func packsAndVoiceCues() {
+        for pack in SoundPack.allCases where pack != .voice {
+            #expect(!BundledSound.sounds(in: pack).isEmpty, "\(pack)")
+        }
+        #expect(Set(BundledSound.all.map(\.id)).count == BundledSound.all.count)
+        #expect(BundledSound.sounds(in: .engine).count >= 10)
+        let cue = VoiceCue.all.first { $0.id == "drive-safe" }
+        #expect(cue?.text(language: .english, name: "Namazee") == "Drive safe, Namazee.")
+        #expect(cue?.text(language: .malay, name: "") == "Pandu dengan selamat.")
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = TimeZone(identifier: "Asia/Kuala_Lumpur") ?? .gmt
+        let evening = calendar.date(from: DateComponents(year: 2026, month: 11, day: 20, hour: 20)) ?? .now
+        let time = VoiceCue.all.first { $0.id == "time-greeting" }
+        #expect(time?.text(language: .malay, name: "", at: evening, calendar: calendar) == "Selamat malam.")
+        #expect(time?.text(language: .english, name: "", at: evening, calendar: calendar) == "Good evening.")
+    }
+
+    @Test func disconnectSoundDefaultsToGoodbyeAndOlderFilesLoad() throws {
+        #expect(ConnectSoundSettings().resolvedDisconnect == .bundled("goodbye"))
+        #expect(ConnectSoundSettings(disconnectSound: .voice("see-you")).resolvedDisconnect == .voice("see-you"))
+        #expect(ConnectSoundSettings(disconnectSound: .imported(UUID())).resolvedDisconnect == .bundled("goodbye"))
+        let old = #"{"defaultSound":{"greeting":{}},"volume":0.8,"greetingName":"","greetingLanguage":"english","imported":[]}"#
+        let decoded = try JSONDecoder().decode(ConnectSoundSettings.self, from: Data(old.utf8))
+        #expect(decoded.disconnectSound == nil && decoded.voiceIdentifier == nil)
     }
 
     @Test func volumeIsClamped() {

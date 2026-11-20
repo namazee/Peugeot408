@@ -10,39 +10,53 @@ struct ConnectSoundView: View {
     @State private var message: String?
     @State private var importing = false
     @State private var trimming: TrimSource?
+    @State private var target: SoundTarget = .connect
 
     var body: some View {
         List {
             Section {
-                ForEach(settings.allSounds, id: \.self) { sound in
-                    HStack {
-                        Button {
-                            update { $0.defaultSound = sound }
-                        } label: {
-                            HStack {
-                                Image(systemName: symbol(sound)).frame(width: 28).foregroundStyle(Theme.accent)
-                                Text(settings.name(of: sound))
-                                Spacer()
-                                if settings.resolved(nil) == sound {
-                                    Image(systemName: "checkmark").foregroundStyle(Theme.accent)
-                                }
+                Picker("Choosing for", selection: $target) {
+                    Text("Connect").tag(SoundTarget.connect)
+                    Text("Disconnect").tag(SoundTarget.disconnect)
+                }
+                .pickerStyle(.segmented)
+                currentRow(title: "When CarPlay connects", sound: settings.resolved(nil), isTarget: target == .connect)
+                currentRow(title: "When CarPlay disconnects", sound: settings.resolvedDisconnect, isTarget: target == .disconnect)
+            } header: {
+                Text("Your sounds")
+            } footer: {
+                Text("Pick Connect or Disconnect, then tap a sound below to use it. ▶ previews it. Every sound is at about the same loudness.")
+            }
+
+            Section("Packs") {
+                ForEach(SoundPack.allCases) { pack in
+                    NavigationLink {
+                        SoundPackView(pack: pack, settings: $settings, target: target, onSave: save, onTest: { sound in Task { await test(sound) } })
+                    } label: {
+                        HStack(spacing: 12) {
+                            Image(systemName: pack.symbol)
+                                .font(.title3)
+                                .foregroundStyle(Theme.accent)
+                                .frame(width: 30)
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(pack.displayName).font(.headline)
+                                Text(pack.summary).font(.footnote).foregroundStyle(Theme.secondaryText).lineLimit(2)
                             }
-                            .contentShape(Rectangle())
-                        }
-                        .buttonStyle(.plain)
-                        Button {
-                            Task { await test(sound) }
-                        } label: {
-                            Image(systemName: "play.circle.fill").font(.title2)
-                        }
-                        .buttonStyle(.borderless)
-                        .accessibilityLabel("Play \(settings.name(of: sound))")
-                    }
-                    .swipeActions {
-                        if case .imported(let id) = sound {
-                            Button("Delete", role: .destructive) { deleteImported(id) }
+                            Spacer()
+                            Text("\(pack == .voice ? VoiceCue.all.count : BundledSound.sounds(in: pack).count)")
+                                .font(.subheadline.monospacedDigit())
+                                .foregroundStyle(Theme.secondaryText)
                         }
                     }
+                }
+            }
+
+            Section {
+                ForEach(settings.imported) { item in
+                    soundRow(.imported(item.id))
+                        .swipeActions {
+                            Button("Delete", role: .destructive) { deleteImported(item.id) }
+                        }
                 }
                 Button {
                     importing = true
@@ -50,9 +64,9 @@ struct ConnectSoundView: View {
                     Label("Import your own (up to 5 s)", systemImage: "square.and.arrow.down")
                 }
             } header: {
-                Text("Sound")
+                Text("Imported")
             } footer: {
-                Text("All bundled sounds are original, made for this app. Tap a sound to make it the default; ▶ plays it.")
+                Text("Imported clips are trimmed to 5 seconds and brought to the same loudness as the built-in sounds. They stay on this iPhone.")
             }
 
             Section {
@@ -73,19 +87,6 @@ struct ConnectSoundView: View {
                 }
             } footer: {
                 Text("Plays through whatever is connected (the car speakers in CarPlay) and lowers other audio while it plays. Volume is relative to the phone's volume.")
-            }
-
-            Section {
-                TextField("Your name", text: binding(\.greetingName))
-                    .onSubmit { save() }
-                Picker("Language", selection: binding(\.greetingLanguage)) {
-                    ForEach(GreetingLanguage.allCases, id: \.self) { Text($0.displayName).tag($0) }
-                }
-                LabeledContent("Says", value: settings.greetingText)
-            } header: {
-                Text("Spoken greeting")
-            } footer: {
-                Text("Spoken by the iPhone's built-in voice. If no Malay voice is installed, iOS uses English; add one in Settings → Accessibility → Spoken Content → Voices.")
             }
 
             Section {
@@ -117,12 +118,28 @@ struct ConnectSoundView: View {
         }
     }
 
-    private func symbol(_ sound: ConnectSoundKind) -> String {
-        switch sound {
-        case .bundled(let id): BundledSound.all.first { $0.id == id }?.symbol ?? "speaker.wave.2"
-        case .imported: "waveform"
-        case .greeting: "person.wave.2.fill"
+    private func currentRow(title: String, sound: ConnectSoundKind, isTarget: Bool) -> some View {
+        HStack {
+            VStack(alignment: .leading, spacing: 2) {
+                Text(title).font(.footnote).foregroundStyle(isTarget ? Theme.accent : Theme.secondaryText)
+                Label(settings.name(of: sound), systemImage: SoundSymbols.symbol(sound))
+                    .font(.headline)
+            }
+            Spacer()
+            Button {
+                Task { await test(sound) }
+            } label: {
+                Image(systemName: "play.circle.fill").font(.title2)
+            }
+            .buttonStyle(.borderless)
+            .accessibilityLabel("Play \(settings.name(of: sound))")
         }
+    }
+
+    private func soundRow(_ sound: ConnectSoundKind) -> some View {
+        SoundRow(sound: sound, settings: settings, target: target,
+                 onPick: { update { $0.set(sound, for: target) } },
+                 onTest: { Task { await test(sound) } })
     }
 
     private func binding<Value>(_ keyPath: WritableKeyPath<ConnectSoundSettings, Value>) -> Binding<Value> {
@@ -275,6 +292,8 @@ struct TrimView: View {
         do {
             try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
             try await session.export(to: output, as: .m4a)
+            // Same loudness as the bundled sounds; keep the clip as is if this fails.
+            try? SoundNormalizer.normalize(output)
             onSave(item)
             dismiss()
         } catch {
@@ -306,9 +325,9 @@ struct AutomationGuideView: View {
         if kind == .connect {
             list.append(Step(text: "Search \"Play Connect Sound\" and pick it (Peugeot408). Leave Sound empty to use the one chosen in the app.", screen: ["Search: Play Connect Sound", "Peugeot408", "▶ Play Connect Sound"], highlight: 2))
         } else {
-            list.append(Step(text: "Add \"Play Connect Sound\" and set Sound to Goodbye. Then add \"Save Parking\" (Peugeot408) below it.", screen: ["▶ Play Connect Sound · Goodbye", "+ Add Action", "P Save Parking"], highlight: 2))
+            list.append(Step(text: "Add \"Play Disconnect Sound\" (it plays the disconnect sound chosen in the app). Then add \"Save Parking\" (Peugeot408) below it.", screen: ["▶ Play Disconnect Sound", "+ Add Action", "P Save Parking"], highlight: 2))
         }
-        list.append(Step(text: "Tap Done. Next time you plug in (or unplug), it runs by itself.", screen: ["When CarPlay \(trigger.lowercased())", kind == .connect ? "Play Connect Sound" : "Play Connect Sound, Save Parking", "Done"], highlight: 2))
+        list.append(Step(text: "Tap Done. Next time you plug in (or unplug), it runs by itself.", screen: ["When CarPlay \(trigger.lowercased())", kind == .connect ? "Play Connect Sound" : "Play Disconnect Sound, Save Parking", "Done"], highlight: 2))
         return list
     }
 
@@ -370,5 +389,127 @@ private struct PhoneScreenSketch: View {
         .background(RoundedRectangle(cornerRadius: 26, style: .continuous).fill(Color.black))
         .overlay(RoundedRectangle(cornerRadius: 26, style: .continuous).strokeBorder(.white.opacity(0.15), lineWidth: 2))
         .accessibilityHidden(true)
+    }
+}
+
+/// Which automation a tapped sound is for.
+enum SoundTarget: Hashable { case connect, disconnect }
+
+extension ConnectSoundSettings {
+    mutating func set(_ sound: ConnectSoundKind, for target: SoundTarget) {
+        switch target {
+        case .connect: defaultSound = sound
+        case .disconnect: disconnectSound = sound
+        }
+    }
+
+    func isChosen(_ sound: ConnectSoundKind, for target: SoundTarget) -> Bool {
+        target == .connect ? resolved(nil) == sound : resolvedDisconnect == sound
+    }
+}
+
+enum SoundSymbols {
+    static func symbol(_ sound: ConnectSoundKind) -> String {
+        switch sound {
+        case .bundled(let id): BundledSound.all.first { $0.id == id }?.symbol ?? "speaker.wave.2"
+        case .imported: "waveform"
+        case .greeting: "person.wave.2.fill"
+        case .voice(let id): VoiceCue.all.first { $0.id == id }?.symbol ?? "person.wave.2.fill"
+        }
+    }
+}
+
+/// One sound: tap to choose it for connect / disconnect, ▶ to preview.
+struct SoundRow: View {
+    let sound: ConnectSoundKind
+    let settings: ConnectSoundSettings
+    let target: SoundTarget
+    let onPick: () -> Void
+    let onTest: () -> Void
+
+    var body: some View {
+        HStack {
+            Button(action: onPick) {
+                HStack(spacing: 10) {
+                    Image(systemName: SoundSymbols.symbol(sound)).frame(width: 28).foregroundStyle(Theme.accent)
+                    VStack(alignment: .leading, spacing: 1) {
+                        Text(settings.name(of: sound))
+                        if let spoken = settings.spokenText(sound) {
+                            Text("Says: \(spoken)").font(.caption).foregroundStyle(Theme.secondaryText)
+                        }
+                    }
+                    Spacer()
+                    if settings.isChosen(sound, for: target) {
+                        Image(systemName: "checkmark").foregroundStyle(Theme.accent)
+                    }
+                }
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            Button(action: onTest) {
+                Image(systemName: "play.circle.fill").font(.title2)
+            }
+            .buttonStyle(.borderless)
+            .accessibilityLabel("Play \(settings.name(of: sound))")
+        }
+    }
+}
+
+/// The sounds in one pack. The Voice cues pack also picks the iPhone voice.
+struct SoundPackView: View {
+    let pack: SoundPack
+    @Binding var settings: ConnectSoundSettings
+    let target: SoundTarget
+    let onSave: () -> Void
+    let onTest: (ConnectSoundKind) -> Void
+
+    private var sounds: [ConnectSoundKind] {
+        pack == .voice ? [.greeting] + VoiceCue.all.map { .voice($0.id) } : BundledSound.sounds(in: pack).map { .bundled($0.id) }
+    }
+
+    private var voices: [AVSpeechSynthesisVoice] {
+        AVSpeechSynthesisVoice.speechVoices()
+            .filter { $0.language.hasPrefix(settings.greetingLanguage == .english ? "en" : "ms") }
+            .sorted { ($0.quality.rawValue, $0.name) > ($1.quality.rawValue, $1.name) }
+    }
+
+    var body: some View {
+        List {
+            Section {
+                ForEach(sounds, id: \.self) { sound in
+                    SoundRow(sound: sound, settings: settings, target: target,
+                             onPick: { settings.set(sound, for: target); onSave() },
+                             onTest: { onTest(sound) })
+                }
+            } header: {
+                Text(target == .connect ? "Tap to use when CarPlay connects" : "Tap to use when CarPlay disconnects")
+            } footer: {
+                Text(pack.summary + (pack == .engine ? " Sources and licences are listed in the app's ASSETS-LICENSES.md." : ""))
+            }
+
+            if pack == .voice {
+                Section {
+                    TextField("Your name (optional)", text: $settings.greetingName)
+                        .onSubmit(onSave)
+                    Picker("Language", selection: $settings.greetingLanguage) {
+                        ForEach(GreetingLanguage.allCases, id: \.self) { Text($0.displayName).tag($0) }
+                    }
+                    Picker("Voice", selection: $settings.voiceIdentifier) {
+                        Text("Default").tag(String?.none)
+                        ForEach(voices, id: \.identifier) { voice in
+                            Text(voice.quality == .default ? voice.name : "\(voice.name) (enhanced)").tag(String?.some(voice.identifier))
+                        }
+                    }
+                } header: {
+                    Text("Voice")
+                } footer: {
+                    Text("Uses the iPhone's built-in voices. Download nicer ones in Settings → Accessibility → Spoken Content → Voices.")
+                }
+                .onChange(of: settings.greetingLanguage) { _, _ in settings.voiceIdentifier = nil; onSave() }
+                .onChange(of: settings.voiceIdentifier) { _, _ in onSave() }
+            }
+        }
+        .navigationTitle(pack.displayName)
+        .onDisappear(perform: onSave)
     }
 }

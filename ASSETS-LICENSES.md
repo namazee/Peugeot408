@@ -23,13 +23,36 @@ The files are renamed only (no glyph or table changes), so they are not "Modifie
 
 All seasonal artwork and stickers are original: drawn in code with SwiftUI shapes and SF Symbols (`CarKit/Studio/Artwork.swift`). No Peugeot logos or lion emblem, nothing copied from other apps.
 
-## Connect sounds (Phase 6)
+## Connect sounds (Phase 6, packs in Phase 12)
 
 | Asset | Source | Licence |
 |---|---|---|
-| `Resources/Sounds/*.wav` (chime-bright, chime-soft, welcome-tone, rev-sport, rev-blip, goodbye) | Synthesised from scratch by `tools/make-sounds.py` (sine, saw and noise oscillators; no samples) on 2026-11-20 | Owned by the project author |
+| `Resources/Sounds/*.m4a`, synthesised packs: Classic (chime-bright, chime-soft, welcome-tone, rev-sport, rev-blip, goodbye), EV whoosh (`ev-*`), Luxury (`lux-*`), Retro arcade (`arc-*`), Minimal pings (`ping-*`), Sci-fi (`sf-*`) | Synthesised from scratch by `tools/make-sounds.py` (sine, square, saw and noise oscillators; no samples), loudness-matched; regenerated 2026-11-20 (Phase 12) | Owned by the project author |
+| Voice cues | Spoken on the device at run time by Apple's `AVSpeechSynthesizer`; the lines are original | Apple system voices (on-device use) |
 | Spoken greeting | Generated on the device at run time by Apple's `AVSpeechSynthesizer` | Apple system voices (on-device use) |
 | Imported clips | Chosen by the user on their own phone; not part of the repo | The user's own |
+
+### Engine starts pack (Phase 12)
+
+Real recordings, each checked on its own page as CC0 1.0 (Freesound) or public domain (Wikimedia Commons) on 2026-11-20.
+Freesound files are the site's high-quality MP3 previews of the originals (same recordings, same licence).
+`tools/process-engine-sounds.py` keeps at most 5 s from the moment the engine fires, fades the ends and loudness-matches them.
+CC0 needs no attribution; the authors are listed anyway, with thanks.
+
+| Asset | Recording | Author | Licence |
+|---|---|---|---|
+| `Resources/Sounds/eng-v8-bigblock.m4a` (Big-block V8) | https://freesound.org/people/Henaway/sounds/127980/ | Henaway | CC0 1.0 |
+| `Resources/Sounds/eng-v8-corvette.m4a` ('74 Corvette V8 start) | https://freesound.org/people/DigPro120/sounds/432638/ | DigPro120 | CC0 1.0 |
+| `Resources/Sounds/eng-v8-mustang.m4a` ('85 Mustang V8) | https://freesound.org/people/lmbubec/sounds/119449/ | lmbubec | CC0 1.0 |
+| `Resources/Sounds/eng-v8-ferrari.m4a` (Ferrari 360 V8) | https://freesound.org/people/PritzProductions/sounds/241083/ | PritzProductions | CC0 1.0 |
+| `Resources/Sounds/eng-v12-lambo.m4a` (Lamborghini start-up) | https://freesound.org/people/JaimeLopes/sounds/564373/ | JaimeLopes | CC0 1.0 |
+| `Resources/Sounds/eng-supercar.m4a` (Supercar rev) | https://freesound.org/people/richwise/sounds/478756/ | richwise | CC0 1.0 |
+| `Resources/Sounds/eng-flat6-911.m4a` (Porsche 911 flat-six) | https://freesound.org/people/mharo/sounds/55727/ | mharo | CC0 1.0 |
+| `Resources/Sounds/eng-boxer-wrx.m4a` (Subaru WRX boxer) | https://freesound.org/people/ulose2piranha/sounds/273334/ | ulose2piranha | CC0 1.0 |
+| `Resources/Sounds/eng-v10-m6.m4a` (BMW M6 V10 start) | https://freesound.org/people/Kinoton/sounds/478597/ | Kinoton | CC0 1.0 |
+| `Resources/Sounds/eng-v8-maserati.m4a` (Maserati sport mode) | https://freesound.org/people/myeclecticself/sounds/585215/ | myeclecticself | CC0 1.0 |
+| `Resources/Sounds/eng-ev-start.m4a` (Electric car start) | https://freesound.org/people/evsecrets/sounds/324119/ | evsecrets | CC0 1.0 |
+| `Resources/Sounds/eng-hatch-start.m4a` (Hatchback start) | https://commons.wikimedia.org/wiki/File:Open_Corsa_E_model_2014_engine_startup_sound.ogg | MKFI | Public domain |
 
 ## My Car built-in photos
 

@@ -2,7 +2,30 @@
 
 Fresh session? Read `docs/SPEC.md`, then this file, then continue from **Current phase**.
 
-## Current phase: 11 (Widget styles) — built. Next: "Continue with Phase 12" (Sound packs), then 13 (Lyrics), 14 (Panorama hero). Phase 8 split cards still waiting for your car test.
+## Current phase: 12 (Sound packs) — built. Next: "Continue with Phase 13" (Lyrics), then 14 (Panorama hero). Phase 8 split cards still waiting for your car test.
+
+## Phase 12 — Sound packs
+### Done
+- **8 packs, 47 bundled sounds plus 9 voice cues.** Studio → Connect sounds now opens a pack list: Engine starts, EV whoosh, Luxury, Retro arcade, Minimal pings, Sci-fi, Voice cues and Classic. Each pack lists its sounds with ▶ previews.
+- **Engine starts:** 12 real recordings.
+  - V8: big-block, '74 Corvette, '85 Mustang, Ferrari 360, Maserati sport mode.
+  - Lamborghini start-up, BMW M6 V10, Porsche 911 flat-six, Subaru WRX boxer, a supercar rev, an EV start, and a hatchback start.
+  - Each was checked on its own page as CC0 (Freesound) or public domain (Wikimedia Commons), then cut by `tools/process-engine-sounds.py` to at most 5 s from when the engine fires.
+  - Sources are in `tools/engine-sounds.json` and `ASSETS-LICENSES.md`.
+  - The Commons Rover V8 was left out (Wikimedia kept rate-limiting the download).
+- **Synthesised packs** (`tools/make-sounds.py`, original, no samples):
+  - 4 EV, 6 Luxury, 8 Arcade, 5 Pings and 6 Sci-fi;
+  - the 6 Classic sounds regenerated.
+  - Encoded as AAC (.m4a, 2.2 MB for everything).
+- **Same loudness everywhere:** every bundled sound sits at about -17 dBFS RMS with peaks limited. Imported clips are brought to the same level after trimming (`SoundNormalizer`).
+- **Voice cues:**
+  - "Welcome back", "Drive safe", "CarPlay connected", "Let's go", "Seatbelt on. Let's roll", "Have a good journey", "Taking you home", "See you soon", and a time-of-day greeting.
+  - English or Malay, with your name added when set.
+  - A **Voice** picker lists the iPhone voices, with enhanced voices first.
+- **Separate disconnect sound:** a Connect / Disconnect switch at the top chooses what a tapped sound is for. There's a new **Play Disconnect Sound** shortcut action; the disconnect automation guide now uses it before Save Parking. The default is Goodbye.
+- Older `connect-sound.json` files still load: the new fields are optional.
+- Tests: packs, unique ids, voice cue text in both languages (including the evening greeting), disconnect fallback, entity ids for voice cues.
+
 
 ## Change after Phase 11 — any background colour for text slots (spec updated first)
 - Text slot designs have a third background option, **Colour**: 12 swatches (the 408's five paint colours first, then vivid ones) plus a full colour picker. Custom text cards in Split/Quad slots get an **Own colour** toggle with the same picker.
