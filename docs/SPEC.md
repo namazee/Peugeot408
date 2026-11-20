@@ -146,6 +146,7 @@ Goal: I set things up once in the app, and my car's CarPlay screen reflects it a
 ### My car as the hero image
 
 * Pick a photo of my 408 GT, then use one-tap background removal with Apple's Vision framework (`VNGenerateForegroundInstanceMaskRequest`, fully on-device). Allow manual touch-up (erase/restore brush), then save it as a transparent PNG downsampled for widget size.
+* Built-in default photos: a few photos of my 408 that I supplied (already cut out, transparent background), bundled with the app so My Car works before I pick my own. The lion badges are pixelated on them, so no Peugeot emblem shows. I can pick one of these in My Car, and choosing my own photo (above) still works and replaces it. The side view is used until I choose.
 * A ready-made "My Car" template: the cut-out car over a gradient in Obsession Blue, with a chosen data line underneath (e.g. "Oil service in 1,240 km"), plus an optional number-plate-style label (text I type in).
 
 ### Connect sound (plays when CarPlay connects)
