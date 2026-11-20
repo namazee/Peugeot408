@@ -2,7 +2,34 @@
 
 Fresh session? Read `docs/SPEC.md`, then this file, then continue from **Current phase**.
 
-## Current phase: 3 — done, waiting for "Continue with Phase 4"
+## Current phase: 4 — done, waiting for "Continue with Phase 5"
+
+## Phase 4 — Photo Frame, Music
+
+### Done
+- `CarKit/Media`:
+  - photo library in `photos.json`: photos, named albums, 30/45/60-minute interval, and the album Car Slots show;
+  - music cache in `music.json`;
+  - `.photos` and `.music` data sources with cards, so both can be assigned to Car Slots.
+- Rotation is a pure function of the clock (slot = time ÷ interval, photo = slot mod count), so a widget reload never restarts the sequence. Timelines hold one entry per change for the next 12 hours.
+- Photo Frame widget (small and medium) uses `AppIntentConfiguration`: long-press → Edit Widget → Album, with "All photos" as the default.
+- Music widget (small and medium): artwork, title and kind (Album, Playlist, Station).
+  - The medium size has optional play/pause and next buttons: `AudioPlaybackIntent`s in `Shared/`, compiled into both targets, which run in the app process and drive the system music player.
+  - The widget looks complete without the buttons, and a toggle in the app hides them.
+- App: Studio → Data sources → Photo Frame and Music.
+  - **Photo Frame:** PhotosPicker, up to 60 photos, shrunk with ImageIO to a 1,000 px long side (EXIF rotation applied), stored as JPEG in the App Group. Albums can be created and edited, with remove via long-press.
+  - **Music:** asks for Apple Music access. Shows "Recently played" or a featured library playlist. Artwork is cached at 600 px. The card refreshes whenever the app becomes active.
+- Tests: rotation (clock-based, wraps, boundaries, 12 h count), the interval clamp, album filtering and fallback, photo removal cleaning albums, photo and music cards, slot timeline, store round-trips. 85 tests in 15 suites.
+- CI green on run 14, uploaded as **1.1 (14)**.
+
+### Decisions
+- The widget never calls MusicKit: the app caches the card, which avoids extension authorisation problems. The card therefore updates when you open the app.
+- Library-only playlist artwork uses a private URL scheme that can't be downloaded, so those cards show original placeholder art (accent gradient and a note).
+- Photo Frame shows the photo inset in the card (not full-bleed), so it stays visible in CarPlay's tinted mode. The full-bleed "Photo" template comes in Phase 5.
+
+### Left over / open
+- [ ] You: install 1.1 (14), add photos, allow Apple Music, and try the play buttons on the medium Music widget on the iPhone. If they do nothing, turn them off in Studio → Music and tell me; per the spec they then get removed.
+- [ ] MusicKit must be enabled on the App ID (App Services). SETUP.md §11.
 
 ## Phase 3 — Parking + Map Snapshot, Prayer Times, Commute, Weather & Haze
 
