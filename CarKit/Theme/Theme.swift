@@ -2,15 +2,16 @@ import SwiftUI
 
 /// The single place to tune the look of the app and every widget.
 public enum Theme {
-    /// Raw hex values (0xRRGGBB). Phase 8 exports these to a shared JSON file for Remotion.
+    /// Raw hex values (0xRRGGBB), from theme/tokens.json via the generated `ThemeTokens`
+    /// (Remotion reads the same JSON, spec §7).
     public enum Hex {
-        public static let accent: UInt32 = 0x1F4FD8        // "Obsession Blue"-style accent
-        public static let background: UInt32 = 0x0A0B0F    // near-black
-        public static let surface: UInt32 = 0x161922
-        public static let primaryText: UInt32 = 0xFFFFFF
-        public static let secondaryText: UInt32 = 0x9AA1AD
-        public static let dueSoon: UInt32 = 0xF5A524       // amber
-        public static let overdue: UInt32 = 0xE5484D       // red
+        public static let accent: UInt32 = ThemeTokens.accent              // "Obsession Blue"-style accent
+        public static let background: UInt32 = ThemeTokens.background      // near-black
+        public static let surface: UInt32 = ThemeTokens.surface
+        public static let primaryText: UInt32 = ThemeTokens.primaryText
+        public static let secondaryText: UInt32 = ThemeTokens.secondaryText
+        public static let dueSoon: UInt32 = ThemeTokens.dueSoon            // amber
+        public static let overdue: UInt32 = ThemeTokens.overdue            // red
     }
 
     public static let accent = Color(hex: Hex.accent)

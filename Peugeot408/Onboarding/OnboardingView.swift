@@ -2,7 +2,7 @@ import CarKit
 import SwiftUI
 
 /// First-run walkthrough for the one-time CarPlay step.
-/// Screenshots / animated clips are added in Phase 8 (Remotion onboarding clip).
+/// Page 1 plays the icon reveal; pages 2 and 3 play the setup and flash-test clips rendered in /remotion.
 struct OnboardingView: View {
     @Environment(SlotsModel.self) private var slots
     let onFinish: () -> Void
@@ -65,6 +65,9 @@ struct OnboardingView: View {
     private var steps: some View {
         VStack(alignment: .leading, spacing: 18) {
             Spacer()
+            ClipOrFallback(resource: "OnboardingSetup") { EmptyView() }
+                .frame(maxWidth: .infinity)
+                .frame(height: 280)
             Text("Add the slots")
                 .font(.largeTitle.bold())
             CarPlaySetupSteps()
@@ -79,12 +82,15 @@ struct OnboardingView: View {
     private var test: some View {
         VStack(spacing: 20) {
             Spacer()
-            SlotTile(slot: 3, content: .flash)
-                .frame(width: 170, height: 170)
+            ClipOrFallback(resource: "OnboardingFlash") {
+                SlotTile(slot: 3, content: .flash)
+                    .frame(width: 170, height: 170)
+            }
+            .frame(height: 280)
             Text("Check which is which")
                 .font(.largeTitle.bold())
                 .multilineTextAlignment(.center)
-            Text("With the phone connected to the car, flash all slots. Each one shows its number for 10 minutes.")
+            Text("With the phone connected to the car, flash all slots. Each card shows its slot and position (\"Slot 2 · Top ✓\") for 10 minutes.")
                 .multilineTextAlignment(.center)
                 .foregroundStyle(Theme.secondaryText)
             FlashControls()

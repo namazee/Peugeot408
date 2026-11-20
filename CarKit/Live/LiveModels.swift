@@ -331,11 +331,11 @@ public enum AQIBand: String, Codable, Sendable, CaseIterable {
     /// DOE colours: blue, green, yellow, orange, red.
     public var hex: UInt32 {
         switch self {
-        case .good: 0x3B82F6
-        case .moderate: 0x22C55E
-        case .unhealthy: 0xEAB308
-        case .veryUnhealthy: 0xF97316
-        case .hazardous: 0xE5484D
+        case .good: ThemeTokens.aqiGood
+        case .moderate: ThemeTokens.aqiModerate
+        case .unhealthy: ThemeTokens.aqiUnhealthy
+        case .veryUnhealthy: ThemeTokens.aqiVeryUnhealthy
+        case .hazardous: ThemeTokens.aqiHazardous
         }
     }
 

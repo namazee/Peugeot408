@@ -185,6 +185,9 @@ public enum LayerContent: Codable, Sendable, Equatable, Hashable {
     case analogClock
     /// A number-plate style label.
     case plate(String)
+    /// Seasonal-pack artwork rendered in Remotion (`Resources/Seasonal/seasonal-<occasion>.png`),
+    /// with the drawn `ArtworkKind` as a fallback.
+    case seasonalArt(SeasonalOccasion)
 }
 
 /// One layer. Position and size are fractions of the canvas (0…1), so a design scales to any widget.
@@ -313,6 +316,22 @@ public enum SeasonalOccasion: String, Codable, Sendable, CaseIterable, Identifia
     case newYear
 
     public var id: String { rawValue }
+
+    /// Drawn artwork used when the rendered PNG isn't available (e.g. unit tests).
+    public var fallbackArt: ArtworkKind {
+        switch self {
+        case .ramadan, .aidiladha: .crescent
+        case .hariRaya: .ketupat
+        case .merdeka: .stripes
+        case .chineseNewYear: .lantern
+        case .deepavali: .diya
+        case .christmas: .tree
+        case .newYear: .fireworks
+        }
+    }
+
+    /// File name of the rendered artwork.
+    public var artResource: String { "seasonal-\(rawValue)" }
 
     public var displayName: String {
         switch self {

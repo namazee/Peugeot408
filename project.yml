@@ -47,7 +47,7 @@ targets:
   Peugeot408:
     type: application
     platform: iOS
-    sources: [Peugeot408, Shared, Resources/Fonts, Resources/Sounds, Resources/MyCar]
+    sources: [Peugeot408, Shared, Resources/Fonts, Resources/Sounds, Resources/MyCar, Resources/Seasonal]
     dependencies:
       - target: CarKit
         embed: false
@@ -91,7 +91,7 @@ targets:
   Peugeot408Widgets:
     type: app-extension
     platform: iOS
-    sources: [Peugeot408Widgets, Shared, Resources/Fonts]
+    sources: [Peugeot408Widgets, Shared, Resources/Fonts, Resources/Seasonal]
     dependencies:
       - target: CarKit
         embed: false

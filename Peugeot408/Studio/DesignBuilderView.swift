@@ -217,7 +217,7 @@ struct DesignBuilderView: View {
     private func add(_ content: LayerContent) {
         var layer = DesignLayer(content: content)
         switch content {
-        case .symbol, .sticker, .carPhoto, .analogClock, .gauge:
+        case .symbol, .sticker, .carPhoto, .analogClock, .gauge, .seasonalArt:
             layer.width = design.canvas == .small ? 0.4 : 0.22
             layer.height = 0.4
             layer.colorHex = content == .carPhoto ? 0xFFFFFF : Theme.Hex.accent
@@ -324,6 +324,11 @@ struct DesignBuilderView: View {
                         Button(name, systemImage: name) { add(.symbol(name)) }
                     }
                 }
+                Menu("Seasonal art", systemImage: "sparkles") {
+                    ForEach(SeasonalOccasion.allCases) { occasion in
+                        Button(occasion.displayName) { add(.seasonalArt(occasion)) }
+                    }
+                }
                 Menu("Sticker", systemImage: "seal") {
                     ForEach(ArtworkKind.stickers, id: \.self) { kind in
                         Button(kind.displayName) { add(.sticker(kind)) }
@@ -364,6 +369,7 @@ struct DesignBuilderView: View {
         case .gauge(let field): "Gauge: \(field?.displayName ?? "decorative")"
         case .analogClock: "Analogue clock"
         case .plate(let text): "Plate \(text)"
+        case .seasonalArt(let occasion): "Art: \(occasion.displayName)"
         }
     }
 }
@@ -451,6 +457,10 @@ private struct LayerInspector: View {
             Text("Set the photo in Studio → My Car photo.").foregroundStyle(Theme.secondaryText)
         case .analogClock:
             Text("Shows the time; the hands move every minute.").foregroundStyle(Theme.secondaryText)
+        case .seasonalArt(let occasion):
+            Picker("Artwork", selection: Binding(get: { occasion }, set: { layer.content = .seasonalArt($0) })) {
+                ForEach(SeasonalOccasion.allCases) { Text($0.displayName).tag($0) }
+            }
         }
     }
 

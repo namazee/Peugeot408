@@ -37,3 +37,14 @@ All seasonal artwork and stickers are original: drawn in code with SwiftUI shape
 |---|---|---|
 | `Resources/MyCar/mycar-{side,front-three-quarter,rear-three-quarter,front,front-detail}.png` | Supplied by the project author on 2026-11-20 as their own photos (backgrounds already removed). The lion badges (grille, tailgate, fender, wheel caps) were removed here with a smooth fill from the surrounding pixels, and the photos were cropped and scaled to 900 px wide. A sixth (straight rear) photo was left out because it still showed a third-party watermark. | The project author, who stated they hold the rights |
 | `Resources/MyCar/mycar-studio-{front-three-quarter,front,side,rear-three-quarter,rear,front-detail}.jpg` | Studio renders of the 408 supplied by the project author on 2026-11-20 (dark background; the app removes it on the device). Wheel-cap logos were removed here with a smooth fill; the grille shields are already blank and the plates already empty. Re-encoded as JPEG (quality 90), 1024 × 1024. | The project author, who stated they hold the rights |
+
+## Phase 9: Remotion videos and art
+
+| Asset | Source | Licence |
+|---|---|---|
+| `remotion/src/**` compositions (WidgetShowcase, AppPreview, Onboarding*, SeasonalArt) | Original, written for this project | Owned by the project author |
+| `Peugeot408/Resources/Onboarding/Onboarding{Welcome,Setup,Flash}.mp4` | Rendered from the compositions above (`npm run videos`) | Owned by the project author |
+| `Resources/Seasonal/seasonal-*.png` | Original SVG illustrations in `SeasonalArt.tsx`, rendered by Remotion. The Malaysian flag (Jalur Gemilang) is drawn as a national symbol; no logos. | Owned by the project author |
+| `remotion/assets/car/*` | Copies of the built-in My Car photos (see above) for the showcase video | The project author |
+| Inter, Nunito fonts (videos only, loaded by `@remotion/google-fonts`) | Google Fonts | SIL Open Font License 1.1 |
+| Remotion | remotion.dev | Remotion free licence (individuals / small teams); this is a personal project |

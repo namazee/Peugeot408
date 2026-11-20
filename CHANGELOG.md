@@ -2,11 +2,31 @@
 
 Fresh session? Read `docs/SPEC.md`, then this file, then continue from **Current phase**.
 
-## Current phase: 8 (split-card slot layouts) — built, waiting for your test in the car
+## Current phase: 9 (Remotion) — done; Phase 8 still waiting for your car test. Next: "Continue with Phase 10" (Polish)
+
+## Phase 9 — Remotion assets (§7)
+
+### Done
+- **Shared theme:** `theme/tokens.json` holds the colours, AQI bands and radii. Remotion imports it directly; `tools/gen-theme.py` writes `CarKit/Theme/ThemeTokens.swift`, which `Theme.Hex` and the AQI bands now use. `ci/generate.sh` runs `gen-theme.py --check`, so CI fails if the JSON and the Swift constants drift apart.
+- **Shared Remotion UI** (`remotion/src/shared`): theme, fonts (Inter and Nunito via `@remotion/google-fonts`, the closest open fonts to SF Pro / SF Rounded), an original icon set, a `SplitCard` drawn like the app's slot card, `Column`, and `CarPlayScreen`.
+- `WidgetShowcase` (1920×720, 18 s): CarPlay-style dashboard. Columns animate in; the prayer countdown and the service km tick, the boost gauge rises on two "pulls", the photo frame crossfades between your studio shots, and it ends on a title card.
+- `AppPreview` (886×1920, 20 s): the Fuel Log, adding a fill-up (fields type in, Save), the new row and km/L 14.2 → 14.4, then the head unit's Fuel card updating. With captions.
+- **Onboarding clips** (720×900): `OnboardingWelcome` (the head unit filling with split cards), `OnboardingSetup` (Settings → General → CarPlay → My 408 → Widgets → add Car Slot 1–5), and `OnboardingFlash` (each card shows "Slot N · Top/Bottom ✓").
+  - They play muted and looping in the app via `ClipView` (AVQueuePlayer + AVPlayerLooper): page 2 shows setup, page 3 the flash test, and the welcome clip is at the top of "How to add to CarPlay". Page 1 keeps the icon reveal.
+- **Seasonal artwork:** `SeasonalArt` stills (600×600, transparent) for all 8 packs, saved as `Resources/Seasonal/seasonal-<occasion>.png` and bundled in the app and the widget.
+  - Seasonal designs use the new `LayerContent.seasonalArt`, which falls back to the drawn artwork if a PNG is missing.
+  - The builder has "Seasonal art" in its Add menu.
+- **Rendering:** `npm run videos` renders everything and copies the clips and art into the app (`--no-copy` skips the copy). The Remotion workflow now also renders them and uploads `videos-<run>` as build artifacts.
+
+### Decisions
+- The rendered clips and art are committed (like the icon), because the iOS build doesn't run Node. CI re-renders them as artifacts.
+- The videos use Inter and Nunito, since SF fonts can't be used on the web or in Linux renders.
+
 
 Note: this change request came after Phase 2, so it became the new Phase 8 (spec commit "spec: split-card slot layouts"). Remotion moved to Phase 9 and Polish to Phase 10.
 
-## Phase 8 — Split-card slot layouts (§4b)
+## Phase 8 — Split-card slot layouts (§4b) — built; waiting for your car test
+- Fix after the first CI run: single-layout slots counted a phantom card as a source (made a Studio test fail); they now don't.
 
 ### Done
 - `SlotLayout`: Single / Split (default) / Quad. Each `SlotDesign` has an optional `layout` and `cards` (each card is its own data source, Studio design or text). Older files decode, since both fields are optional.

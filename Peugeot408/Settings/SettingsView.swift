@@ -93,6 +93,12 @@ struct HowToCarPlayView: View {
     var body: some View {
         List {
             Section {
+                ClipOrFallback(resource: "OnboardingWelcome") { EmptyView() }
+                    .frame(height: 260)
+                    .listRowInsets(EdgeInsets())
+                    .listRowBackground(Color.clear)
+            }
+            Section {
                 CarPlaySetupSteps()
             } header: {
                 Text("One-time setup")

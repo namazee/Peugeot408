@@ -129,6 +129,15 @@ private struct LayerView: View {
             ArtworkView(kind: .gaugeArc, color: color, progress: field.flatMap { card.values[$0]?.progress } ?? 1)
         case .analogClock:
             AnalogClock(date: card.date, color: color)
+        case .seasonalArt(let occasion):
+            if let image = UIImage(named: occasion.artResource) {
+                Image(uiImage: image)
+                    .resizable()
+                    .widgetAccentedRenderingMode(.fullColor)
+                    .scaledToFit()
+            } else {
+                ArtworkView(kind: occasion.fallbackArt, color: color)
+            }
         }
     }
 

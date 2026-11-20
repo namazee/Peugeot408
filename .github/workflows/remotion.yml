@@ -3,9 +3,9 @@ name: Remotion
 on:
   push:
     branches: [main]
-    paths: ["remotion/**", ".github/workflows/remotion.yml"]
+    paths: ["remotion/**", "theme/**", ".github/workflows/remotion.yml"]
   pull_request:
-    paths: ["remotion/**", ".github/workflows/remotion.yml"]
+    paths: ["remotion/**", "theme/**", ".github/workflows/remotion.yml"]
   workflow_dispatch:
 
 concurrency:
@@ -50,4 +50,20 @@ jobs:
           path: |
             remotion/out/*.png
             remotion/out/*.mp4
+          if-no-files-found: error
+
+      # Phase 9 (spec §7): widget showcase, app preview, onboarding clips, seasonal artwork.
+      # --no-copy: the clips and art the app bundles are committed; CI only re-renders them as artifacts.
+      - name: Render videos and seasonal art
+        run: npm run videos -- --no-copy
+
+      - name: Upload videos
+        uses: actions/upload-artifact@v4
+        with:
+          name: videos-${{ github.run_number }}
+          path: |
+            remotion/out/WidgetShowcase.mp4
+            remotion/out/AppPreview.mp4
+            remotion/out/Onboarding*.mp4
+            remotion/out/seasonal-*.png
           if-no-files-found: error

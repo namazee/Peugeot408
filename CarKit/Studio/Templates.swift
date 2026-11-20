@@ -176,7 +176,8 @@ public enum Templates {
         let white: UInt32 = 0xFFFFFF
         func design(_ background: DesignBackground, art: ArtworkKind, artColor: UInt32, title: String, subtitle: DataField? = nil, subtitleText: String? = nil) -> CardDesign {
             var layers = [
-                DesignLayer(content: .sticker(art), x: wide ? 0.82 : 0.72, y: wide ? 0.5 : 0.3, width: wide ? 0.3 : 0.48, height: wide ? 0.8 : 0.46, colorHex: artColor),
+                // Rendered artwork from /remotion; `art` is drawn instead if the PNG is missing.
+                DesignLayer(content: .seasonalArt(occasion), x: wide ? 0.82 : 0.72, y: wide ? 0.5 : 0.3, width: wide ? 0.3 : 0.48, height: wide ? 0.8 : 0.46, colorHex: artColor),
                 DesignLayer(content: .text(title), x: wide ? 0.36 : 0.5, y: wide ? 0.38 : 0.66, width: wide ? 0.64 : 0.9, height: 0.28, font: .playfair, weight: .bold, fontSize: wide ? 24 : 19, colorHex: white, alignment: .leading, shadow: true),
             ]
             if let subtitle {

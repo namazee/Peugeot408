@@ -6,7 +6,8 @@
     "studio": "remotion studio",
     "icon": "node scripts/render-icon.mjs",
     "check-icon": "node scripts/check-icon-alpha.mjs out/AppIcon-1024.png",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "videos": "node scripts/render-videos.mjs"
   },
   "dependencies": {
     "@remotion/cli": "4.0.540",
