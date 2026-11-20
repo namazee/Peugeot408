@@ -22,6 +22,7 @@ Fresh session? Read `docs/SPEC.md`, then this file, then continue from **Current
   - widget and head-unit snapshots, rendered by CI from the real SwiftUI views (`ReadmeSnapshots`, artifact `readme-snapshots`);
   - frames from the Remotion videos (`docs/images/`);
   - the feature list, backup notes and the repo layout.
+- CI: green on run 37 (**1.1 (37)** in TestFlight). The snapshot test rendered all 11 images; they're committed in `docs/images/`.
 - SETUP.md section numbers fixed (Phase 4 and Phase 6 were out of order, and two sections were both numbered 12).
 
 
