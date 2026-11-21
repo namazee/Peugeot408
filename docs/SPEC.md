@@ -2,7 +2,7 @@
 
 You are building a personal iOS app called Peugeot408 for my 2025 Peugeot 408 GT (1.6T PureTech, Malaysia). Its main purpose is a set of WidgetKit widgets that show on the CarPlay widget screen (iOS 26+ shows any iPhone widget in CarPlay, no CarPlay entitlement needed). The app itself is the place where I enter data and change settings; the widgets display it.
 
-App name everywhere (display name, Xcode target, scheme, home-screen label): Peugeot408. This is a personal app distributed only to me through TestFlight internal testing; it is not affiliated with Peugeot/Stellantis. Do not use Peugeot logos or the lion emblem anywhere — use my own car photo and original artwork only. Keep the display name in one setting (`PRODUCT_NAME`/`CFBundleDisplayName` in `project.yml`) so I can rename it later.
+App name: the public name is **DashCraft** (display name, home-screen and CarPlay label, App Store name, every user-visible text). The Xcode targets, scheme, bundle IDs, App Group and URL scheme keep their internal `Peugeot408`/`peugeot408` names, which users never see (§10). It started as a personal app for me through TestFlight and is now also prepared for the App Store (Phase 15, §10); it is not affiliated with Peugeot/Stellantis or any car maker. Do not use Peugeot logos or the lion emblem anywhere — use my own car photo and original artwork only. Keep the display name in one setting (`PRODUCT_NAME`/`CFBundleDisplayName` in `project.yml`) so I can rename it later.
 
 I do not own a Mac. Everything must build, sign and upload to TestFlight through GitHub Actions on a macOS runner. Never assume I can open Xcode. Generate the Xcode project from a spec file (XcodeGen), and keep every manual step I must do (Apple Developer portal, App Store Connect, GitHub secrets) in a checklist in `SETUP.md`.
 
@@ -80,13 +80,13 @@ Work in phases (below). At the end of each phase: commit, push, make sure the CI
 
 ### App icon
 
-* Source art: my own icon artwork (generated from a photo of my car), stored in `remotion/assets/icon/` as `icon-default.jpg` (plus `icon-dark.jpg` and `icon-tinted.jpg` if I provide them). This is the master art: don't redraw the car. No logos; the only text is the "GTCP" wordmark (layer 5).
+* Source art: my own icon artwork (generated from a photo of my car), stored in `remotion/assets/icon/` as `icon-default.jpg` (plus `icon-dark.jpg` and `icon-tinted.jpg` if I provide them). This is the master art: don't redraw the car. No logos; the only text is the "DASHCRAFT" wordmark (layer 5).
 * Remotion composition `AppIcon` (1024×1024), prop `variant: "default" | "dark" | "tinted"`, built in layers:
    1. Background `#05070D` with a soft radial blue glow (`#1F4FD8` at ~25% opacity) behind the car.
    2. The source image, scaled/cropped so the headlights, light strips and grille sit inside the central 80% safe area.
    3. Glow boost: duplicate the brightest areas (luminance threshold), blur, tint `#7FD4FF`, screen-blend at ~40%, so the lights pop at small sizes.
    4. A subtle vignette and a faint Liquid Glass highlight along the top edge.
-   5. Wordmark "GTCP" centred below the car, inside the safe area: wide-tracked, wide sans-serif (open-licence font, recorded in `ASSETS-LICENSES.md`), white with a soft `#7FD4FF` glow (white glow on tinted), sized to be readable at 180 and 120 px. The car moves up slightly to make room; the lights stay inside the safe area. In `IconReveal` the wordmark fades in as the icon settles.
+   5. Wordmark "DASHCRAFT" (the app name in capitals; it replaced the earlier "GTCP") centred below the car on one line, inside the safe area: wide-tracked (less than before so the nine letters fit), wide sans-serif (open-licence font, recorded in `ASSETS-LICENSES.md`), white with a soft `#7FD4FF` glow (white glow on tinted), sized to be readable at 180 and 120 px. The car moves up slightly to make room; the lights stay inside the safe area. In `IconReveal` the wordmark fades in as the icon settles.
    * If the dark/tinted source images aren't provided, generate them: dark = pure-black background and the car at −15% brightness, lights unchanged; tinted = grayscale with strong contrast, lights brightest.
 * `IconPreview` (1920×1080): each variant at 1024, 180, 120, 60 and 40 px on a mock iPhone home screen (light and dark wallpaper) and on a CarPlay-style dark dashboard mock, to judge it at real sizes.
 * `IconReveal` (3.5 s; 1080×1080 and 1080×1920): starts black, the light strips draw on top to bottom, the headlights flash on with a bloom, a glow sweeps across, then it settles on the final icon. Used on the app's first-run screen and for sharing.
@@ -154,6 +154,7 @@ CarPlay widgets can't play audio or run navigation (those need Apple CarPlay ent
    * Spotify isn't supported: other apps can't read its now-playing data. Say so in the app and in `SETUP.md`.
    * When a song has no synced lyrics, show the title and artist instead (or plain lyrics if that's all there is).
    * Personal use; lyrics are fetched on demand and never bundled.
+   * The App Store build leaves this whole feature out (§10 Build flavours): LRCLIB lyrics are only in my personal TestFlight builds.
 
 ## 4b. Customisation studio (design it in the app → the head unit updates by itself)
 
@@ -291,6 +292,7 @@ Widgets themselves are static SwiftUI, so use Remotion only for the animated ass
 12. Sound packs (§4b Connect sound): engine starts from CC0 recordings, synthesised EV, luxury, arcade, pings and sci-fi packs, voice cues, normalising and the 5-second trim, and a separate disconnect sound.
 13. Synced lyrics (§4 item 13): the Lyrics widget, card and Live Activity from the Apple Music system player and LRCLIB.
 14. Panorama hero (§3): one wide design across Slots 1–3, the Hero template, and the greeting and weather-place fields.
+15. App Store release (§10): the DashCraft name in all user-visible text and the "DASHCRAFT" icon wordmark, the `store` build flavour without lyrics, Sample data mode, privacy manifests, the support and privacy pages, store metadata and screenshots, and the `store_metadata` lane. Stop before anything public: I turn on Pages and submit for review myself.
 
 ## 9. Quality bar
 
@@ -298,5 +300,46 @@ Widgets themselves are static SwiftUI, so use Remotion only for the animated ass
 * No force unwraps in widget code; every provider returns a valid entry even with no data.
 * No secrets in git. Keep a `.env.example` for Remotion and an `xcconfig` template for Swift.
 * Keep a `CHANGELOG.md` updated each phase.
+
+## 10. App Store release (Phase 15)
+
+### Name and wording
+
+* Public name: **DashCraft**. App Store subtitle: "Car widgets & dashboard". `APP_DISPLAY_NAME` in `project.yml` is `DashCraft`.
+* Internal names stay as they are: targets and scheme `Peugeot408`, bundle IDs `….peugeot408…`, App Group `group.….peugeot408`, URL scheme `peugeot408://`, backup format id `peugeot408-backup`. Renaming them would lose the data in the App Group, need new signing and break existing backups, and users never see them.
+* No user-visible text says "Peugeot", "Stellantis" or "408": permission prompts, Siri/Shortcuts descriptions, Settings, help texts, onboarding, error messages, backup file names ("DashCraft backup <date>.json"), the IconPreview mock label. Generic wording instead ("your car", "Some cars' ECUs don't answer every standard PID"). Settings footer: "Not affiliated with any car maker."
+* Defaults for a new install use neutral text: Slot 1 "MY CAR" instead of "408 GT", the Hero template lettering "MY CAR", plate placeholder "ABC 1234". My own saved slots and designs are not changed.
+* The built-in My Car photos are my own photos and stay in both builds.
+
+### Build flavours
+
+* `personal` (default): every push to `main`, as now. Everything in this spec, including LRCLIB lyrics. Goes to TestFlight.
+* `store`: run the iOS workflow by hand with input `flavour: store`. Compiles with the Swift condition `STORE_BUILD`, which leaves out the Lyrics feature completely: the LRCLIB client, the Lyrics widget, the Lyrics data source and card, the Lyrics Live Activity, the Sync Lyrics intent and the lyrics screen. A saved slot that points at Lyrics shows the Music card instead. No hidden switches: the code isn't in the store binary at all.
+* Both flavours upload to the same App Store Connect app and share the run-number build numbers; the store build's TestFlight note says "Store build". Only a store build is ever submitted for review (`SETUP.md` says how to pick it).
+
+### Sample data (for App Review and first look)
+
+* Settings → "Sample data" switch, also offered on the last onboarding page ("Try it with sample data"). While it is on, the app and every widget show `SampleData` (a full service history, fill-ups, renewals, prayer times, TnG, parking, OBD values) and the app shows a small "Sample data" badge at the top of each tab. My real data is untouched and comes back when it is turned off.
+* The App Review notes tell the reviewer to turn it on, so they can see filled widgets without a car, OBD dongle or Malaysian data.
+
+### Privacy
+
+* No account, no analytics, no tracking, no ads; nothing is sent to me. Data stays on the phone in the App Group (and in backups I export myself). App Privacy answer in App Store Connect: "Data Not Collected".
+* What leaves the phone, only to answer a request: location to Apple WeatherKit (weather) and, if I add a WAQI key, to the WAQI air-quality service; the prayer zone code to JAKIM e-solat; song title and artist to LRCLIB (personal build only).
+* `PrivacyInfo.xcprivacy` privacy manifests in the app and the widget extension, declaring the required-reason APIs used (UserDefaults, file timestamps, system boot time if used) and no tracking.
+* `ITSAppUsesNonExemptEncryption = NO` stays (export compliance).
+
+### Web pages
+
+* `site/index.html` (support: what the app does, how to add widgets to CarPlay, contact by GitHub issue), `site/privacy.html` (the Privacy section above in plain words). Plain HTML and CSS in the app's colours, the DashCraft icon, no logos, no trackers, no external scripts.
+* Published with GitHub Pages from the `site/` folder by a `pages.yml` workflow. Turning Pages on makes the pages public: ask me first. Their URLs are the App Store support and privacy URLs.
+
+### Store listing
+
+* `fastlane/metadata/` (deliver format), English (primary) and Malay: name, subtitle, description, keywords, promotional text, release notes, support URL, privacy URL; plus the review notes (no login; turn on Sample data; how to add widgets in CarPlay on iOS 26; the OBD2 dongle is optional hardware), category Utilities (secondary Lifestyle), free, and the age-rating answers (4+), all written down in `SETUP.md` for anything deliver can't set.
+* The description says what works best in Malaysia (JAKIM prayer times, Touch 'n Go, road tax and insurance renewals). Availability is set by me in App Store Connect (suggested: Malaysia first).
+* Screenshots for the 6.9-inch iPhone size (1320×2868), 6 of them, taken from the app running on the simulator with Sample data on (a UI test with launch argument `-screenshots`), then framed in Remotion (`StoreScreenshot` composition: dark background in the theme colours, a short headline above the phone screen, no device frame from Apple's artwork). Screens: Slots mock CarPlay, Studio template gallery, a Bold vs Neon card pair, Car service and fuel, Panorama hero, Connect sounds. Rendered by a manual `store-assets` job and uploaded as an artifact.
+* fastlane lane `store_metadata` uploads the metadata and screenshots only (`skip_binary_upload`, `submit_for_review: false`), from a manual workflow run. I submit for review myself in App Store Connect; CI never submits.
+* `SETUP.md` §15 lists my manual steps in order: rename the app record to DashCraft (and check the name is free), answer App Privacy, approve turning on GitHub Pages, run the store build, run `store_metadata`, pick the store build, submit.
 
 Start with Phase 1. First, ask me only for: the bundle ID prefix, my Apple Developer Team ID (or whether I've enrolled yet), and the GitHub repo name.
