@@ -25,7 +25,14 @@ final class StoreScreenshots: XCTestCase {
     @MainActor
     private func open(_ label: String, in app: XCUIApplication) {
         let button = app.buttons[label].firstMatch
-        if button.waitForExistence(timeout: 8) {
+        // Rows further down the list (e.g. Connect sounds in Studio) need a scroll first.
+        _ = button.waitForExistence(timeout: 8)
+        var swipes = 0
+        while !button.isHittable && swipes < 6 {
+            app.swipeUp()
+            swipes += 1
+        }
+        if button.exists {
             button.tap()
         } else {
             let text = app.staticTexts[label].firstMatch

@@ -31,11 +31,12 @@ jobs:
       - name: Take screenshots
         run: bash ci/screenshots.sh
       - name: Upload raw screenshots
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: store-raw
           path: build/store-raw
-          if-no-files-found: error
+          if-no-files-found: warn
       - name: Upload UI test results
         if: failure()
         uses: actions/upload-artifact@v4
