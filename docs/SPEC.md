@@ -242,7 +242,7 @@ Goal: I set things up once in the app, and my car's CarPlay screen reflects it a
    * **Car Stereo:** a dark faceplate with an amber LCD panel showing the value in mono lettering. Medium adds a radio tuning scale (numbers and a red needle) above the LCD and the label beside it.
    * **Navigation:** a night-mode street map drawn in code (blocks, roads, a blue route line and a pin) with the value in a pill. Medium: the map on the left, a turn arrow, the value and the second value on the right.
    * **Rainy Window:** blurred city lights (bokeh) behind raindrops on glass, with the value in big white lettering. Medium adds the label and second value.
-   * **Parking Ticket:** a thermal-paper ticket with zigzag torn edges and the label, value and second value in black mono lettering. Medium is the ticket turned slightly, on a dark dashboard.
+   * **Parking Ticket:** a thermal-paper ticket with zigzag torn edges and the label, value and second value in black mono lettering. Medium is the ticket turned slightly, on a light grey car-park floor (so the black lettering keeps its contrast).
    * **Number Plate:** the value on a black number plate with white lettering and a chrome edge (a generic plate, no country marks). Medium adds the label and second value beside the plate.
   To draw these, the design model gains (new cases, so saved designs still load, and every piece is in the builder):
    * a split-flap layer that draws the value's characters on flap tiles;
