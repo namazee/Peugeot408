@@ -160,7 +160,7 @@ final class LyricsSync {
 struct SyncLyricsIntent: AppIntent {
     static var title: LocalizedStringResource { "Sync Lyrics" }
     static var description: IntentDescription {
-        IntentDescription("Reads the Apple Music song that's playing and updates the DashCraft Lyrics widget.")
+        IntentDescription("Reads the song playing in Music and updates the DashCraft Lyrics widget.")
     }
     static var openAppWhenRun: Bool { false }
 

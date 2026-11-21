@@ -10,6 +10,7 @@ Fresh session? Read `docs/SPEC.md`, then this file, then continue from **Current
 - **New design pieces** (all in the builder too): a Dial layer (Instrument or Fuel E–F, with ticks, numbers and a needle at the value's progress), an Odometer layer (rolling-counter wheels), segments on the progress bar, a Leather texture, Frosted and Live Sky backgrounds, and stickers: Stitching, Sign frame, Road arrow, HUD horizon, Ticket and Glass panel. All drawn in code (`RealisticArt.swift`). Older design files still load.
 - **Live Sky** shows dawn, day, dusk or night from today's Syuruk and Maghrib (7:15 am / 7:20 pm without prayer times), with the sun moving along its arc; the widget timeline has entries at each change and every hour while the sun is up.
 - `RealisticTemplateTests` (both sizes: no linter warnings, JSON round trip, render; sky phases and timeline). README snapshots add `templates-realistic-both.png`.
+- **Upload fix:** App Store Connect rejected build 53 (error 90626) because the Sync Lyrics intent description said "Apple Music". It now reads "Reads the song playing in Music and updates the DashCraft Lyrics widget." No App Intent text says Apple (spec §1).
 ### Not verified yet
 - How the templates look on the head unit; check the `readme-snapshots` artifact and the gallery.
 
