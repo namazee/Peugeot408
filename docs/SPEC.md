@@ -74,6 +74,14 @@ Work in phases (below). At the end of each phase: commit, push, make sure the CI
 
 * One wide "hero" design spread across Car Slots 1–3. Each slot draws its third, so the three tall columns read as one picture, e.g. my My Car photo spanning the screen with big lettering behind it. The gaps between columns stay, because CarPlay draws them.
 * A Hero template for it: a greeting, big "408 GT" (or my own text) lettering behind the car, my car photo and a weather line. No brand logos or emblems.
+* More Hero templates (Phase 17), all on the panorama canvas, each keeping its text inside one column so nothing is cut by the gaps:
+   * **Sunset Road:** an orange-to-purple sky and sun with the road running into the middle column, my car photo on it, the clock left and the temperature right.
+   * **Night City:** a city skyline with lit windows under a crescent moon, my car photo in the middle, the greeting left and the date right.
+   * **Cockpit:** three instrument dials, one per column: fuel (km/L) left, a big chrome dial with the clock middle, km to service right.
+   * **Live Sky:** the live sky (§4b) across all three columns with hills and my car photo, the temperature left, the greeting top middle and the next prayer countdown right.
+   * **Neon Grid:** a retro purple grid floor in perspective under a striped sun, my car photo in the middle and the clock in glowing Orbitron.
+   * **Glass Info:** soft colour blobs behind three frosted glass panels, one per column: the next prayer and countdown, the weather, and km to service.
+  New original stickers for these: city skyline, neon grid floor and striped sun. The template gallery gets a **Hero** section (the old Hero template moves there from Car) that always previews at the panorama shape across the full width, whatever the Size picker says. On the Panorama hero screen, "Create a Hero design" lets me pick any Hero template.
 * New data fields:
    * a time-of-day greeting with my name ("Good morning, …" / "Selamat pagi, …");
    * the weather place and condition ("Kuala Lumpur · Sunny").
@@ -227,6 +235,20 @@ Goal: I set things up once in the app, and my car's CarPlay screen reflects it a
    * a leather texture, a frosted-glass background and a live sky background;
    * new original stickers: stitching, sign frame, road arrow, HUD horizon lines, ticket (with notches and perforation) and a frosted glass panel (the frosted-glass background draws only the blurred colour blobs, so a design can have one or two panels).
   The gallery shows these first, in a new **Realistic** section, marked "New". Every realistic template gets a render test from JSON in both sizes.
+* More realistic templates (Phase 17), added to the Realistic section with the same rules (own Small and Medium layouts, any data source, marked "New"):
+   * **Split-Flap:** the value on split-flap tiles (white characters on dark tiles with a hairline split across the middle), the label above in small caps. Medium is a departure board: two rows, the label and value, then the second value.
+   * **Neon Sign:** a dark brick wall with a glowing neon tube frame (pink) and the value in glowing cyan neon lettering. Medium adds the label in pink neon and the second value.
+   * **Wood Trim:** walnut wood grain with a thin brass inlay frame and the value in engraved brass serif lettering. Medium adds the label and second value.
+   * **Car Stereo:** a dark faceplate with an amber LCD panel showing the value in mono lettering. Medium adds a radio tuning scale (numbers and a red needle) above the LCD and the label beside it.
+   * **Navigation:** a night-mode street map drawn in code (blocks, roads, a blue route line and a pin) with the value in a pill. Medium: the map on the left, a turn arrow, the value and the second value on the right.
+   * **Rainy Window:** blurred city lights (bokeh) behind raindrops on glass, with the value in big white lettering. Medium adds the label and second value.
+   * **Parking Ticket:** a thermal-paper ticket with zigzag torn edges and the label, value and second value in black mono lettering. Medium is the ticket turned slightly, on a dark dashboard.
+   * **Number Plate:** the value on a black number plate with white lettering and a chrome edge (a generic plate, no country marks). Medium adds the label and second value beside the plate.
+  To draw these, the design model gains (new cases, so saved designs still load, and every piece is in the builder):
+   * a split-flap layer that draws the value's characters on flap tiles;
+   * wood and brick textures;
+   * a rain background (two bokeh colours);
+   * new original stickers: neon tube frame, thermal ticket, plate frame, radio tuning scale, street map and LCD panel.
 * Seasonal packs for Malaysia that the app can switch to automatically on the right dates: Hari Raya Aidilfitri, Ramadan (with an iftar countdown using the prayer module's Maghrib time), Aidiladha, Merdeka/Malaysia Day, Chinese New Year, Deepavali, Christmas, New Year. All original artwork, drawn in SwiftUI shapes/SF Symbols or as bundled assets generated in Remotion; nothing copied from other apps.
 
 ### Custom builder
@@ -314,6 +336,7 @@ Widgets themselves are static SwiftUI, so use Remotion only for the animated ass
 14. Panorama hero (§3): one wide design across Slots 1–3, the Hero template, and the greeting and weather-place fields.
 15. App Store release (§10): the DashCraft name in all user-visible text and the "DASHCRAFT" icon wordmark, the `store` build flavour without lyrics, Sample data mode, privacy manifests, the support and privacy pages, store metadata and screenshots, and the `store_metadata` lane. Stop before anything public: I turn on Pages and submit for review myself.
 16. Realistic templates (§4b Templates): the 10 realistic templates in Small and Medium, the new dial, odometer, segmented bar, leather, frosted-glass and live-sky pieces, the Realistic gallery section, and render tests.
+17. More templates (§4b Templates, §3 Panorama hero): 8 more realistic templates, 6 more Hero templates, the Hero gallery section and template picker, the split-flap, wood, brick, rain and new sticker pieces, and render tests.
 
 ## 9. Quality bar
 
