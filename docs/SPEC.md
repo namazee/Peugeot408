@@ -125,7 +125,7 @@ For each widget: an app screen to enter or configure the data, a timeline provid
 6. Prayer Times
    * Primary source: JAKIM e-Solat API, zone SGR01 by default (covers Sepang/Cyberjaya), with a zone picker and an "auto from location" option. Endpoint pattern: `https://www.e-solat.gov.my/index.php?r=esolatApi/TakwimSolat&period=month&zone=SGR01`. Verify the current response format before coding against it.
    * Fallback: offline calculation (e.g. the Adhan Swift library) using JAKIM-style parameters, in case the API is down.
-   * Cache a month ahead in the App Group. Widget: next prayer name, time, and a live countdown. Medium size shows all 5 times for today.
+   * Cache a month ahead in the App Group. Widget: next prayer name, time, and a live countdown. When the prayer time arrives the countdown stops at 0:00 (it never counts up past it) until the card moves on to the next prayer; the same goes for every prayer and iftar countdown in slots and Studio designs. Medium size shows all 5 times for today.
    * Keep this module self-contained in `CarKit/PrayerTimes`. I'll reuse it in another app later.
 7. Commute
    * App: save Home and Work (APU, Bukit Jalil) locations.
