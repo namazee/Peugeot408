@@ -23,6 +23,7 @@ Work in phases (below). At the end of each phase: commit, push, make sure the CI
 
 * Swift 6, SwiftUI, WidgetKit, ActivityKit, App Intents, SwiftData, CoreBluetooth, CoreLocation, MapKit, EventKit, WeatherKit, PhotosUI, MusicKit
 * Deployment target: iOS 26.0; iPhone only
+* App Intent titles, descriptions and Siri phrases never contain the word "Apple" (App Store Connect rejects such builds, error 90626); say "Music" instead, e.g. "the song playing in Music".
 * XcodeGen (`project.yml`) generates the `.xcodeproj` on CI. Do not commit the `.xcodeproj`.
 * Targets:
    * `Peugeot408`: main app
