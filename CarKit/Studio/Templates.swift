@@ -1053,8 +1053,8 @@ public enum Templates {
             if wide {
                 return (.gradient(0x0B3D2E, 0x04140F), [
                     art(.sticker(.crescent), 0.14, 0.5, 0.2, 0.6, gold),
-                    data(.hijriDate, 0.6, 0.42, 0.74, 0.3, .playfair, .bold, 28, white, .leading),
-                    data(.date, 0.6, 0.72, 0.74, 0.14, .rounded, .semibold, 16, gold, .leading),
+                    data(.hijriDate, 0.64, 0.42, 0.66, 0.3, .playfair, .bold, 28, white, .leading),
+                    data(.date, 0.64, 0.72, 0.66, 0.14, .rounded, .semibold, 16, gold, .leading),
                 ])
             }
             return (.gradient(0x0B3D2E, 0x04140F), [
@@ -1069,8 +1069,8 @@ public enum Templates {
                 return (.gradient(0x0B1026, 0x02030A), [
                     art(.sticker(.starfield), 0.5, 0.5, 1, 1, white, opacity: 0.8),
                     art(.moonPhase, 0.22, 0.5, 0.36, 0.8, moon),
-                    text("TONIGHT'S MOON", 0.64, 0.33, 0.6, 0.13, .rounded, .bold, 14, mist, .leading),
-                    data(.moonPhaseName, 0.64, 0.56, 0.6, 0.24, .rounded, .bold, 26, white, .leading),
+                    text("TONIGHT'S MOON", 0.71, 0.33, 0.52, 0.13, .rounded, .bold, 14, mist, .leading),
+                    data(.moonPhaseName, 0.71, 0.56, 0.52, 0.24, .rounded, .bold, 26, white, .leading),
                 ])
             }
             return (.gradient(0x0B1026, 0x02030A), [
@@ -1135,20 +1135,19 @@ public enum Templates {
                 art(.dial(.kmPerLitre, .fuel), left, 0.46, 0.3, 0.64, orange),
                 art(.dial(nil, .instrument), mid, 0.48, 0.31, 0.72, red),
                 art(.dial(.kmToService, .instrument), right, 0.46, 0.3, 0.64, red),
-                data(.clock, mid, 0.63, 0.1, .rajdhani, .bold, 15, white, w: 0.13, shadow: false),
                 data(.kmPerLitre, left, 0.87, 0.12, .rajdhani, .bold, 16, white, shadow: false),
-                data(.weekday, mid, 0.92, 0.1, .rajdhani, .bold, 14, grey, shadow: false),
+                data(.clock, mid, 0.9, 0.12, .rajdhani, .bold, 16, white, shadow: false),
                 data(.kmToService, right, 0.87, 0.12, .rajdhani, .bold, 16, white, shadow: false),
             ])
 
         case .heroLiveSky:
             return (.sky, [
                 car,
-                data(.temperature, left, 0.2, 0.18, .rounded, .heavy, 30, white),
-                data(.weatherPlace, left, 0.36, 0.1, .rounded, .semibold, 14, white),
+                data(.temperature, left, 0.5, 0.18, .rounded, .heavy, 30, white),
+                data(.weatherPlace, left, 0.65, 0.1, .rounded, .semibold, 14, white),
                 data(.greeting, mid, 0.14, 0.18, .rounded, .bold, 16, white, w: 0.3),
-                data(.prayerCountdown, right, 0.2, 0.18, .rounded, .heavy, 28, white),
-                data(.nextPrayerName, right, 0.36, 0.1, .rounded, .semibold, 14, white),
+                data(.prayerCountdown, right, 0.5, 0.18, .rounded, .heavy, 28, white),
+                data(.nextPrayerName, right, 0.65, 0.1, .rounded, .semibold, 14, white),
             ])
 
         case .heroNeonGrid:

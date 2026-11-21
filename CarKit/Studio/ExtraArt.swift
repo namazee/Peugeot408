@@ -515,8 +515,10 @@ struct Waves: View {
             let w = size.width, h = size.height
             context.fill(Path(CGRect(origin: .zero, size: size)),
                          with: .linearGradient(Gradient(colors: [Color(hex: 0x1D4E89), Color(hex: 0x0B1E3A)]), startPoint: .zero, endPoint: CGPoint(x: 0, y: h)))
-            context.fill(Path(CGRect(x: w * 0.3, y: 0, width: w * 0.4, height: h)),
-                         with: .linearGradient(Gradient(colors: [color.opacity(0.55), .clear]), startPoint: .zero, endPoint: CGPoint(x: 0, y: h * 0.8)))
+            context.drawLayer { layer in
+                layer.addFilter(.blur(radius: w * 0.04))
+                layer.fill(Path(ellipseIn: CGRect(x: w * 0.36, y: -h * 0.1, width: w * 0.28, height: h * 0.9)), with: .color(color.opacity(0.4)))
+            }
             for i in 0..<7 {
                 let y = h * (0.12 + Double(i) * 0.13)
                 var wave = Path()
