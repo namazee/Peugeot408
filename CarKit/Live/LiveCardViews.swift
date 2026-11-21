@@ -91,7 +91,7 @@ struct PrayerCard: View {
             .lineLimit(1)
             .minimumScaleFactor(0.6)
             // Live countdown to the next prayer.
-            Text(next.time, style: .timer)
+            Text.countdown(to: next.time)
                 .font(Theme.number(30))
                 .foregroundStyle(Theme.primaryText)
                 .lineLimit(1)

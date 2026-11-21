@@ -8,6 +8,7 @@ import WidgetKit
 /// The big value of a compact card. Timers and relative times tick by themselves in widgets.
 public enum CompactValue: Sendable, Equatable {
     case text(String)
+    /// Prayer countdown; drawn with `Text.countdown`, which stops at 0:00.
     case timer(Date)
     case relative(Date)
 }
@@ -303,7 +304,7 @@ struct SlotCardView: View {
     private func valueText(_ value: CompactValue) -> Text {
         switch value {
         case .text(let text): Text(text)
-        case .timer(let date): Text(date, style: .timer)
+        case .timer(let date): Text.countdown(to: date)
         case .relative(let date): Text(date, style: .relative)
         }
     }

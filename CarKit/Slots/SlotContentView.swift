@@ -222,7 +222,7 @@ public struct SlotContentView: View {
     private func compactValueText(_ value: CompactValue) -> Text {
         switch value {
         case .text(let text): Text(text)
-        case .timer(let date): Text(date, style: .timer)
+        case .timer(let date): Text.countdown(to: date)
         case .relative(let date): Text(date, style: .relative)
         }
     }

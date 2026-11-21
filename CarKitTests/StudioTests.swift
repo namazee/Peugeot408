@@ -134,7 +134,7 @@ struct DataFieldTests {
         let day = PrayerCalculator.jakim.day(for: at(2027, 2, 20), zone: zone)
         let data = CarData(prayer: PrayerCache(zoneCode: "SGR01", days: day.map { [$0] } ?? []))
         let value = DesignResolver.resolve(.iftarCountdown, data: data, design: CardDesign(name: "R"), at: at(2027, 2, 20, 15), calendar: my)
-        #expect(value.style == .timer(day?.maghrib ?? .distantPast))
+        #expect(value.style == .countdown(day?.maghrib ?? .distantPast))
         let after = DesignResolver.resolve(.iftarCountdown, data: data, design: CardDesign(name: "R"), at: at(2027, 2, 20, 21), calendar: my)
         #expect(after.text == "Selamat berbuka")
     }

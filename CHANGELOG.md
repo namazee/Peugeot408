@@ -6,6 +6,8 @@ Fresh session? Read `docs/SPEC.md`, then this file, then continue from **Current
 
 ## Phase 15 — App Store release as DashCraft
 ### Done
+- **Prayer countdown fix (car test):** prayer and iftar countdowns stop at 0:00 when the time arrives instead of counting up ("0:01, 0:02…") while CarPlay waits to show the next timeline entry. New `Text.countdown(to:)` (`Text(timerInterval:countsDown:)`) in widgets, slots, faces and Studio designs; the clock still counts up. `CountdownTests`.
+- **GitHub Pages on:** support and privacy pages are live at https://namazee.github.io/Peugeot408/.
 - **Name:** the display name, permission prompts, Siri/Shortcuts texts, help texts, onboarding, backups ("DashCraft backup <date>.json") and widget descriptions say **DashCraft**; nothing user-visible says Peugeot, Stellantis or 408. Target, bundle ID, App Group and URL-scheme names are unchanged, so your data and signing carry over. New-install defaults say "MY CAR" (Slot 1, Hero lettering); your saved slots and designs aren't changed.
 - **Icon:** the wordmark is now **DASHCRAFT** (Michroma, tighter tracking so nine letters fit on one line); Any, Dark and Tinted re-rendered, plus IconPreview and IconReveal. The onboarding setup clip says "My Car" instead of "My 408".
 - **Build flavours:** `FLAVOUR_CONDITION` in `project.yml`; the iOS workflow has a `flavour` input (personal / store). The store build compiles with `STORE_BUILD`: no LRCLIB client, Lyrics widget, Lyrics Live Activity, Sync Lyrics intent or lyrics screen, and Lyrics isn't offered in pickers (an old Lyrics slot shows Music). Store builds wait for processing and get the TestFlight note "Store build". CI also compiles the store flavour on every push.

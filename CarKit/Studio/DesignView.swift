@@ -216,6 +216,8 @@ private struct LayerView: View {
                 styled(Text(value.text)).widgetAccentable()
             case .timer(let date):
                 styled(Text(date, style: .timer)).monospacedDigit().widgetAccentable()
+            case .countdown(let date):
+                styled(Text.countdown(to: date)).monospacedDigit().widgetAccentable()
             case .relative(let date):
                 styled(Text("\(Text(date, style: .relative)) ago"))
             }

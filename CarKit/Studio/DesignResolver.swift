@@ -4,8 +4,10 @@ import Foundation
 public struct ResolvedField: Sendable, Equatable, Hashable {
     public enum Style: Sendable, Equatable, Hashable {
         case plain
-        /// Live countdown or count-up to `date` (`Text(date, style: .timer)`).
+        /// Live count-up from `date` (`Text(date, style: .timer)`), e.g. the clock.
         case timer(Date)
+        /// Live countdown to `date` that stops at 0:00 (prayer and iftar).
+        case countdown(Date)
         /// Live relative text ("2 hr, 14 min").
         case relative(Date)
     }
@@ -100,13 +102,13 @@ public enum DesignResolver {
             switch field {
             case .nextPrayerName: return ResolvedField(text: next.prayer.displayName)
             case .nextPrayerTime: return ResolvedField(text: next.time.formatted(time))
-            default: return ResolvedField(text: "", style: .timer(next.time))
+            default: return ResolvedField(text: "", style: .countdown(next.time))
             }
 
         case .iftarCountdown:
             let days = data.prayer.days
             guard let today = PrayerSchedule.day(containing: date, in: days) else { return ResolvedField(text: "--") }
-            if today.maghrib > date { return ResolvedField(text: "", style: .timer(today.maghrib)) }
+            if today.maghrib > date { return ResolvedField(text: "", style: .countdown(today.maghrib)) }
             return ResolvedField(text: "Selamat berbuka")
 
         case .serviceItem, .kmToService, .daysToService:

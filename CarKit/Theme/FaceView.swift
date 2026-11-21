@@ -148,7 +148,7 @@ public struct FaceView: View {
     private var valueText: Text {
         switch face.value {
         case .text(let text): Text(text)
-        case .timer(let date): Text(date, style: .timer)
+        case .timer(let date): Text.countdown(to: date)
         case .relative(let date): Text(date, style: .relative)
         }
     }
