@@ -864,7 +864,7 @@ public enum Templates {
                 art(.dial(.kmPerLitre, .fuel), left, 0.46, 0.3, 0.64, orange),
                 art(.dial(nil, .instrument), mid, 0.48, 0.31, 0.72, red),
                 art(.dial(.kmToService, .instrument), right, 0.46, 0.3, 0.64, red),
-                data(.clock, mid, 0.72, 0.11, .rajdhani, .bold, 16, white, w: 0.14, shadow: false),
+                data(.clock, mid, 0.63, 0.1, .rajdhani, .bold, 15, white, w: 0.13, shadow: false),
                 data(.kmPerLitre, left, 0.87, 0.12, .rajdhani, .bold, 16, white, shadow: false),
                 data(.weekday, mid, 0.92, 0.1, .rajdhani, .bold, 14, grey, shadow: false),
                 data(.kmToService, right, 0.87, 0.12, .rajdhani, .bold, 16, white, shadow: false),

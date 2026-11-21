@@ -43,13 +43,19 @@ struct SplitFlapView: View {
 
     @ViewBuilder
     private func tiles(_ text: String, size: CGSize) -> some View {
+        // Spaces are a narrow gap between words rather than an empty tile.
         let chars = Array(text.uppercased())
+        let spaces = Double(chars.filter { $0 == " " }.count)
         let gap = max(size.height * 0.04, 1)
-        let width = min(size.height * 0.7, (size.width - gap * Double(chars.count)) / Double(max(chars.count, 1)))
+        let width = min(size.height * 0.7, (size.width - gap * Double(chars.count)) / max(Double(chars.count) - spaces * 0.7, 1))
         let height = min(size.height, width * 1.45)
         HStack(spacing: gap) {
             ForEach(Array(chars.enumerated()), id: \.offset) { _, ch in
-                tile(Text(ch == " " ? " " : String(ch)), width: width, height: height)
+                if ch == " " {
+                    Color.clear.frame(width: width * 0.3, height: height)
+                } else {
+                    tile(Text(String(ch)), width: width, height: height)
+                }
             }
         }
     }
@@ -71,7 +77,6 @@ struct SplitFlapView: View {
                 }
             )
             .overlay(Rectangle().fill(.black.opacity(0.85)).frame(height: max(height * 0.025, 0.8)))
-            .overlay(alignment: .bottom) { Rectangle().fill(accent).frame(height: max(height * 0.03, 1)) }
             .clipShape(shape)
             .overlay(shape.stroke(.black.opacity(0.8), lineWidth: 1))
             .shadow(color: .black.opacity(0.55), radius: 1.5, y: 1.2)
@@ -348,8 +353,7 @@ struct StreetMap: View {
             context.stroke(main, with: .color(Color(hex: 0x56607A)), lineWidth: m * 0.07)
             context.stroke(cross, with: .color(Color(hex: 0x3F475C)), lineWidth: m * 0.045)
             var route = Path()
-            route.move(to: CGPoint(x: w * 0.12, y: h * 0.95))
-            route.addLine(to: CGPoint(x: w * 0.2, y: h * 0.64))
+            route.move(to: CGPoint(x: w * 0.2, y: h * 0.64))
             route.addCurve(to: CGPoint(x: w * 0.55, y: h * 0.48), control1: CGPoint(x: w * 0.35, y: h * 0.67), control2: CGPoint(x: w * 0.45, y: h * 0.55))
             route.addLine(to: CGPoint(x: w * 0.57, y: h * 0.2))
             context.drawLayer { layer in
@@ -360,7 +364,7 @@ struct StreetMap: View {
             let r = m * 0.06
             context.fill(Path(ellipseIn: CGRect(x: pin.x - r, y: pin.y - r, width: r * 2, height: r * 2)), with: .color(Color(hex: 0xFF3B30)))
             context.fill(Path(ellipseIn: CGRect(x: pin.x - r * 0.4, y: pin.y - r * 0.4, width: r * 0.8, height: r * 0.8)), with: .color(.white))
-            let me = CGPoint(x: w * 0.12, y: h * 0.92)
+            let me = CGPoint(x: w * 0.2, y: h * 0.64)
             context.fill(Path(ellipseIn: CGRect(x: me.x - r * 0.8, y: me.y - r * 0.8, width: r * 1.6, height: r * 1.6)), with: .color(.white))
             context.fill(Path(ellipseIn: CGRect(x: me.x - r * 0.55, y: me.y - r * 0.55, width: r * 1.1, height: r * 1.1)), with: .color(color))
         }
