@@ -17,12 +17,17 @@ struct RoundThreeTemplateTests {
     }
 
     @Test func groups() {
-        #expect(Self.realistic.allSatisfy { $0.group == .realistic && $0.usesDataSource })
-        #expect([TemplateStyle.vinyl, .comicPop].allSatisfy { $0.group == .data && $0.usesDataSource })
-        #expect([TemplateStyle.flipClock, .wordClock, .hijriDate].allSatisfy { $0.group == .clockDate && !$0.usesDataSource })
+        let realisticOK = Self.realistic.allSatisfy { style in style.group == TemplateGroup.realistic && style.usesDataSource }
+        #expect(realisticOK)
+        let dataOK = [TemplateStyle.vinyl, .comicPop].allSatisfy { style in style.group == TemplateGroup.data && style.usesDataSource }
+        #expect(dataOK)
+        let clockOK = [TemplateStyle.flipClock, .wordClock, .hijriDate].allSatisfy { style in style.group == TemplateGroup.clockDate && !style.usesDataSource }
+        #expect(clockOK)
         #expect(TemplateStyle.moonPhase.group == .special)
-        #expect(Self.heroes.allSatisfy { $0.group == .hero && !$0.usesDataSource })
-        #expect((Self.realistic + Self.others + Self.heroes).allSatisfy(\.isNew))
+        let heroesOK = Self.heroes.allSatisfy { style in style.group == TemplateGroup.hero && !style.usesDataSource }
+        #expect(heroesOK)
+        let allNew = (Self.realistic + Self.others + Self.heroes).allSatisfy { style in style.isNew }
+        #expect(allNew)
     }
 
     @Test func glanceableWithTheirOwnSmallAndMedium() {
