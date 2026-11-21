@@ -4,6 +4,12 @@ Fresh session? Read `docs/SPEC.md`, then this file, then continue from **Current
 
 ## Current phase: 18 (Another round of templates) — built, waiting for you to try the new templates. Phase 15 store steps (SETUP.md §15) and the Phase 8 car test are still yours.
 
+## Fix — Panorama hero blank in the car
+### Done
+- Slots 1–3 now draw their part of the Hero as the widget's content on black, instead of only as the widget background, which CarPlay can drop (it showed blank on the head unit).
+### Not verified yet
+- On the head unit.
+
 ## Phase 18 — Another round of templates
 ### Done
 - **8 more realistic templates**, each with its own Small and Medium layout: Shift Lights, Polaroid (your My Car photo pinned to cork; Medium adds a sticky note), Sticky Note (Medium: two notes), Dot Matrix (amber LED board), Chalkboard, Thermometer, Battery (green, amber under 30%, red under 15%) and Speed Sign.

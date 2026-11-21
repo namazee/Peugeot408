@@ -102,11 +102,10 @@ struct SlotWidgetView: View {
                     DesignBackgroundView(background: card.design.background, card: card)
                 }
         } else if case .panorama(let card, let part) = entry.content {
-            // This slot's third of the Panorama hero, edge to edge.
-            Color.clear
-                .containerBackground(for: .widget) {
-                    PanoramaSlice(card: card, part: part)
-                }
+            // This slot's third of the Panorama hero, edge to edge. Drawn as the content, not the
+            // container background: CarPlay can drop widget backgrounds, which left the slots blank.
+            PanoramaSlice(card: card, part: part)
+                .containerBackground(for: .widget) { Color.black }
         } else {
             WidgetCard(style: entry.content.cardStyle, paint: entry.content.paint) {
                 SlotContentView(slot: entry.slot, content: entry.content, isMedium: family == .systemMedium)
