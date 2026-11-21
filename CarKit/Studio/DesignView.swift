@@ -43,7 +43,7 @@ public struct DesignView: View {
             switch layer.content {
             case .text(let text): text
             case .plate(let text): text.isEmpty ? card.plateText : text
-            case .data(let field), .odometer(let field): "\(field.displayName): \(card.values[field]?.text ?? "")"
+            case .data(let field), .odometer(let field), .splitFlap(let field): "\(field.displayName): \(card.values[field]?.text ?? "")"
             default: nil
             }
         }
@@ -119,6 +119,8 @@ public struct DesignBackgroundView: View {
         case .sky:
             let date = card?.date ?? .now
             SkyBackground(date: date, sun: card?.sun ?? Sky.sunTimes(on: date, prayerDays: []))
+        case .rain(let a, let b):
+            RainBackground(a: Color(hex: a), b: Color(hex: b))
         }
     }
 }
@@ -196,6 +198,8 @@ private struct LayerView: View {
             DialView(style: style, needle: color, progress: field.flatMap { card.values[$0]?.progress } ?? 0.6)
         case .odometer(let field):
             OdometerView(value: card.values[field] ?? ResolvedField(text: "--"), accent: color)
+        case .splitFlap(let field):
+            SplitFlapView(value: card.values[field] ?? ResolvedField(text: "--"), accent: color)
         case .analogClock:
             AnalogClock(date: card.date, color: color)
         case .seasonalArt(let occasion):

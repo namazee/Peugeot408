@@ -41,6 +41,15 @@ public struct ArtworkView: View {
                 case .hudLines: HUDLines(color: color)
                 case .ticket: TicketArt(color: color)
                 case .glassPanel: GlassPanel(color: color)
+                case .neonTube: NeonTube(color: color)
+                case .thermalTicket: ThermalTicket(color: color)
+                case .plateFrame: PlateFrame(color: color)
+                case .tuningScale: TuningScale(color: color)
+                case .streetMap: StreetMap(color: color)
+                case .lcdPanel: LCDPanel(color: color)
+                case .skyline: Skyline(color: color)
+                case .neonGrid: NeonGrid(color: color)
+                case .stripedSun: StripedSun(color: color)
                 }
             }
             .frame(width: kind.fillsFrame ? geo.size.width : size,
@@ -247,7 +256,8 @@ extension ArtworkKind {
     /// Artwork stretched to the layer's frame rather than kept square.
     var fillsFrame: Bool {
         switch self {
-        case .stripes, .speedLines, .gaugeArc, .road, .starfield, .stitching, .signFrame, .hudLines, .ticket, .glassPanel: true
+        case .stripes, .speedLines, .gaugeArc, .road, .starfield, .stitching, .signFrame, .hudLines, .ticket, .glassPanel,
+             .neonTube, .thermalTicket, .plateFrame, .tuningScale, .streetMap, .lcdPanel, .skyline, .neonGrid: true
         default: false
         }
     }
@@ -401,6 +411,10 @@ public struct TextureView: View {
                 }
             case .leather:
                 LeatherGrain.draw(&context, size: size)
+            case .wood:
+                WoodGrain.draw(&context, size: size)
+            case .brick:
+                BrickWall.draw(&context, size: size)
             case .dots:
                 var y = 6.0
                 while y < size.height {

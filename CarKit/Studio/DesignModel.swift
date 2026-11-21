@@ -210,6 +210,16 @@ public enum ArtworkKind: String, Codable, Sendable, CaseIterable {
     case hudLines
     case ticket
     case glassPanel
+    // Phase 17 templates.
+    case neonTube
+    case thermalTicket
+    case plateFrame
+    case tuningScale
+    case streetMap
+    case lcdPanel
+    case skyline
+    case neonGrid
+    case stripedSun
 
     public var displayName: String {
         switch self {
@@ -235,12 +245,23 @@ public enum ArtworkKind: String, Codable, Sendable, CaseIterable {
         case .hudLines: "HUD horizon"
         case .ticket: "Ticket"
         case .glassPanel: "Glass panel"
+        case .neonTube: "Neon tube"
+        case .thermalTicket: "Thermal ticket"
+        case .plateFrame: "Plate frame"
+        case .tuningScale: "Radio tuning scale"
+        case .streetMap: "Street map"
+        case .lcdPanel: "LCD panel"
+        case .skyline: "City skyline"
+        case .neonGrid: "Neon grid floor"
+        case .stripedSun: "Striped sun"
         }
     }
 
     /// Shown in the sticker picker (the rest are used by seasonal packs and templates).
     public static let stickers: [ArtworkKind] = [.ketupat, .crescent, .lantern, .diya, .tree, .fireworks, .heart, .star, .flag, .speedLines, .sun, .road, .starfield,
-                                                   .stitching, .signFrame, .roadArrow, .hudLines, .ticket, .glassPanel]
+                                                   .stitching, .signFrame, .roadArrow, .hudLines, .ticket, .glassPanel,
+                                                   .neonTube, .thermalTicket, .plateFrame, .tuningScale, .streetMap, .lcdPanel,
+                                                   .skyline, .neonGrid, .stripedSun]
 }
 
 /// What a layer draws.
@@ -267,6 +288,8 @@ public enum LayerContent: Codable, Sendable, Equatable, Hashable {
     case dial(DataField?, DialStyle)
     /// A field's value on rolling-counter wheels.
     case odometer(DataField)
+    /// A field's value on split-flap tiles (Phase 17).
+    case splitFlap(DataField)
 }
 
 /// Dial layer styles (Phase 16).
@@ -343,7 +366,7 @@ public struct DesignLayer: Codable, Sendable, Equatable, Hashable, Identifiable 
         switch content {
         case .data(let field): field
         case .gauge(let field), .ring(let field), .progressBar(let field), .dial(let field, _): field
-        case .odometer(let field): field
+        case .odometer(let field), .splitFlap(let field): field
         default: nil
         }
     }
@@ -361,6 +384,8 @@ public enum DesignTexture: String, Codable, Sendable, CaseIterable {
     case brushed
     case dots
     case leather
+    case wood
+    case brick
 
     public var displayName: String { rawValue.capitalized }
 }
@@ -383,6 +408,8 @@ public enum DesignBackground: Codable, Sendable, Equatable, Hashable {
     /// A sky that follows the time of day (dawn, day, dusk, night), with sunrise and sunset from
     /// today's Syuruk and Maghrib.
     case sky
+    /// Blurred city lights (two bokeh colours) behind raindrops on glass (Phase 17).
+    case rain(UInt32, UInt32)
 
     /// Approximate colour behind the text, for the contrast check (nil for photos: unknown).
     public var approximateHex: UInt32? {
@@ -396,6 +423,7 @@ public enum DesignBackground: Codable, Sendable, Equatable, Hashable {
         case .stateColor(let hex): hex
         case .frosted(let a, let b): ColorMath.mix(ColorMath.mix(a, b), 0x0B1020)
         case .sky: nil
+        case .rain(let a, let b): ColorMath.mix(ColorMath.mix(ColorMath.mix(a, b), 0x070A12), 0x070A12)
         }
     }
 }

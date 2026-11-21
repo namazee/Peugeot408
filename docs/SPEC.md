@@ -75,11 +75,11 @@ Work in phases (below). At the end of each phase: commit, push, make sure the CI
 * One wide "hero" design spread across Car Slots 1–3. Each slot draws its third, so the three tall columns read as one picture, e.g. my My Car photo spanning the screen with big lettering behind it. The gaps between columns stay, because CarPlay draws them.
 * A Hero template for it: a greeting, big "408 GT" (or my own text) lettering behind the car, my car photo and a weather line. No brand logos or emblems.
 * More Hero templates (Phase 17), all on the panorama canvas, each keeping its text inside one column so nothing is cut by the gaps:
-   * **Sunset Road:** an orange-to-purple sky and sun with the road running into the middle column, my car photo on it, the clock left and the temperature right.
-   * **Night City:** a city skyline with lit windows under a crescent moon, my car photo in the middle, the greeting left and the date right.
+   * **Sunset Road:** an orange-to-purple sky and sun with the road running into the middle column, my car photo on it, the clock and date left, the temperature and weather place right.
+   * **Night City:** a city skyline with lit windows under a crescent moon, my car photo in the middle, the greeting and clock left, the date and temperature right.
    * **Cockpit:** three instrument dials, one per column: fuel (km/L) left, a big chrome dial with the clock middle, km to service right.
    * **Live Sky:** the live sky (§4b) across all three columns with hills and my car photo, the temperature left, the greeting top middle and the next prayer countdown right.
-   * **Neon Grid:** a retro purple grid floor in perspective under a striped sun, my car photo in the middle and the clock in glowing Orbitron.
+   * **Neon Grid:** a retro purple grid floor in perspective under a striped sun, my car photo in the middle, the clock and date left and the temperature and weather place right, in glowing Orbitron.
    * **Glass Info:** soft colour blobs behind three frosted glass panels, one per column: the next prayer and countdown, the weather, and km to service.
   New original stickers for these: city skyline, neon grid floor and striped sun. The template gallery gets a **Hero** section (the old Hero template moves there from Car) that always previews at the panorama shape across the full width, whatever the Size picker says. On the Panorama hero screen, "Create a Hero design" lets me pick any Hero template.
 * New data fields:

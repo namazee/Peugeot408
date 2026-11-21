@@ -240,6 +240,10 @@ struct DesignBuilderView: View {
             layer.width = 0.8
             layer.height = 0.26
             layer.colorHex = 0xD92D20
+        case .splitFlap:
+            layer.width = 0.8
+            layer.height = 0.26
+            layer.colorHex = 0xF5B700
         case .data, .text:
             layer.fontSize = 24
         }
@@ -358,6 +362,7 @@ struct DesignBuilderView: View {
                 Button("Dial", systemImage: "speedometer") { add(.dial(.kmToService, .instrument)) }
                 Button("Fuel gauge", systemImage: "fuelpump") { add(.dial(.kmPerLitre, .fuel)) }
                 Button("Odometer", systemImage: "number.square") { add(.odometer(.kmToService)) }
+                Button("Split-flap", systemImage: "rectangle.split.3x1") { add(.splitFlap(.kmToService)) }
             } label: {
                 Image(systemName: "plus")
             }
@@ -394,6 +399,7 @@ struct DesignBuilderView: View {
         case .seasonalArt(let occasion): "Art: \(occasion.displayName)"
         case .dial(let field, let style): "\(style == .fuel ? "Fuel gauge" : "Dial"): \(field?.displayName ?? "decorative")"
         case .odometer(let field): "Odometer: \(field.displayName)"
+        case .splitFlap(let field): "Split-flap: \(field.displayName)"
         }
     }
 }
@@ -494,6 +500,10 @@ private struct LayerInspector: View {
             Picker("Shows", selection: Binding(get: { field }, set: { layer.content = .odometer($0) })) {
                 ForEach(DataField.allCases) { Text($0.displayName).tag($0) }
             }
+        case .splitFlap(let field):
+            Picker("Shows", selection: Binding(get: { field }, set: { layer.content = .splitFlap($0) })) {
+                ForEach(DataField.allCases) { Text($0.displayName).tag($0) }
+            }
         case .symbol(let name):
             Picker("Icon", selection: Binding(get: { name }, set: { layer.content = .symbol($0) })) {
                 ForEach(SlotDesign.symbolChoices, id: \.self) { Label($0, systemImage: $0).tag($0) }
@@ -550,7 +560,7 @@ private struct BackgroundEditor: View {
     @Binding var background: DesignBackground
     let photos: [PhotoItem]
 
-    private enum Kind: String, CaseIterable { case solid, gradient, aurora, glow, frosted, sky, texture, photo, state }
+    private enum Kind: String, CaseIterable { case solid, gradient, aurora, glow, frosted, sky, rain, texture, photo, state }
 
     private var kind: Kind {
         switch background {
@@ -563,6 +573,7 @@ private struct BackgroundEditor: View {
         case .stateColor: .state
         case .frosted: .frosted
         case .sky: .sky
+        case .rain: .rain
         }
     }
 
@@ -605,6 +616,12 @@ private struct BackgroundEditor: View {
                 Text("Follows the time of day: dawn, day, dusk and night, with sunrise and sunset from today's Syuruk and Maghrib.")
                     .font(.footnote)
                     .foregroundStyle(Theme.secondaryText)
+            case .rain(let a, let b):
+                ColorPicker("Light 1", selection: Binding(get: { Color(hex: a) }, set: { background = .rain($0.hexValue, b) }), supportsOpacity: false)
+                ColorPicker("Light 2", selection: Binding(get: { Color(hex: b) }, set: { background = .rain(a, $0.hexValue) }), supportsOpacity: false)
+                Text("Blurred city lights behind raindrops on the glass.")
+                    .font(.footnote)
+                    .foregroundStyle(Theme.secondaryText)
             case .photo(let file):
                 if photos.isEmpty {
                     Text("Add photos in Studio → Photo Frame first.").foregroundStyle(Theme.secondaryText)
@@ -628,6 +645,7 @@ private struct BackgroundEditor: View {
         case .photo: background = .photo(photos.first?.fileName ?? "")
         case .frosted: background = .frosted(0x8B5CF6, 0x06B6D4)
         case .sky: background = .sky
+        case .rain: background = .rain(0xFF4D6D, 0x3BA7FF)
         }
     }
 }
