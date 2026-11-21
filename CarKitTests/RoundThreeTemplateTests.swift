@@ -83,7 +83,9 @@ struct RoundThreeTemplateTests {
         #expect(back.layers.map(\.content) == design.layers.map(\.content))
         #expect(back.dataFields == [.engineRPM, .tngBalance, .hijriDate])
         for texture in [DesignTexture.cork, .chalkboard] {
-            #expect(try CardDesign.importing(CardDesign(name: "t", background: .texture(texture, 1)).exportData()).background == .texture(texture, 1))
+            let file = try CardDesign(name: "t", background: .texture(texture, 1)).exportData()
+            let loaded = try CardDesign.importing(file)
+            #expect(loaded.background == .texture(texture, 1))
         }
     }
 
