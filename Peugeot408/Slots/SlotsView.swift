@@ -14,7 +14,7 @@ struct SlotsView: View {
                         .listRowInsets(EdgeInsets())
                         .listRowBackground(Color.clear)
                 } footer: {
-                    Text("Your 408 shows 3 columns: Slot 1–3. Tap any card to change it. Slots 4 and 5 sit behind the columns (Smart Rotate). CarPlay may take a moment to redraw; reconnecting the phone redraws it fastest.")
+                    Text("Cars with a wide screen show 3 columns: Slot 1–3. Tap any card to change it. Slots 4 and 5 sit behind the columns (Smart Rotate). CarPlay may take a moment to redraw; reconnecting the phone redraws it fastest.")
                 }
 
                 Section {
@@ -98,7 +98,7 @@ struct MockCarPlayView: View {
                 .foregroundStyle(Theme.secondaryText)
                 .padding(.horizontal, 16)
 
-                // The 408 head unit: 3 tall columns (Slot 1–3).
+                // A wide CarPlay screen: 3 tall columns (Slot 1–3).
                 HStack(spacing: 10) {
                     ForEach(1...3, id: \.self) { number in
                         column(number, date: context.date)

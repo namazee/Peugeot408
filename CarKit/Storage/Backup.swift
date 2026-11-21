@@ -43,7 +43,7 @@ public enum Backup {
 
         public var errorDescription: String? {
             switch self {
-            case .notABackup: "This isn't a Peugeot408 backup file."
+            case .notABackup: "This isn't a DashCraft backup file."
             case .newerVersion(let version): "This backup is from a newer version of the app (format \(version))."
             case .badFile(let title): "The \(title) data in this backup is damaged, so nothing was changed."
             }
@@ -105,8 +105,8 @@ public enum Backup {
         return ImportResult(restored: pending.map(\.0.title), createdAt: createdAt)
     }
 
-    /// "Peugeot408 backup 2026-11-20.json"
+    /// "DashCraft backup 2026-11-20.json"
     public static func fileName(for date: Date = .now) -> String {
-        "Peugeot408 backup \(date.formatted(.iso8601.year().month().day())).json"
+        "DashCraft backup \(date.formatted(.iso8601.year().month().day())).json"
     }
 }

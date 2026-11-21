@@ -31,7 +31,7 @@ struct OBDView: View {
                 }
             } footer: {
                 if !session.unsupported.isEmpty {
-                    Text("Your car didn't report \(session.unsupported.map(\.displayName).sorted().joined(separator: ", ")), so it shows n/a. Peugeot/Stellantis ECUs don't answer every standard PID.")
+                    Text("Your car didn't report \(session.unsupported.map(\.displayName).sorted().joined(separator: ", ")), so it shows n/a. Some cars' ECUs don't answer every standard PID.")
                 }
             }
 
@@ -51,7 +51,7 @@ struct OBDView: View {
                     }
                 }
             } footer: {
-                Text("While a session runs, a Live Activity shows the values on the Lock Screen and in CarPlay. Keep Peugeot408 open or in the background; the last values are saved for the Live OBD2 widget.")
+                Text("While a session runs, a Live Activity shows the values on the Lock Screen and in CarPlay. Keep DashCraft open or in the background; the last values are saved for the Live OBD2 widget.")
             }
 
             Section {

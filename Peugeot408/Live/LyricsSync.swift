@@ -1,3 +1,5 @@
+// Not in the App Store build (spec §10 Build flavours): LRCLIB lyrics are personal-build only.
+#if !STORE_BUILD
 import ActivityKit
 import AppIntents
 import CarKit
@@ -154,11 +156,11 @@ final class LyricsSync {
 }
 
 /// "Sync Lyrics": for a Shortcuts automation (e.g. when CarPlay connects, or when the Music app
-/// opens) so the Lyrics widget knows the song and its timing without opening Peugeot408.
+/// opens) so the Lyrics widget knows the song and its timing without opening DashCraft.
 struct SyncLyricsIntent: AppIntent {
     static var title: LocalizedStringResource { "Sync Lyrics" }
     static var description: IntentDescription {
-        IntentDescription("Reads the Apple Music song that's playing and updates the Peugeot408 Lyrics widget.")
+        IntentDescription("Reads the Apple Music song that's playing and updates the DashCraft Lyrics widget.")
     }
     static var openAppWhenRun: Bool { false }
 
@@ -168,3 +170,4 @@ struct SyncLyricsIntent: AppIntent {
         return .result(dialog: IntentDialog(stringLiteral: status))
     }
 }
+#endif

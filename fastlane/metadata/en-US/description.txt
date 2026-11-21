@@ -1,0 +1,31 @@
+Make the CarPlay screen yours. DashCraft gives you five Car Slot widgets that you design on your iPhone; the car screen updates by itself.
+
+YOUR CAR AT A GLANCE
+• Service due by km or date, whichever comes first
+• Fuel log with km/L, price per litre and monthly spend
+• Road tax and insurance renewal countdowns
+• Toll card balance with a low-balance warning
+• Live OBD2 values (boost, coolant, battery, RPM) with an optional Bluetooth adapter
+
+YOUR DAY ON THE DASHBOARD
+• Prayer times with the next prayer counting down (JAKIM zones, Malaysia)
+• Weather and haze, drive time to home or work, your next calendar event
+• Where you parked, with a map picture
+• A photo frame for family pictures, and your Apple Music
+
+DESIGN IT YOUR WAY
+• Split each slot into one, two or four cards
+• Bold and Neon looks for every card, any background colour
+• Template gallery, custom builder and your own car photo in the middle
+• Panorama: one wide picture across three columns, with a greeting and the clock
+• Seasonal packs for Hari Raya, Chinese New Year, Deepavali, Merdeka, Christmas and more
+
+SOUNDS
+• Engine starts, EV hums, luxury chimes and more when CarPlay connects, plus a disconnect sound and a spoken greeting (set up once with a Shortcuts automation)
+
+PRIVATE BY DESIGN
+No account, no ads, no tracking. Your data stays on your iPhone, and you can back it up to one file.
+
+Try everything with Settings → Sample data before you enter your own.
+
+Needs iOS 26 or later and a car with CarPlay for the car screen; the widgets also work on the iPhone. Not affiliated with any car maker.

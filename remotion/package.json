@@ -1,10 +1,11 @@
 {
   "name": "peugeot408-remotion",
   "private": true,
-  "description": "Remotion assets for the Peugeot408 app (app icon, previews, videos).",
+  "description": "Remotion assets for the DashCraft app (app icon, previews, videos).",
   "scripts": {
     "studio": "remotion studio",
     "icon": "node scripts/render-icon.mjs",
+    "store": "node scripts/render-store.mjs",
     "check-icon": "node scripts/check-icon-alpha.mjs out/AppIcon-1024.png",
     "typecheck": "tsc --noEmit",
     "videos": "node scripts/render-videos.mjs"

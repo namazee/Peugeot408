@@ -53,7 +53,7 @@ struct MusicView: View {
                 }
             case .denied, .restricted:
                 Section {
-                    Text("Apple Music access is off. Turn it on in Settings → Privacy & Security → Media & Apple Music → Peugeot408.")
+                    Text("Apple Music access is off. Turn it on in Settings → Privacy & Security → Media & Apple Music → DashCraft.")
                         .foregroundStyle(Theme.secondaryText)
                 }
             default:

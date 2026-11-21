@@ -34,7 +34,7 @@ public enum DesignCanvas: String, Codable, Sendable, CaseIterable {
     public static let widgetCanvases: [DesignCanvas] = [.small, .medium]
 }
 
-/// How the panorama is cut into Slots 1–3. The 408 shows three tall columns (about 0.72 wide
+/// How the panorama is cut into Slots 1–3. Wide CarPlay screens show three tall columns (about 0.72 wide
 /// per 1 high) with a thin gap between them; each slot draws its third, skipping the gaps, so
 /// the three columns read as one picture.
 public enum PanoramaGeometry {
@@ -523,7 +523,7 @@ public struct StudioState: Codable, Sendable, Equatable {
     public var seasonal: SeasonalSettings
     /// File name of the cut-out car photo (transparent PNG) in the App Group.
     public var carPhotoFile: String?
-    /// Number-plate text for the My Car template, e.g. "VKL 408".
+    /// Number-plate text for the My Car template, e.g. "ABC 1234".
     public var plateText: String
     /// Which built-in photo is in use ("side", "front", …), or nil for your own photo. Nil in older files.
     public var builtInCarPhoto: String?

@@ -253,7 +253,7 @@ struct EmptyCard: View {
                 .foregroundStyle(Theme.primaryText)
                 .lineLimit(2)
                 .minimumScaleFactor(0.7)
-            SmallLine(text: "Open Peugeot408")
+            SmallLine(text: "Open DashCraft")
         }
     }
 }

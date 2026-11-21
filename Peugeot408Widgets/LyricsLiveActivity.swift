@@ -1,3 +1,5 @@
+// Not in the App Store build (spec §10 Build flavours): LRCLIB lyrics are personal-build only.
+#if !STORE_BUILD
 import ActivityKit
 import CarKit
 import SwiftUI
@@ -30,3 +32,4 @@ struct LyricsLiveActivity: Widget {
         .supplementalActivityFamilies([.small, .medium])
     }
 }
+#endif

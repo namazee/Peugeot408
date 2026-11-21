@@ -18,6 +18,16 @@ public enum DataSource: String, Codable, Sendable, CaseIterable, Identifiable {
 
     public var id: String { rawValue }
 
+    /// The sources this build offers in pickers. The App Store build has no Lyrics (spec §10);
+    /// `.lyrics` still decodes from older files and shows the Music card there.
+    public static var available: [DataSource] {
+        #if STORE_BUILD
+        allCases.filter { $0 != .lyrics }
+        #else
+        allCases
+        #endif
+    }
+
     public var displayName: String {
         switch self {
         case .service: "Service Tracker"
@@ -182,6 +192,12 @@ public struct CarData: Sendable, Equatable {
     public static let empty = CarData()
 
     public static func load(from directory: URL = AppGroup.containerURL) -> CarData {
+        if SampleMode.isOn(in: directory) {
+            // Settings → Sample data (spec §10): show the made-up history, leave the real files alone.
+            var sample = SampleData.carData(now: .now)
+            sample.directory = directory
+            return sample
+        }
         let prayer = PrayerService(directory: directory)
         return CarData(
             service: CarStores.service(in: directory).load(),
@@ -267,7 +283,11 @@ public struct CarData: Sendable, Equatable {
             return .obd(OBDSummary(reading: obd.last, isDemo: obd.lastWasDemo, sessionActive: obd.sessionActive, unsupported: obd.unsupported))
 
         case .lyrics:
+            #if STORE_BUILD
+            return musicCard()
+            #else
             return .lyrics(LyricsSummary.make(state: lyrics, at: date))
+            #endif
         }
     }
 }
@@ -482,6 +502,9 @@ public enum DataTimeline {
             return [start]
 
         case .lyrics:
+            #if STORE_BUILD
+            return [start]
+            #endif
             // One entry per line of the song that's playing (no de-duplication limit of 40).
             return LyricsTimeline.dates(nowPlaying: data.lyrics.nowPlaying, lyrics: data.lyrics.current, from: start)
 

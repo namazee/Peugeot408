@@ -181,7 +181,7 @@ struct WeatherCard: View {
                 Text(summary.weatherError == nil ? "Loading…" : "No weather yet")
                     .font(.system(size: 17, weight: .semibold, design: .rounded))
                     .foregroundStyle(Theme.primaryText)
-                SmallLine(text: "Open Peugeot408")
+                SmallLine(text: "Open DashCraft")
                 attribution
             }
         } else if size == .medium {

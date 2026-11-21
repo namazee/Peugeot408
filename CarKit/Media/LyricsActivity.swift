@@ -1,3 +1,5 @@
+// Not in the App Store build (spec §10 Build flavours): LRCLIB lyrics are personal-build only.
+#if !STORE_BUILD
 import ActivityKit
 import SwiftUI
 import WidgetKit
@@ -57,3 +59,4 @@ public struct LyricsActivityView: View {
         .frame(maxWidth: .infinity, alignment: .leading)
     }
 }
+#endif

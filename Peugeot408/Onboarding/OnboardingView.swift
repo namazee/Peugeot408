@@ -5,6 +5,7 @@ import SwiftUI
 /// Page 1 plays the icon reveal; pages 2 and 3 play the setup and flash-test clips rendered in /remotion.
 struct OnboardingView: View {
     @Environment(SlotsModel.self) private var slots
+    @Environment(CarDataModel.self) private var cars
     let onFinish: () -> Void
     @State private var page = 0
 
@@ -46,7 +47,7 @@ struct OnboardingView: View {
                 IconRevealView()
                     .frame(width: 240, height: 240)
                     .clipShape(RoundedRectangle(cornerRadius: 36, style: .continuous))
-                    .accessibilityLabel("Peugeot408 app icon")
+                    .accessibilityLabel("DashCraft app icon")
             } else {
                 SlotTile(slot: 1, content: .design(.starter(for: 1)))
                     .frame(width: 170, height: 170)
@@ -95,6 +96,13 @@ struct OnboardingView: View {
                 .foregroundStyle(Theme.secondaryText)
             FlashControls()
                 .buttonStyle(.bordered)
+            if !cars.isSampleData {
+                Button("Try it with sample data", systemImage: "testtube.2") {
+                    cars.setSampleData(true)
+                    onFinish()
+                }
+                .font(.footnote)
+            }
             Spacer()
         }
         .padding(24)

@@ -31,7 +31,7 @@ struct ReadmeSnapshots {
             let mixed: [SlotContent] = [
                 .cards(.quad, [card(.prayer), card(.service), card(.fuel), card(.tng)]),
                 .data(SampleData.card(for: .service, now: now)),
-                .design(SlotDesign(value: "408 GT", title: "Drive safe", symbol: "car.side.fill")),
+                .design(SlotDesign(value: "MY CAR", title: "Drive safe", symbol: "car.side.fill")),
             ]
             save(carPlayScreen(mixed).environment(\.cardLook, look), "carplay-mixed\(suffix).png", in: directory)
 

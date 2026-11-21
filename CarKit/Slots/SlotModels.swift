@@ -49,7 +49,7 @@ public struct PanoramaSettings: Codable, Sendable, Equatable {
 }
 
 public extension SlotDesign {
-    /// Quick swatches: the 408's Malaysian paint colours, then a few vivid ones.
+    /// Quick swatches: classic car paint colours, then a few vivid ones.
     static let colourSwatches: [UInt32] = [
         Theme.Hex.accent, 0x8E1A22, 0xE6E6E2, 0x5B5E63, 0x16171A,
         0x7C3AED, 0x059669, 0xF97316, 0xDB2777, 0x0EA5E9, 0xEAB308, 0x0F766E,
@@ -66,7 +66,7 @@ public extension SlotDesign {
     }
 }
 
-/// How a slot widget is divided (spec §4b, split-card layouts). The 408 shows 3 tall columns,
+/// How a slot widget is divided (spec §4b, split-card layouts). Wide CarPlay screens show 3 tall columns,
 /// so splitting a slot puts more information on the screen.
 public enum SlotLayout: String, Codable, Sendable, CaseIterable, Identifiable {
     /// One card: the original behaviour.
@@ -248,7 +248,7 @@ public struct SlotDesign: Codable, Sendable, Equatable, Hashable {
 
     public static func starter(for slot: Int) -> SlotDesign {
         switch slot {
-        case 1: SlotDesign(value: "408 GT", title: "Selamat jalan", symbol: "car.side.fill", style: .accent)
+        case 1: SlotDesign(value: "MY CAR", title: "Selamat jalan", symbol: "car.side.fill", style: .accent)
         case 2: SlotDesign(value: "Slot 2", title: "Set in app", symbol: "fuelpump.fill")
         case 3: SlotDesign(value: "Slot 3", title: "Set in app", symbol: "wrench.and.screwdriver.fill")
         case 4: SlotDesign(value: "Slot 4", title: "Set in app", symbol: "moon.stars.fill")

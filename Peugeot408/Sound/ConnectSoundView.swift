@@ -323,9 +323,9 @@ struct AutomationGuideView: View {
             Step(text: "Tap Next, then New Blank Automation, then Add Action.", screen: ["When CarPlay \(trigger.lowercased())", "New Blank Automation", "Add Action"], highlight: 2),
         ]
         if kind == .connect {
-            list.append(Step(text: "Search \"Play Connect Sound\" and pick it (Peugeot408). Leave Sound empty to use the one chosen in the app.", screen: ["Search: Play Connect Sound", "Peugeot408", "▶ Play Connect Sound"], highlight: 2))
+            list.append(Step(text: "Search \"Play Connect Sound\" and pick it (DashCraft). Leave Sound empty to use the one chosen in the app.", screen: ["Search: Play Connect Sound", "DashCraft", "▶ Play Connect Sound"], highlight: 2))
         } else {
-            list.append(Step(text: "Add \"Play Disconnect Sound\" (it plays the disconnect sound chosen in the app). Then add \"Save Parking\" (Peugeot408) below it.", screen: ["▶ Play Disconnect Sound", "+ Add Action", "P Save Parking"], highlight: 2))
+            list.append(Step(text: "Add \"Play Disconnect Sound\" (it plays the disconnect sound chosen in the app). Then add \"Save Parking\" (DashCraft) below it.", screen: ["▶ Play Disconnect Sound", "+ Add Action", "P Save Parking"], highlight: 2))
         }
         list.append(Step(text: "Tap Done. Next time you plug in (or unplug), it runs by itself.", screen: ["When CarPlay \(trigger.lowercased())", kind == .connect ? "Play Connect Sound" : "Play Disconnect Sound, Save Parking", "Done"], highlight: 2))
         return list

@@ -1,0 +1,1 @@
+carplay,widgets,dashboard,car,service,fuel,road tax,insurance,prayer,obd2,parking,weather,haze

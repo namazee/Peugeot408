@@ -30,3 +30,7 @@ fastlane/test_output/
 .DS_Store
 .vscode/
 node_modules/
+
+# App Store screenshots (spec §10): raw shots come from CI, framed ones are artifacts
+remotion/assets/store-raw/
+fastlane/screenshots/

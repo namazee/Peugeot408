@@ -86,6 +86,16 @@ final class CarDataModel {
     /// Re-reads every file (e.g. after the Save Parking shortcut ran in the background).
     func reload() {
         data = CarData.load(from: directory)
+        isSampleData = SampleMode.isOn(in: directory)
+    }
+
+    /// Settings → Sample data (spec §10): the app and every widget show `SampleData` while it's on.
+    private(set) var isSampleData = SampleMode.isOn()
+
+    func setSampleData(_ on: Bool) {
+        SampleMode.set(on, in: directory)
+        reload()
+        WidgetCenter.shared.reloadAllTimelines()
     }
 
     /// Fetches fresh live data (prayer, commute, weather), then redraws the affected widgets.

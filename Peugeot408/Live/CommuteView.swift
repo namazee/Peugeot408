@@ -59,7 +59,7 @@ struct CommuteView: View {
                         Text("No events in the next 24 hours.").foregroundStyle(Theme.secondaryText)
                     }
                 case .denied, .restricted:
-                    Text("Calendar access is off. Turn it on in Settings → Privacy → Calendars → Peugeot408.")
+                    Text("Calendar access is off. Turn it on in Settings → Privacy → Calendars → DashCraft.")
                         .foregroundStyle(Theme.secondaryText)
                 default:
                     Button {

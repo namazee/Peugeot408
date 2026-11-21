@@ -76,7 +76,12 @@ struct DataSourceScreen: View {
         case .photos: PhotoFrameView()
         case .music: MusicView()
         case .obd: OBDView()
-        case .lyrics: LyricsView()
+        case .lyrics:
+            #if STORE_BUILD
+            MusicView()
+            #else
+            LyricsView()
+            #endif
         }
     }
 }

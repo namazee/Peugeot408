@@ -2,7 +2,20 @@
 
 Fresh session? Read `docs/SPEC.md`, then this file, then continue from **Current phase**.
 
-## Current phase: 14 (Panorama hero) — built. All spec phases are built. Phase 8 split cards still waiting for your car test.
+## Current phase: 15 (App Store release as DashCraft) — built, waiting for your manual store steps (SETUP.md §15). Phase 8 split cards still waiting for your car test.
+
+## Phase 15 — App Store release as DashCraft
+### Done
+- **Name:** the display name, permission prompts, Siri/Shortcuts texts, help texts, onboarding, backups ("DashCraft backup <date>.json") and widget descriptions say **DashCraft**; nothing user-visible says Peugeot, Stellantis or 408. Target, bundle ID, App Group and URL-scheme names are unchanged, so your data and signing carry over. New-install defaults say "MY CAR" (Slot 1, Hero lettering); your saved slots and designs aren't changed.
+- **Icon:** the wordmark is now **DASHCRAFT** (Michroma, tighter tracking so nine letters fit on one line); Any, Dark and Tinted re-rendered, plus IconPreview and IconReveal. The onboarding setup clip says "My Car" instead of "My 408".
+- **Build flavours:** `FLAVOUR_CONDITION` in `project.yml`; the iOS workflow has a `flavour` input (personal / store). The store build compiles with `STORE_BUILD`: no LRCLIB client, Lyrics widget, Lyrics Live Activity, Sync Lyrics intent or lyrics screen, and Lyrics isn't offered in pickers (an old Lyrics slot shows Music). Store builds wait for processing and get the TestFlight note "Store build". CI also compiles the store flavour on every push.
+- **Sample data:** Settings → Sample data, and "Try it with sample data" on the last onboarding page. The app and all widgets then show `SampleData`, with a "Sample data" badge; your files aren't touched. `SampleModeTests`.
+- **Privacy:** `PrivacyInfo.xcprivacy` for the app (UserDefaults, reason CA92.1) and the widgets; no tracking, nothing collected.
+- **Web pages:** `site/index.html` (support) and `site/privacy.html`, published by the manual `pages.yml` workflow once you turn Pages on.
+- **Listing:** `fastlane/metadata` in English and Malay (name, subtitle, description, keywords, promotional text, release notes, URLs, review notes, categories). Lane `store_metadata` uploads text and screenshots only.
+- **Screenshots:** `DashCraftUITests/StoreScreenshots` (scheme `StoreScreenshots`) shoots six screens on a 6.9-inch simulator with Sample data on (`ScreenshotMode` launch flags); Remotion `StoreScreenshot` frames them with English and Malay headlines (`npm run store`). Manual workflow `store.yml`.
+### Not verified yet
+- The screenshots, the store build and the listing upload only run when you trigger them (SETUP.md §15); check the `store-screenshots` artifact before uploading.
 
 ## Phase 14 — Panorama hero
 ### Done

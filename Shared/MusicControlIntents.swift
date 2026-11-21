@@ -34,8 +34,10 @@ struct MusicNextIntent: AudioPlaybackIntent {
     func perform() async throws -> some IntentResult {
         #if !WIDGET_EXTENSION
         try await SystemMusicPlayer.shared.skipToNextEntry()
+        #if !STORE_BUILD
         try? await Task.sleep(for: .milliseconds(600))
         await LyricsSync.shared.sync()
+        #endif
         #endif
         return .result()
     }

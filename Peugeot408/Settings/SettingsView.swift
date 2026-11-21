@@ -4,6 +4,7 @@ import UniformTypeIdentifiers
 
 struct SettingsView: View {
     @Environment(SlotsModel.self) private var slots
+    @Environment(CarDataModel.self) private var cars
     @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding = false
     @State private var showReloaded = false
 
@@ -57,6 +58,12 @@ struct SettingsView: View {
                     }
                 }
 
+                Section {
+                    Toggle("Sample data", isOn: Binding(get: { cars.isSampleData }, set: { cars.setSampleData($0) }))
+                } footer: {
+                    Text("Shows a made-up service history, fill-ups, renewals, prayer times and OBD values in the app and on every widget, to try things out. Your own data is kept and comes back when you turn this off.")
+                }
+
                 BackupSection()
 
                 Section {
@@ -72,7 +79,7 @@ struct SettingsView: View {
                 }
 
                 Section {
-                    Text("Personal project. Not affiliated with Peugeot or Stellantis.")
+                    Text("Not affiliated with any car maker.")
                         .font(.footnote)
                         .foregroundStyle(Theme.secondaryText)
                 }
@@ -207,7 +214,7 @@ struct HowToCarPlayView: View {
             Section {
                 Label("Google Maps has its own CarPlay widget with ETA, distance and the next turn while it navigates. Update Google Maps, then in the same Widgets screen add \"Google Maps\" to a stack with a Car Slot.", systemImage: "map")
                 Label("Keep Smart Rotate on for that stack: it brings Google's widget forward while you navigate and goes back to your slot afterwards.", systemImage: "arrow.triangle.2.circlepath")
-                Label("Peugeot408 can't show Google's turn-by-turn itself: iOS doesn't let other apps read Google Maps' navigation.", systemImage: "info.circle")
+                Label("DashCraft can't show Google's turn-by-turn itself: iOS doesn't let other apps read Google Maps' navigation.", systemImage: "info.circle")
                     .foregroundStyle(Theme.secondaryText)
             } header: {
                 Text("Google Maps ETA")

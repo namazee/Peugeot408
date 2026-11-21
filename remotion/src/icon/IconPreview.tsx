@@ -76,7 +76,7 @@ const HomeScreen: React.FC<{variant: IconVariant; wallpaper: 'light' | 'dark'; t
 						<div key={i} style={{display: 'flex', flexDirection: 'column', alignItems: 'center'}}>
 							{c === 'me' ? <IconTile variant={variant} size={60} tint={tint} /> : <Placeholder size={60} dark={dark} hue={c} />}
 							<div style={{fontFamily: FONT, fontSize: 10.5, color: text, marginTop: 4, opacity: c === 'me' ? 1 : 0.5}}>
-								{c === 'me' ? 'Peugeot408' : '—'}
+								{c === 'me' ? 'DashCraft' : '—'}
 							</div>
 						</div>
 					))}
@@ -132,7 +132,7 @@ const CarPlay: React.FC = () => (
 			<div style={{flex: 1, display: 'grid', gridTemplateColumns: 'repeat(4, 120px)', justifyContent: 'center', alignContent: 'center', columnGap: 34, rowGap: 22}}>
 				<div style={{display: 'flex', flexDirection: 'column', alignItems: 'center'}}>
 					<IconTile variant="dark" size={120} />
-					<div style={{fontFamily: FONT, fontSize: 14, color: '#F2F4F8', marginTop: 6}}>Peugeot408</div>
+					<div style={{fontFamily: FONT, fontSize: 14, color: '#F2F4F8', marginTop: 6}}>DashCraft</div>
 				</div>
 				{[210, 140, 30, 280, 190, 0, 320].map((h) => (
 					<div key={h} style={{display: 'flex', flexDirection: 'column', alignItems: 'center'}}>

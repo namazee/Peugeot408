@@ -281,6 +281,8 @@ public struct LyricsSummary: Sendable, Equatable {
 
 // MARK: - LRCLIB
 
+#if !STORE_BUILD   // Not in the App Store build (spec §10 Build flavours): LRCLIB lyrics are personal-build only.
+
 /// https://lrclib.net — free, community time-coded lyrics, no key.
 public enum LRCLIBClient {
     struct Record: Decodable {
@@ -293,7 +295,7 @@ public enum LRCLIBClient {
         let syncedLyrics: String?
     }
 
-    static let userAgent = "Peugeot408/1.1 (personal CarPlay widget app)"
+    static let userAgent = "DashCraft/1.1 (CarPlay widget app)"
 
     /// Exact match first (title, artist, album, duration), then a search.
     public static func fetch(title: String, artist: String, album: String?, duration: Double?, session: URLSession = .shared) async throws -> SongLyrics {
@@ -341,3 +343,4 @@ public enum LRCLIBClient {
         return try JSONDecoder().decode(T.self, from: data)
     }
 }
+#endif

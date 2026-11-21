@@ -14,15 +14,17 @@ configFiles:
 settings:
   base:
     # ---- Change these in one place --------------------------------------
-    APP_DISPLAY_NAME: Peugeot408          # home-screen / CarPlay label
+    APP_DISPLAY_NAME: DashCraft           # home-screen / CarPlay label
     BUNDLE_PREFIX: com.namazee88          # App ID = $(BUNDLE_PREFIX).peugeot408
     DEVELOPMENT_TEAM: YCS7MW628Y          # CI can override with the TEAM_ID secret
     APP_GROUP_ID: group.$(BUNDLE_PREFIX).peugeot408
+    FLAVOUR_CONDITION: ""                 # "STORE_BUILD" for the App Store build (spec §10); CI sets it
     MARKETING_VERSION: "1.1"
     CURRENT_PROJECT_VERSION: "1"          # CI sets this from the GitHub run number
     # ----------------------------------------------------------------------
     SWIFT_VERSION: "6.0"
     SWIFT_STRICT_CONCURRENCY: complete
+    SWIFT_ACTIVE_COMPILATION_CONDITIONS: $(inherited) $(FLAVOUR_CONDITION)
     IPHONEOS_DEPLOYMENT_TARGET: "26.0"
     TARGETED_DEVICE_FAMILY: "1"
     CODE_SIGN_STYLE: Automatic
@@ -61,12 +63,12 @@ targets:
         AppGroupID: $(APP_GROUP_ID)
         UIAppFonts: [Orbitron.ttf, PlayfairDisplay.ttf, Rajdhani-SemiBold.ttf, Rajdhani-Bold.ttf]   # OFL, see ASSETS-LICENSES.md
         AQIAPIKey: $(AQI_API_KEY)         # from Config/Secrets.xcconfig (CI writes it from the AQI_API_KEY secret)
-        NSLocationWhenInUseUsageDescription: Peugeot408 uses your location to save where you parked, find your prayer zone, and show local weather, haze and drive times.
-        NSCalendarsFullAccessUsageDescription: Peugeot408 shows your next calendar event on the Commute widget. Events stay on your phone.
+        NSLocationWhenInUseUsageDescription: DashCraft uses your location to save where you parked, find your prayer zone, and show local weather, haze and drive times.
+        NSCalendarsFullAccessUsageDescription: DashCraft shows your next calendar event on the Commute widget. Events stay on your phone.
         UIBackgroundModes: [audio, bluetooth-central]   # connect sound from an automation; OBD2 dongle while the screen is locked
         NSSupportsLiveActivities: true
-        NSBluetoothAlwaysUsageDescription: Peugeot408 connects to your OBD2 Bluetooth dongle to show boost, coolant temperature, battery voltage and RPM.
-        NSAppleMusicUsageDescription: Peugeot408 shows your recently played or featured Apple Music item on the Music widget.
+        NSBluetoothAlwaysUsageDescription: DashCraft connects to your OBD2 Bluetooth dongle to show boost, coolant temperature, battery voltage and RPM.
+        NSAppleMusicUsageDescription: DashCraft shows your recently played or featured Apple Music item on the Music widget.
         ITSAppUsesNonExemptEncryption: false
         UILaunchScreen: {}
         UIApplicationSceneManifest:
@@ -107,7 +109,7 @@ targets:
         UIAppFonts: [Orbitron.ttf, PlayfairDisplay.ttf, Rajdhani-SemiBold.ttf, Rajdhani-Bold.ttf]   # OFL, see ASSETS-LICENSES.md
         AQIAPIKey: $(AQI_API_KEY)
         NSWidgetWantsLocation: true       # weather and drive times from where the phone is
-        NSLocationWhenInUseUsageDescription: Peugeot408 widgets use your location for local weather, haze and drive times.
+        NSLocationWhenInUseUsageDescription: DashCraft widgets use your location for local weather, haze and drive times.
         NSCalendarsFullAccessUsageDescription: The Commute widget shows your next calendar event.
         NSExtension:
           NSExtensionPointIdentifier: com.apple.widgetkit-extension
@@ -136,7 +138,30 @@ targets:
         PRODUCT_BUNDLE_IDENTIFIER: $(BUNDLE_PREFIX).peugeot408.carkittests
         GENERATE_INFOPLIST_FILE: YES
 
+  DashCraftUITests:
+    type: bundle.ui-testing
+    platform: iOS
+    sources: [DashCraftUITests]
+    dependencies:
+      - target: Peugeot408
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: $(BUNDLE_PREFIX).peugeot408.uitests
+        GENERATE_INFOPLIST_FILE: YES
+        TEST_TARGET_NAME: Peugeot408
+
 schemes:
+  # App Store screenshots (spec §10): ci/screenshots.sh
+  StoreScreenshots:
+    build:
+      targets:
+        Peugeot408: all
+        DashCraftUITests: [test]
+    test:
+      config: Debug
+      targets:
+        - DashCraftUITests
+
   Peugeot408:
     build:
       targets:

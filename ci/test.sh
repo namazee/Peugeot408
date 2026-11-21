@@ -39,3 +39,13 @@ xcodebuild build \
   -configuration Debug \
   -destination 'generic/platform=iOS Simulator' \
   CODE_SIGNING_ALLOWED=NO
+
+# The App Store build (spec §10) must compile too: same app without the LRCLIB lyrics.
+xcodebuild build \
+  -project Peugeot408.xcodeproj \
+  -scheme Peugeot408 \
+  -configuration Debug \
+  -destination 'generic/platform=iOS Simulator' \
+  -derivedDataPath build/StoreDerivedData \
+  FLAVOUR_CONDITION=STORE_BUILD \
+  CODE_SIGNING_ALLOWED=NO

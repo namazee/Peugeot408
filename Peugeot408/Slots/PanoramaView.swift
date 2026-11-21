@@ -23,7 +23,7 @@ struct PanoramaView: View {
                         .listRowInsets(EdgeInsets(top: 12, leading: 12, bottom: 12, trailing: 12))
                         .listRowBackground(Color.clear)
                 } footer: {
-                    Text("As on your 408: Slot 1, 2 and 3 each show their part; the thin gaps are drawn by CarPlay.")
+                    Text("As on a 3-column CarPlay screen: Slot 1, 2 and 3 each show their part; the thin gaps are drawn by CarPlay.")
                 }
             }
 
@@ -81,7 +81,7 @@ struct PanoramaView: View {
             } header: {
                 Text("Design")
             } footer: {
-                Text("Hero: your My Car photo in the middle, big \"408 GT\" lettering behind it (change the text in the builder), a greeting and the clock on top, the weather along the bottom. Any design you make on the Panorama canvas in the builder shows up here too.")
+                Text("Hero: your My Car photo in the middle, big \"MY CAR\" lettering behind it (change the text in the builder), a greeting and the clock on top, the weather along the bottom. Any design you make on the Panorama canvas in the builder shows up here too.")
             }
 
             Section {

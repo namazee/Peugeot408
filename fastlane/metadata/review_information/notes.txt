@@ -1,0 +1,11 @@
+No login is needed.
+
+To see every widget filled without a car or your own data: open Settings → Sample data and turn it on (or tap "Try it with sample data" on the last onboarding page). A "Sample data" badge shows while it is on.
+
+CarPlay: on iOS 26, any iPhone widget can be added to the CarPlay widget screen without a CarPlay entitlement (Settings → General → CarPlay → [car] → Widgets → add "Car Slot 1" … "Car Slot 5"). The same widgets also work on the iPhone Home Screen for review. The app plays no audio in CarPlay itself and has no navigation.
+
+Connect sounds play through an App Intent that the user adds to a Shortcuts automation ("When CarPlay connects → Play Connect Sound").
+
+Live OBD2 values need an optional Bluetooth LE OBD2 adapter; Car → OBD2 has a demo mode that shows made-up values without one.
+
+Prayer times, toll card and road tax renewals are Malaysia-specific features.

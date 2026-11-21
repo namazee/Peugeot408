@@ -10,6 +10,11 @@ on:
         description: "Regenerate provisioning profiles (after adding a capability to an App ID)"
         type: boolean
         default: false
+      flavour:
+        description: "personal (everything, TestFlight) or store (App Store build without lyrics, spec §10)"
+        type: choice
+        options: [personal, store]
+        default: personal
 
 concurrency:
   group: ios-${{ github.ref }}
@@ -58,6 +63,7 @@ jobs:
       AQI_API_KEY: ${{ secrets.AQI_API_KEY }}
       TEAM_ID_SECRET: ${{ secrets.TEAM_ID }}
       BUILD_NUMBER: ${{ github.run_number }}
+      FLAVOUR: ${{ inputs.flavour || 'personal' }}
     steps:
       - uses: actions/checkout@v4
 
@@ -97,6 +103,6 @@ jobs:
         continue-on-error: true
         uses: actions/upload-artifact@v4
         with:
-          name: Peugeot408-${{ github.run_number }}.ipa
+          name: DashCraft-${{ github.run_number }}-${{ inputs.flavour || 'personal' }}.ipa
           path: build/Peugeot408.ipa
           if-no-files-found: warn

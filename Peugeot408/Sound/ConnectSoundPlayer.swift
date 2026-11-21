@@ -136,7 +136,7 @@ struct ConnectSoundQuery: EntityQuery {
 struct PlayConnectSoundIntent: AudioPlaybackIntent {
     static var title: LocalizedStringResource { "Play Connect Sound" }
     static var description: IntentDescription {
-        IntentDescription("Plays your Peugeot408 connect sound (or the one you pick) through the car speakers.")
+        IntentDescription("Plays your DashCraft connect sound (or the one you pick) through the car speakers.")
     }
     static var openAppWhenRun: Bool { false }
 
@@ -156,7 +156,7 @@ struct PlayConnectSoundIntent: AudioPlaybackIntent {
 struct PlayDisconnectSoundIntent: AudioPlaybackIntent {
     static var title: LocalizedStringResource { "Play Disconnect Sound" }
     static var description: IntentDescription {
-        IntentDescription("Plays your Peugeot408 disconnect sound through the car speakers.")
+        IntentDescription("Plays your DashCraft disconnect sound through the car speakers.")
     }
     static var openAppWhenRun: Bool { false }
 

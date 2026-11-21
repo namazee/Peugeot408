@@ -126,7 +126,7 @@ enum CarSlotConfiguration {
         // and WidgetKit on iOS 27 hits an assertion on it, crashing the extension at launch
         // so no Car Slot shows in the widget gallery or CarPlay.
         let name: String = "Car Slot \(slot)"
-        let details: String = "Shows whatever you assign to slot \(slot) in the Peugeot408 app."
+        let details: String = "Shows whatever you assign to slot \(slot) in the DashCraft app."
         return StaticConfiguration(kind: SlotKind.kind(for: slot), provider: SlotProvider(slot: slot)) { entry in
             SlotWidgetView(entry: entry)
         }

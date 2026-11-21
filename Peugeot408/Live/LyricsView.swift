@@ -1,3 +1,5 @@
+// Not in the App Store build (spec §10 Build flavours): LRCLIB lyrics are personal-build only.
+#if !STORE_BUILD
 import CarKit
 import MusicKit
 import SwiftUI
@@ -72,7 +74,7 @@ struct LyricsView: View {
             } header: {
                 Text("Look")
             } footer: {
-                Text("1 line: just the current line. 3: the line before, current and next. 5: one before and three after. The Live Activity can only change lines while Peugeot408 is running.")
+                Text("1 line: just the current line. 3: the line before, current and next. 5: one before and three after. The Live Activity can only change lines while DashCraft is running.")
             }
 
             Section {
@@ -127,3 +129,4 @@ struct LyricsView: View {
         Binding(get: { state.settings[keyPath: keyPath] }, set: { value in update { $0.settings[keyPath: keyPath] = value } })
     }
 }
+#endif

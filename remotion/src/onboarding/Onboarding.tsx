@@ -53,7 +53,7 @@ export const OnboardingSetup: React.FC = () => {
 	const frame = useCurrentFrame();
 	const {fps} = useVideoConfig();
 	const t = frame / fps;
-	const path = ['Settings', 'General', 'CarPlay', 'My 408', 'Widgets'];
+	const path = ['Settings', 'General', 'CarPlay', 'My Car', 'Widgets'];
 	const step = Math.min(Math.floor(interpolate(t, [0.4, 3.2], [0, path.length - 1], clamp)), path.length - 1);
 	const listIn = interpolate(t, [3.2, 3.7], [0, 1], {...clamp, easing: out});
 	const added = (i: number) => t > 4 + i * 0.75;
@@ -88,7 +88,7 @@ export const OnboardingSetup: React.FC = () => {
 							);
 						})}
 					</div>
-					<div style={{fontFamily: textFont, fontSize: 18, color: colors.secondaryText, margin: '14px 6px'}}>Up to 5 widgets in a stack. Your 408 shows Slot 1–3 side by side.</div>
+					<div style={{fontFamily: textFont, fontSize: 18, color: colors.secondaryText, margin: '14px 6px'}}>Up to 5 widgets in a stack. Many cars show Slot 1–3 side by side.</div>
 				</div>
 			</div>
 		</AbsoluteFill>

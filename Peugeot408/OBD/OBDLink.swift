@@ -21,7 +21,7 @@ final class OBDLink: NSObject {
             switch self {
             case .idle: "Not connected"
             case .bluetoothOff: "Bluetooth is off"
-            case .unauthorized: "Bluetooth permission is off (Settings → Peugeot408)"
+            case .unauthorized: "Bluetooth permission is off (Settings → DashCraft)"
             case .scanning: "Scanning…"
             case .connecting: "Connecting…"
             case .ready: "Connected"

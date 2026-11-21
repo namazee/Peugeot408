@@ -199,7 +199,7 @@ struct PhotoGrid: View {
             ForEach(photos) { photo in
                 PhotoThumb(photo: photo, directory: directory)
                     .contextMenu {
-                        Button("Remove from Peugeot408", systemImage: "trash", role: .destructive) {
+                        Button("Remove from DashCraft", systemImage: "trash", role: .destructive) {
                             onDelete([photo.id])
                         }
                     }

@@ -38,7 +38,7 @@ struct SlotEditorView: View {
             Form {
                 Section("Preview") {
                     HStack(spacing: 12) {
-                        // As on the 408: a tall column.
+                        // As on a 3-column CarPlay screen: a tall column.
                         SlotTile(slot: slot, content: previewContent)
                             .frame(width: 116, height: 160)
                         SlotTile(slot: slot, content: previewContent, isMedium: true)
@@ -332,7 +332,7 @@ struct SlotEditorView: View {
             Text("Background")
         } footer: {
             if draft.style == .custom {
-                Text("Bold look: the tile is this colour. Neon look: it's the glow colour on black. The first five are the 408's paint colours.")
+                Text("Bold look: the tile is this colour. Neon look: it's the glow colour on black. The first five are classic car paint colours.")
             }
         }
 
@@ -388,7 +388,7 @@ struct ChoicePicker: View {
                 Text("Custom text").tag(SlotChoice?.none)
             }
             Section("Data widgets") {
-                ForEach(DataSource.allCases) { source in
+                ForEach(DataSource.available) { source in
                     Label(source.displayName, systemImage: source.symbol).tag(SlotChoice?.some(SlotChoice(source: source)))
                 }
             }
@@ -403,7 +403,7 @@ struct ChoicePicker: View {
     }
 }
 
-/// Swatches (408 paint colours first) plus a full colour picker.
+/// Swatches (car paint colours first) plus a full colour picker.
 struct SlotColourPicker: View {
     @Binding var hex: UInt32
 

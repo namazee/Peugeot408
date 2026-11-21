@@ -148,7 +148,7 @@ private struct LayerView: View {
             styled(Text(text))
         case .plate(let text):
             let plate = text.isEmpty ? card.plateText : text
-            Text(plate.isEmpty ? "ABC 408" : plate.uppercased())
+            Text(plate.isEmpty ? "ABC 1234" : plate.uppercased())
                 .font(card.plateFont.font(size: layer.fontSize * scale))
                 .foregroundStyle(.white)
                 .lineLimit(1)

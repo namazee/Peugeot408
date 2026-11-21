@@ -30,7 +30,7 @@ enum ParkingSaver {
         case noLocation
 
         var errorDescription: String? {
-            "No location. Allow location for Peugeot408 in Settings → Privacy → Location Services."
+            "No location. Allow location for DashCraft in Settings → Privacy → Location Services."
         }
     }
 
@@ -108,12 +108,14 @@ struct Peugeot408Shortcuts: AppShortcutsProvider {
             shortTitle: "Play Connect Sound",
             systemImageName: "speaker.wave.2.fill"
         )
+        #if !STORE_BUILD
         AppShortcut(
             intent: SyncLyricsIntent(),
             phrases: ["Sync lyrics in \(.applicationName)"],
             shortTitle: "Sync Lyrics",
             systemImageName: "quote.bubble.fill"
         )
+        #endif
     }
 }
 
@@ -186,7 +188,7 @@ struct ParkingView: View {
                     Text(error).foregroundStyle(Theme.overdue)
                 }
             } footer: {
-                Text("Also works from Siri and Shortcuts: \"Save parking in Peugeot408\". To save automatically when you leave the car, add a Shortcuts automation \"When CarPlay disconnects → Save Parking\" (steps in SETUP.md).")
+                Text("Also works from Siri and Shortcuts: \"Save parking in DashCraft\". To save automatically when you leave the car, add a Shortcuts automation \"When CarPlay disconnects → Save Parking\" (Settings → How to add to CarPlay).")
             }
         }
         .navigationTitle("Parking")

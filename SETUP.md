@@ -186,6 +186,21 @@ The icon comes from your artwork in `remotion/assets/icon/` (spec §3 App icon).
 
 ---
 
+## 15. Phase 15: App Store release as DashCraft
+
+Do these in order. Nothing here is public until step 3 or step 8, and CI never submits for review.
+
+1. **App Store Connect → your app → App Information:** change the name to **DashCraft** and the subtitle to **Car widgets & dashboard** (step 6 also sets them). If Apple says the name is taken, pick another and tell me.
+2. **App Privacy:** answer **"Data Not Collected"** (spec §10 Privacy). Privacy policy URL: `https://namazee.github.io/Peugeot408/privacy.html`.
+3. **GitHub Pages** (this makes the support and privacy pages public): repo **Settings → Pages → Source: GitHub Actions**, then **Actions → Pages → Run workflow**. Check both pages open.
+4. **Store build:** **Actions → iOS → Run workflow**, flavour **store**. It waits for Apple's processing and gives the build the TestFlight note "Store build N (App Store flavour, no lyrics)".
+5. **Screenshots:** **Actions → Store assets → Run workflow** with "upload" off, then look at the `store-screenshots` artifact (English and Malay, 6.9-inch).
+6. **Listing:** when the screenshots look right, run **Store assets** again with **Upload the listing** ticked. It uploads the text in `fastlane/metadata` and the screenshots: no binary, no submission.
+7. In App Store Connect, set by hand: **Age rating** ("None" to everything → 4+), **Price** (Free), **Availability** (suggested: Malaysia first), **App Review contact** (your name, phone and email; kept out of git), and check the categories (Utilities / Lifestyle). Export compliance is already answered by the app (no non-exempt encryption).
+8. On the version page pick the build whose TestFlight note says **Store build**, then **Add for Review → Submit**. This is the step that makes it public once approved; you do it yourself.
+
+Personal TestFlight builds (every push) keep the LRCLIB lyrics: never submit one of those.
+
 ## Troubleshooting
 
 - **"Missing secrets" warning** — step 6.

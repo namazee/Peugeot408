@@ -385,7 +385,7 @@ struct DesignBuilderView: View {
     }
 }
 
-/// Where the panorama is cut: the gaps between the 408's three columns (Slots 1–3).
+/// Where the panorama is cut: the gaps between CarPlay's three columns (Slots 1–3).
 private struct PanoramaGapsOverlay: View {
     var body: some View {
         Canvas { context, size in

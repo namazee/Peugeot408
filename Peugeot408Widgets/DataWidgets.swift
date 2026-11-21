@@ -191,11 +191,13 @@ struct MusicWidget: Widget {
     }
 }
 
+#if !STORE_BUILD
 struct LyricsWidget: Widget {
     var body: some WidgetConfiguration {
         DataWidgetConfiguration.make(source: .lyrics, description: "Synced lyrics of the Apple Music song that's playing; the current line is highlighted.")
     }
 }
+#endif
 
 struct MapSnapshotWidget: Widget {
     var body: some WidgetConfiguration {

@@ -67,7 +67,7 @@ struct StudioView: View {
                 }
 
                 Section("Data sources") {
-                    ForEach([DataSource.map, .photos, .music, .lyrics]) { source in
+                    ForEach([DataSource.map, .photos, .music, .lyrics].filter(DataSource.available.contains)) { source in
                         NavigationLink(value: source) {
                             Label(source.displayName, systemImage: source.symbol)
                         }
@@ -144,7 +144,7 @@ struct TemplateGalleryView: View {
                 }
                 .pickerStyle(.segmented)
                 Picker("Data", selection: $source) {
-                    ForEach(DataSource.allCases) { Label($0.displayName, systemImage: $0.symbol).tag($0) }
+                    ForEach(DataSource.available) { Label($0.displayName, systemImage: $0.symbol).tag($0) }
                 }
             } footer: {
                 Text("Previews use your real data. Pick one to open it in the builder.")

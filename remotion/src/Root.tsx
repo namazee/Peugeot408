@@ -7,6 +7,7 @@ import {SHOWCASE_FPS, SHOWCASE_FRAMES, WidgetShowcase} from './showcase/WidgetSh
 import {AppPreview, PREVIEW_FPS, PREVIEW_FRAMES} from './preview/AppPreview';
 import {FLASH_FRAMES, ONBOARDING_FPS, OnboardingFlash, OnboardingSetup, OnboardingWelcome, SETUP_FRAMES, WELCOME_FRAMES} from './onboarding/Onboarding';
 import {SeasonalArt, type SeasonalArtProps} from './seasonal/SeasonalArt';
+import {STORE_HEIGHT, STORE_WIDTH, StoreScreenshot, type StoreScreenshotProps} from './store/StoreScreenshot';
 
 export const RemotionRoot: React.FC = () => (
 	<>
@@ -25,6 +26,13 @@ export const RemotionRoot: React.FC = () => (
 		<Composition id="OnboardingWelcome" component={OnboardingWelcome} fps={ONBOARDING_FPS} durationInFrames={WELCOME_FRAMES} width={720} height={900} />
 		<Composition id="OnboardingSetup" component={OnboardingSetup} fps={ONBOARDING_FPS} durationInFrames={SETUP_FRAMES} width={720} height={900} />
 		<Composition id="OnboardingFlash" component={OnboardingFlash} fps={ONBOARDING_FPS} durationInFrames={FLASH_FRAMES} width={720} height={900} />
+		<Still
+			id="StoreScreenshot"
+			component={StoreScreenshot}
+			width={STORE_WIDTH}
+			height={STORE_HEIGHT}
+			defaultProps={{file: '1-slots.png', headline: 'Your car screen, your way', subline: 'Five slots you design on your iPhone'} satisfies StoreScreenshotProps}
+		/>
 		<Still id="SeasonalArt" component={SeasonalArt} width={600} height={600} defaultProps={{occasion: 'hariRaya'} satisfies SeasonalArtProps} />
 		<Composition id="AppPreview" component={AppPreview} fps={PREVIEW_FPS} durationInFrames={PREVIEW_FRAMES} width={886} height={1920} />
 		<Composition id="WidgetShowcase" component={WidgetShowcase} fps={SHOWCASE_FPS} durationInFrames={SHOWCASE_FRAMES} width={1920} height={720} />

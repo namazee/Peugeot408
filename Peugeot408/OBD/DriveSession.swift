@@ -155,7 +155,7 @@ final class DriveSession {
     }
 
     /// Sends a mode-01 PID. Two "NO DATA" answers in a row mark the value as not supported by
-    /// this car (PSA/Stellantis ECUs don't report every PID), so it stops being polled.
+    /// this car (not every ECU reports every PID), so it stops being polled.
     private func ask(_ command: OBDCommand, for value: OBDValue?) async -> [UInt8]? {
         do {
             let reply = try await link.send(command.rawValue, timeout: 2.5)
@@ -181,7 +181,7 @@ final class DriveSession {
 
     private func startActivity(startedAt: Date, demo: Bool) {
         guard ActivityAuthorizationInfo().areActivitiesEnabled else {
-            lastError = "Live Activities are off for Peugeot408 (Settings → Peugeot408 → Live Activities)."
+            lastError = "Live Activities are off for DashCraft (Settings → DashCraft → Live Activities)."
             return
         }
         let initial = DriveActivityAttributes.ContentState(reading: reading ?? OBDReading(date: .now), status: demo ? "Demo" : "Live")

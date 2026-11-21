@@ -1,10 +1,11 @@
-# Peugeot408
+# DashCraft
 
-A personal iOS 26 app for a 2025 Peugeot 408 GT (1.6T PureTech, Malaysia). Its WidgetKit widgets
-show on the car's CarPlay widget screen. The app is where data and settings are entered; the widgets
-display it, and the head unit updates by itself. It is distributed only to the owner through TestFlight.
+An iOS 26 app whose WidgetKit widgets show on the car's CarPlay widget screen. It began as a personal
+app for a 2025 Peugeot 408 GT in Malaysia and is now prepared for the App Store as **DashCraft**
+(spec §10). The app is where data and settings are entered; the widgets display it, and the head unit
+updates by itself. Internal names (targets, bundle IDs, folders) are still `Peugeot408`.
 
-Not affiliated with Peugeot or Stellantis. No Peugeot logos or emblems are used.
+Not affiliated with any car maker. No car-maker logos or emblems are used.
 
 ![The CarPlay widget screen: prayer countdown, road tax, oil service, fuel average, live boost and a photo frame](docs/images/showcase.png)
 

@@ -1,0 +1,95 @@
+name: Store assets
+
+# App Store screenshots and listing (spec §10). Manual only.
+#  1. screenshots: StoreScreenshots UI test on a 6.9-inch iPhone simulator (store build, Sample data on)
+#  2. frame: Remotion adds the headline frame, English and Malay
+#  3. metadata (only if upload_metadata is ticked): fastlane store_metadata uploads the listing text
+#     and screenshots to App Store Connect. It never uploads a binary and never submits for review.
+on:
+  workflow_dispatch:
+    inputs:
+      upload_metadata:
+        description: "Upload the listing text and screenshots to App Store Connect (no binary, no submission)"
+        type: boolean
+        default: false
+
+concurrency:
+  group: store-assets
+  cancel-in-progress: true
+
+jobs:
+  screenshots:
+    name: Simulator screenshots
+    runs-on: macos-26
+    timeout-minutes: 50
+    steps:
+      - uses: actions/checkout@v4
+      - name: Select Xcode 26
+        run: bash ci/select-xcode.sh
+      - name: Install XcodeGen, generate project, resolve packages
+        run: bash ci/generate.sh
+      - name: Take screenshots
+        run: bash ci/screenshots.sh
+      - name: Upload raw screenshots
+        uses: actions/upload-artifact@v4
+        with:
+          name: store-raw
+          path: build/store-raw
+          if-no-files-found: error
+      - name: Upload UI test results
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: StoreScreenshots.xcresult
+          path: build/StoreScreenshots.xcresult
+          if-no-files-found: ignore
+
+  frame:
+    name: Frame with headlines (Remotion)
+    needs: screenshots
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: remotion
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: remotion/package-lock.json
+      - run: npm ci
+      - uses: actions/download-artifact@v4
+        with:
+          name: store-raw
+          path: remotion/assets/store-raw
+      - name: Render framed screenshots
+        run: npm run store
+      - name: Upload store screenshots
+        uses: actions/upload-artifact@v4
+        with:
+          name: store-screenshots
+          path: remotion/out/store
+          if-no-files-found: error
+
+  metadata:
+    name: Upload listing to App Store Connect
+    needs: frame
+    if: inputs.upload_metadata
+    runs-on: macos-26
+    timeout-minutes: 30
+    env:
+      ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+      ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+      ASC_KEY_P8: ${{ secrets.ASC_KEY_P8 }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: store-screenshots
+          path: fastlane/screenshots
+      - name: Upload metadata and screenshots (fastlane)
+        run: |
+          echo "BUNDLE_PREFIX=$(awk '/^ *BUNDLE_PREFIX:/ {print $2; exit}' project.yml)" >> "$GITHUB_ENV"
+      - run: fastlane ios store_metadata

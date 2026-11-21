@@ -225,7 +225,7 @@ struct MyCarView: View {
             }
 
             Section {
-                TextField("e.g. VKL 408", text: $plate)
+                TextField("e.g. ABC 1234", text: $plate)
                     .textInputAutocapitalization(.characters)
                     .onSubmit { studio.setPlate(plate) }
                 Button("Save plate") { studio.setPlate(plate) }
@@ -237,7 +237,7 @@ struct MyCarView: View {
                 }
                 HStack {
                     Spacer()
-                    Text(plate.isEmpty ? "ABC 408" : plate.uppercased())
+                    Text(plate.isEmpty ? "ABC 1234" : plate.uppercased())
                         .font((studio.state.plateFont ?? .classic).font(size: 26))
                         .foregroundStyle(.white)
                         .lineLimit(1)
@@ -252,7 +252,7 @@ struct MyCarView: View {
             } header: {
                 Text("Number-plate label")
             } footer: {
-                Text("Optional. Drawn as a black plate with white characters on the built-in photos (front, front ¾, rear ¾, front detail) and in plate layers. Leave empty to keep the original \"408\" plate.")
+                Text("Optional. Drawn as a black plate with white characters on the built-in photos (front, front ¾, rear ¾, front detail) and in plate layers. Leave empty to keep the plate in the photo.")
             }
 
             Section {
