@@ -100,6 +100,13 @@ struct ReadmeSnapshots {
             (.navigation, .commute), (.rainyWindow, .weather), (.parkingTicket, .parking), (.numberPlate, .service),
         ]
         saveBoth(more, data: data, now: now, "templates-realistic-more.png", in: directory)
+        // Phase 18: realistic and other templates.
+        let round3: [(TemplateStyle, DataSource)] = [
+            (.shiftLight, .obd), (.polaroid, .service), (.stickyNote, .renewals), (.dotMatrix, .commute), (.chalkboard, .fuel),
+            (.thermometer, .weather), (.battery, .tng), (.speedSign, .service), (.vinyl, .music), (.comicPop, .tng),
+            (.flipClock, .service), (.wordClock, .service), (.hijriDate, .service), (.moonPhase, .service),
+        ]
+        saveBoth(round3, data: data, now: now, "templates-round3.png", in: directory)
         // Hero templates (Phase 17), each across the three visible columns.
         save(
             VStack(spacing: 10) {

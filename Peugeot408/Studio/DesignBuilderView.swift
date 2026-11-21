@@ -244,6 +244,20 @@ struct DesignBuilderView: View {
             layer.width = 0.8
             layer.height = 0.26
             layer.colorHex = 0xF5B700
+        case .shiftLights:
+            layer.width = 0.86
+            layer.height = 0.14
+        case .thermometer:
+            layer.width = 0.3
+            layer.height = 0.8
+            layer.colorHex = 0xFF3B30
+        case .battery:
+            layer.width = 0.7
+            layer.height = 0.36
+        case .moonPhase:
+            layer.width = 0.5
+            layer.height = 0.5
+            layer.colorHex = 0xF4F1E6
         case .data, .text:
             layer.fontSize = 24
         }
@@ -363,6 +377,10 @@ struct DesignBuilderView: View {
                 Button("Fuel gauge", systemImage: "fuelpump") { add(.dial(.kmPerLitre, .fuel)) }
                 Button("Odometer", systemImage: "number.square") { add(.odometer(.kmToService)) }
                 Button("Split-flap", systemImage: "rectangle.split.3x1") { add(.splitFlap(.kmToService)) }
+                Button("Shift lights", systemImage: "circle.grid.3x3.fill") { add(.shiftLights(.engineRPM)) }
+                Button("Thermometer", systemImage: "thermometer.medium") { add(.thermometer(.temperature)) }
+                Button("Battery", systemImage: "battery.75percent") { add(.battery(.tngBalance)) }
+                Button("Moon phase", systemImage: "moonphase.waxing.crescent") { add(.moonPhase) }
             } label: {
                 Image(systemName: "plus")
             }
@@ -400,6 +418,10 @@ struct DesignBuilderView: View {
         case .dial(let field, let style): "\(style == .fuel ? "Fuel gauge" : "Dial"): \(field?.displayName ?? "decorative")"
         case .odometer(let field): "Odometer: \(field.displayName)"
         case .splitFlap(let field): "Split-flap: \(field.displayName)"
+        case .shiftLights(let field): "Shift lights: \(field?.displayName ?? "decorative")"
+        case .thermometer(let field): "Thermometer: \(field?.displayName ?? "decorative")"
+        case .battery(let field): "Battery: \(field?.displayName ?? "decorative")"
+        case .moonPhase: "Moon phase"
         }
     }
 }
@@ -504,6 +526,12 @@ private struct LayerInspector: View {
             Picker("Shows", selection: Binding(get: { field }, set: { layer.content = .splitFlap($0) })) {
                 ForEach(DataField.allCases) { Text($0.displayName).tag($0) }
             }
+        case .shiftLights(let field):
+            progressPicker(field) { layer.content = .shiftLights($0) }
+        case .thermometer(let field):
+            progressPicker(field) { layer.content = .thermometer($0) }
+        case .battery(let field):
+            progressPicker(field) { layer.content = .battery($0) }
         case .symbol(let name):
             Picker("Icon", selection: Binding(get: { name }, set: { layer.content = .symbol($0) })) {
                 ForEach(SlotDesign.symbolChoices, id: \.self) { Label($0, systemImage: $0).tag($0) }
@@ -516,6 +544,8 @@ private struct LayerInspector: View {
             Text("Set the photo in Studio → My Car photo.").foregroundStyle(Theme.secondaryText)
         case .analogClock:
             Text("Shows the time; the hands move every minute.").foregroundStyle(Theme.secondaryText)
+        case .moonPhase:
+            Text("Shows tonight's moon in its phase, worked out from the date.").foregroundStyle(Theme.secondaryText)
         case .seasonalArt(let occasion):
             Picker("Artwork", selection: Binding(get: { occasion }, set: { layer.content = .seasonalArt($0) })) {
                 ForEach(SeasonalOccasion.allCases) { Text($0.displayName).tag($0) }

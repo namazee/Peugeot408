@@ -200,6 +200,14 @@ private struct LayerView: View {
             OdometerView(value: card.values[field] ?? ResolvedField(text: "--"), accent: color)
         case .splitFlap(let field):
             SplitFlapView(value: card.values[field] ?? ResolvedField(text: "--"), accent: color)
+        case .shiftLights(let field):
+            ShiftLightsView(progress: field.flatMap { card.values[$0]?.progress } ?? 0.7)
+        case .thermometer(let field):
+            ThermometerView(progress: field.flatMap { card.values[$0]?.progress } ?? 0.6, color: color)
+        case .battery(let field):
+            BatteryView(progress: field.flatMap { card.values[$0]?.progress } ?? 0.8)
+        case .moonPhase:
+            MoonPhaseView(date: card.date, color: color)
         case .analogClock:
             AnalogClock(date: card.date, color: color)
         case .seasonalArt(let occasion):

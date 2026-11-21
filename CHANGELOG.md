@@ -2,7 +2,17 @@
 
 Fresh session? Read `docs/SPEC.md`, then this file, then continue from **Current phase**.
 
-## Current phase: 17 (More templates) — built, waiting for you to try the new templates; Phase 18 (another round of realistic, Hero and other templates) comes next, as you asked. Phase 15 store steps (SETUP.md §15) and the Phase 8 car test are still yours.
+## Current phase: 18 (Another round of templates) — built, waiting for you to try the new templates. Phase 15 store steps (SETUP.md §15) and the Phase 8 car test are still yours.
+
+## Phase 18 — Another round of templates
+### Done
+- **8 more realistic templates**, each with its own Small and Medium layout: Shift Lights, Polaroid (your My Car photo pinned to cork; Medium adds a sticky note), Sticky Note (Medium: two notes), Dot Matrix (amber LED board), Chalkboard, Thermometer, Battery (green, amber under 30%, red under 15%) and Speed Sign.
+- **6 more templates in the other sections:** Flip Clock, Word Clock ("HALF PAST TEN", a timeline entry every five minutes) and Hijri Date (Malay month names, Umm al-Qura calendar, changes at midnight) in Clock & Date; Moon Phase (the real phase, worked out from the date) in Special; Vinyl and Comic Pop in Data.
+- **6 more Hero templates:** Garage, Coastal Drive, Rain City, Starting Grid, Mountain Pass and Departure Board.
+- **New pieces** (all in the builder too): Shift lights, Thermometer, Battery and Moon phase layers; Cork, Chalkboard and Halftone textures; data fields Time in words, Hijri date and Moon phase; stickers: Instant photo frame, Sticky note, Dot-matrix panel, Speed sign, Letter grid, Vinyl record, Comic burst, Light cone, Palms, Waves, Mountains, Start lights and Chequered strip (`ExtraArt.swift`). Older design files still load.
+- `RoundThreeTemplateTests` (groups, no linter warnings in both sizes and three sources, Hero text inside one column, JSON round trip and render, word clock, Hijri and moon). README snapshots add `templates-round3.png`.
+### Not verified yet
+- How the new templates look on the head unit. The Hijri date is calculated and can be a day off JAKIM's official date.
 
 ## Phase 17 — More realistic and Hero templates
 ### Done

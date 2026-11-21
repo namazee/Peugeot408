@@ -93,6 +93,9 @@ public enum DesignResolver {
         if design.background == .sky {
             dates.formUnion(Sky.changeDates(from: start, prayerDays: data.prayer.days, calendar: calendar))
         }
+        if design.dataFields.contains(.timeInWords) {
+            dates.formUnion(WordClock.changeDates(from: start, count: 72, calendar: calendar))
+        }
         if design.layers.contains(where: { $0.content == .analogClock }) {
             let minute = calendar.dateInterval(of: .minute, for: start)?.start ?? start
             for offset in 1...60 { dates.insert(minute.addingTimeInterval(Double(offset) * 60)) }
@@ -200,6 +203,15 @@ public enum DesignResolver {
 
         case .weekday:
             return ResolvedField(text: date.formatted(.dateTime.weekday(.wide)).uppercased())
+
+        case .timeInWords:
+            return ResolvedField(text: WordClock.text(at: date, calendar: calendar))
+
+        case .hijriDate:
+            return ResolvedField(text: HijriDate.text(at: date, timeZone: calendar.timeZone))
+
+        case .moonPhaseName:
+            return ResolvedField(text: MoonPhase.name(at: date), progress: MoonPhase.fraction(at: date))
 
         case .dayOfMonth:
             return ResolvedField(text: "\(calendar.component(.day, from: date))")

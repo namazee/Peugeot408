@@ -50,6 +50,19 @@ public struct ArtworkView: View {
                 case .skyline: Skyline(color: color)
                 case .neonGrid: NeonGrid(color: color)
                 case .stripedSun: StripedSun(color: color)
+                case .polaroidFrame: PolaroidFrame(color: color)
+                case .stickyNote: StickyNote(color: color)
+                case .dotMatrix: DotMatrixPanel(color: color)
+                case .speedSign: SpeedSign(color: color)
+                case .letterGrid: LetterGrid(color: color)
+                case .vinylRecord: VinylRecord(color: color)
+                case .comicBurst: ComicBurst(color: color)
+                case .lightCone: LightCone(color: color)
+                case .palms: Palms(color: color)
+                case .waves: Waves(color: color)
+                case .mountains: Mountains(color: color)
+                case .startLights: StartLights(color: color)
+                case .chequeredStrip: ChequeredStrip(color: color)
                 }
             }
             .frame(width: kind.fillsFrame ? geo.size.width : size,
@@ -257,7 +270,9 @@ extension ArtworkKind {
     var fillsFrame: Bool {
         switch self {
         case .stripes, .speedLines, .gaugeArc, .road, .starfield, .stitching, .signFrame, .hudLines, .ticket, .glassPanel,
-             .neonTube, .thermalTicket, .plateFrame, .tuningScale, .streetMap, .lcdPanel, .skyline, .neonGrid: true
+             .neonTube, .thermalTicket, .plateFrame, .tuningScale, .streetMap, .lcdPanel, .skyline, .neonGrid,
+             .polaroidFrame, .stickyNote, .dotMatrix, .letterGrid, .comicBurst, .lightCone, .palms, .waves, .mountains,
+             .startLights, .chequeredStrip: true
         default: false
         }
     }
@@ -415,6 +430,12 @@ public struct TextureView: View {
                 WoodGrain.draw(&context, size: size)
             case .brick:
                 BrickWall.draw(&context, size: size)
+            case .cork:
+                CorkBoard.draw(&context, size: size)
+            case .chalkboard:
+                Chalkboard.draw(&context, size: size)
+            case .halftone:
+                Halftone.draw(&context, size: size)
             case .dots:
                 var y = 6.0
                 while y < size.height {

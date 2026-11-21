@@ -124,6 +124,10 @@ public enum DataField: String, Codable, Sendable, CaseIterable, Identifiable {
     case coolantTemp
     case batteryVoltage
     case engineRPM
+    // Phase 18.
+    case timeInWords
+    case hijriDate
+    case moonPhaseName
 
     public var id: String { rawValue }
 
@@ -164,6 +168,9 @@ public enum DataField: String, Codable, Sendable, CaseIterable, Identifiable {
         case .coolantTemp: "Coolant (OBD2)"
         case .batteryVoltage: "Battery voltage (OBD2)"
         case .engineRPM: "RPM (OBD2)"
+        case .timeInWords: "Time in words"
+        case .hijriDate: "Hijri date"
+        case .moonPhaseName: "Moon phase"
         }
     }
 
@@ -180,7 +187,8 @@ public enum DataField: String, Codable, Sendable, CaseIterable, Identifiable {
         case .commuteTime, .nextEvent: .commute
         case .musicTitle: .music
         case .boost, .coolantTemp, .batteryVoltage, .engineRPM: .obd
-        case .clock, .date, .dayCounter, .countdownDays, .weekday, .dayOfMonth, .monthName, .yearProgress, .greeting: nil
+        case .clock, .date, .dayCounter, .countdownDays, .weekday, .dayOfMonth, .monthName, .yearProgress, .greeting,
+             .timeInWords, .hijriDate, .moonPhaseName: nil
         }
     }
 }
@@ -220,6 +228,20 @@ public enum ArtworkKind: String, Codable, Sendable, CaseIterable {
     case skyline
     case neonGrid
     case stripedSun
+    // Phase 18 templates.
+    case polaroidFrame
+    case stickyNote
+    case dotMatrix
+    case speedSign
+    case letterGrid
+    case vinylRecord
+    case comicBurst
+    case lightCone
+    case palms
+    case waves
+    case mountains
+    case startLights
+    case chequeredStrip
 
     public var displayName: String {
         switch self {
@@ -254,6 +276,19 @@ public enum ArtworkKind: String, Codable, Sendable, CaseIterable {
         case .skyline: "City skyline"
         case .neonGrid: "Neon grid floor"
         case .stripedSun: "Striped sun"
+        case .polaroidFrame: "Instant photo frame"
+        case .stickyNote: "Sticky note"
+        case .dotMatrix: "Dot-matrix panel"
+        case .speedSign: "Speed sign"
+        case .letterGrid: "Letter grid"
+        case .vinylRecord: "Vinyl record"
+        case .comicBurst: "Comic burst"
+        case .lightCone: "Light cone"
+        case .palms: "Palms"
+        case .waves: "Waves"
+        case .mountains: "Mountains"
+        case .startLights: "Start lights"
+        case .chequeredStrip: "Chequered strip"
         }
     }
 
@@ -261,7 +296,8 @@ public enum ArtworkKind: String, Codable, Sendable, CaseIterable {
     public static let stickers: [ArtworkKind] = [.ketupat, .crescent, .lantern, .diya, .tree, .fireworks, .heart, .star, .flag, .speedLines, .sun, .road, .starfield,
                                                    .stitching, .signFrame, .roadArrow, .hudLines, .ticket, .glassPanel,
                                                    .neonTube, .thermalTicket, .plateFrame, .tuningScale, .streetMap, .lcdPanel,
-                                                   .skyline, .neonGrid, .stripedSun]
+                                                   .skyline, .neonGrid, .stripedSun,
+                                                   .polaroidFrame, .stickyNote, .dotMatrix, .speedSign, .letterGrid, .vinylRecord, .comicBurst, .lightCone, .palms, .waves, .mountains, .startLights, .chequeredStrip]
 }
 
 /// What a layer draws.
@@ -290,6 +326,14 @@ public enum LayerContent: Codable, Sendable, Equatable, Hashable {
     case odometer(DataField)
     /// A field's value on split-flap tiles (Phase 17).
     case splitFlap(DataField)
+    /// Shift-light LEDs lit by a field's progress (Phase 18); `nil` lights 70%.
+    case shiftLights(DataField?)
+    /// A glass thermometer filled by a field's progress (Phase 18); `nil` fills 60%.
+    case thermometer(DataField?)
+    /// A battery whose cells fill with a field's progress (Phase 18); `nil` fills 80%.
+    case battery(DataField?)
+    /// Tonight's moon in its phase, calculated from the date (Phase 18).
+    case moonPhase
 }
 
 /// Dial layer styles (Phase 16).
@@ -365,7 +409,8 @@ public struct DesignLayer: Codable, Sendable, Equatable, Hashable, Identifiable 
     public var dataField: DataField? {
         switch content {
         case .data(let field): field
-        case .gauge(let field), .ring(let field), .progressBar(let field), .dial(let field, _): field
+        case .gauge(let field), .ring(let field), .progressBar(let field), .dial(let field, _),
+             .shiftLights(let field), .thermometer(let field), .battery(let field): field
         case .odometer(let field), .splitFlap(let field): field
         default: nil
         }
@@ -386,6 +431,9 @@ public enum DesignTexture: String, Codable, Sendable, CaseIterable {
     case leather
     case wood
     case brick
+    case cork
+    case chalkboard
+    case halftone
 
     public var displayName: String { rawValue.capitalized }
 }

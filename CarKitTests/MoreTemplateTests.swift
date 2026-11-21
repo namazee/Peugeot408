@@ -12,7 +12,7 @@ struct MoreTemplateTests {
     @Test func groups() {
         #expect(TemplateGroup.allCases.prefix(2) == [.realistic, .hero])
         #expect(Self.phase17Realistic.allSatisfy { $0.group == .realistic && $0.isNew && $0.usesDataSource })
-        #expect(TemplateGroup.hero.styles == [.hero] + Self.phase17Hero)
+        #expect(Array(TemplateGroup.hero.styles.prefix(7)) == [.hero] + Self.phase17Hero)
         #expect(TemplateGroup.hero.styles.allSatisfy { !$0.usesDataSource && $0.isNew })
         #expect(TemplateGroup.car.styles.contains(.hero) == false)
     }
