@@ -94,6 +94,7 @@ Work in phases (below). At the end of each phase: commit, push, make sure the CI
    * a time-of-day greeting with my name ("Good morning, …" / "Selamat pagi, …");
    * the weather place and condition ("Kuala Lumpur · Sunny").
 * Turning Panorama on asks before it replaces what Slots 1–3 show, and turning it off restores them.
+* In the car each slot draws its part of the picture as the widget's content (with plain black behind it), not only as the widget background, because CarPlay can drop widget backgrounds and would leave the slots blank.
 
 ### App icon
 
