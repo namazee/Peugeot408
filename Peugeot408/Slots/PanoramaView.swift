@@ -70,18 +70,22 @@ struct PanoramaView: View {
                         .accessibilityLabel("Edit \(design.name)")
                     }
                 }
-                Button {
-                    let hero = Templates.make(.hero)
-                    studio.save(hero)
-                    slots.setPanorama(PanoramaSettings(enabled: settings.enabled, designID: hero.id))
-                    editing = hero
+                Menu {
+                    ForEach(TemplateGroup.hero.styles) { style in
+                        Button(style.displayName) {
+                            let hero = Templates.make(style)
+                            studio.save(hero)
+                            slots.setPanorama(PanoramaSettings(enabled: settings.enabled, designID: hero.id))
+                            editing = hero
+                        }
+                    }
                 } label: {
                     Label("Create a Hero design", systemImage: "plus.circle.fill")
                 }
             } header: {
                 Text("Design")
             } footer: {
-                Text("Hero: your My Car photo in the middle, big \"MY CAR\" lettering behind it (change the text in the builder), a greeting and the clock on top, the weather along the bottom. Any design you make on the Panorama canvas in the builder shows up here too.")
+                Text("Pick a Hero template: the classic Hero (your My Car photo with big \"MY CAR\" lettering behind it), Sunset Road, Night City, Cockpit, Live Sky, Neon Grid or Glass Info. Any design you make on the Panorama canvas in the builder shows up here too.")
             }
 
             Section {

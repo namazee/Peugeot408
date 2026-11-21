@@ -12,9 +12,9 @@ struct RealisticTemplateTests {
         malaysia.date(from: DateComponents(year: 2026, month: 11, day: 21, hour: hour, minute: minute)) ?? .now
     }
 
-    @Test func realisticGroupComesFirstWithTenTemplates() {
+    @Test func realisticGroupComesFirstWithEighteenTemplates() {
         #expect(TemplateGroup.allCases.first == .realistic)
-        #expect(TemplateGroup.realistic.styles.count == 10)
+        #expect(TemplateGroup.realistic.styles.count == 18)
         #expect(TemplateGroup.realistic.styles.allSatisfy { $0.isNew && $0.usesDataSource })
     }
 

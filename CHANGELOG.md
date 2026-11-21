@@ -2,7 +2,17 @@
 
 Fresh session? Read `docs/SPEC.md`, then this file, then continue from **Current phase**.
 
-## Current phase: 16 (Realistic templates) — built, waiting for you to try the new templates. Phase 15 store steps (SETUP.md §15) and the Phase 8 car test are still yours.
+## Current phase: 17 (More templates) — built, waiting for you to try the new templates; Phase 18 (another round of realistic, Hero and other templates) comes next, as you asked. Phase 15 store steps (SETUP.md §15) and the Phase 8 car test are still yours.
+
+## Phase 17 — More realistic and Hero templates
+### Done
+- **8 more realistic templates** in the Realistic section, each with its own Small and Medium layout: Split-Flap (Medium: a two-row departure board), Neon Sign (on brick), Wood Trim (walnut and brass), Car Stereo (amber LCD; Medium adds a radio tuning scale), Navigation (night street map with a route), Rainy Window (city bokeh and raindrops), Parking Ticket (thermal paper; Medium turned on a car-park floor) and Number Plate.
+- **6 more Hero templates** for the Panorama across Slots 1–3: Sunset Road, Night City, Cockpit (three dials), Live Sky, Neon Grid and Glass Info (three glass panels). Text stays inside one column so the gaps never cut it.
+- **Hero gallery section** (the old Hero moved there from Car), previewed at the panorama shape across the full width; the Panorama hero screen's "Create a Hero design" now offers every Hero template.
+- **New pieces** (all in the builder too): a Split-flap layer, Wood and Brick textures, a Rain background, and stickers: Neon tube, Thermal ticket, Plate frame, Radio tuning scale, Street map, LCD panel, City skyline, Neon grid floor and Striped sun (`MoreArt.swift`). Older design files still load.
+- `MoreTemplateTests` (groups, no linter warnings in both sizes and three sources, Hero text inside one column, JSON round trip and render, new pieces). README snapshots add `templates-realistic-more.png`, `templates-hero.png` and `carplay-heroes.png`.
+### Not verified yet
+- How the new templates look on the head unit.
 
 ## Phase 16 — Realistic templates
 ### Done

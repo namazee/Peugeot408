@@ -93,6 +93,27 @@ struct ReadmeSnapshots {
             (.chromeDial, .obd), (.fuelGauge, .fuel), (.odometer, .service), (.highwaySign, .commute), (.leatherStitch, .renewals),
             (.digitalCockpit, .service), (.headUpDisplay, .weather), (.frostedGlass, .tng), (.liveSky, .weather), (.boardingPass, .commute),
         ]
+        saveBoth(realistic, data: data, now: now, "templates-realistic-both.png", in: directory)
+        // Phase 17 realistic templates.
+        let more: [(TemplateStyle, DataSource)] = [
+            (.splitFlap, .commute), (.neonSign, .weather), (.woodTrim, .renewals), (.carStereo, .music),
+            (.navigation, .commute), (.rainyWindow, .weather), (.parkingTicket, .parking), (.numberPlate, .service),
+        ]
+        saveBoth(more, data: data, now: now, "templates-realistic-more.png", in: directory)
+        // Hero templates (Phase 17), each across the three visible columns.
+        save(
+            VStack(spacing: 10) {
+                ForEach(TemplateGroup.hero.styles) { style in
+                    let card = DesignResolver.card(for: Templates.make(style), data: data, studio: .empty, at: now)
+                    carPlayScreen((0..<3).map { SlotContent.panorama(card, $0) })
+                }
+            },
+            "carplay-heroes.png",
+            in: directory
+        )
+    }
+
+    private func saveBoth(_ realistic: [(TemplateStyle, DataSource)], data: CarData, now: Date, _ name: String, in directory: URL) {
         save(
             VStack(alignment: .leading, spacing: 12) {
                 ForEach(Array(realistic.enumerated()), id: \.offset) { _, pair in
@@ -108,7 +129,7 @@ struct ReadmeSnapshots {
             }
             .padding(14)
             .background(Color(hex: 0x000000)),
-            "templates-realistic-both.png",
+            name,
             in: directory
         )
     }

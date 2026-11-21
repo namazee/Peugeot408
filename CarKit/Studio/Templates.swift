@@ -37,6 +37,21 @@ public enum TemplateStyle: String, Codable, Sendable, CaseIterable, Identifiable
     case frostedGlass
     case liveSky
     case boardingPass
+    // Phase 17: more realistic templates (Small and Medium) and Hero templates (panorama).
+    case splitFlap
+    case neonSign
+    case woodTrim
+    case carStereo
+    case navigation
+    case rainyWindow
+    case parkingTicket
+    case numberPlate
+    case heroSunsetRoad
+    case heroNightCity
+    case heroCockpit
+    case heroLiveSky
+    case heroNeonGrid
+    case heroGlassInfo
 
     public var id: String { rawValue }
 
@@ -44,11 +59,13 @@ public enum TemplateStyle: String, Codable, Sendable, CaseIterable, Identifiable
     public var group: TemplateGroup {
         switch self {
         case .sporty, .minimal, .premium, .dashboard, .boldTile, .neonRing, .twinGauges, .aurora, .racingStripes: .data
-        case .myCar, .photo, .nightDrive, .showroom, .sunsetDrive, .hero: .car
+        case .myCar, .photo, .nightDrive, .showroom, .sunsetDrive: .car
+        case .hero, .heroSunsetRoad, .heroNightCity, .heroCockpit, .heroLiveSky, .heroNeonGrid, .heroGlassInfo: .hero
         case .clockAnalog, .clockDigital, .bigDate, .retroLED, .yearProgress: .clockDate
         case .countdown, .anniversary, .starryNight: .special
         case .chromeDial, .fuelGauge, .odometer, .highwaySign, .leatherStitch, .digitalCockpit,
-             .headUpDisplay, .frostedGlass, .liveSky, .boardingPass: .realistic
+             .headUpDisplay, .frostedGlass, .liveSky, .boardingPass,
+             .splitFlap, .neonSign, .woodTrim, .carStereo, .navigation, .rainyWindow, .parkingTicket, .numberPlate: .realistic
         }
     }
 
@@ -95,6 +112,20 @@ public enum TemplateStyle: String, Codable, Sendable, CaseIterable, Identifiable
         case .frostedGlass: "Frosted Glass"
         case .liveSky: "Live Sky"
         case .boardingPass: "Boarding Pass"
+        case .splitFlap: "Split-Flap"
+        case .neonSign: "Neon Sign"
+        case .woodTrim: "Wood Trim"
+        case .carStereo: "Car Stereo"
+        case .navigation: "Navigation"
+        case .rainyWindow: "Rainy Window"
+        case .parkingTicket: "Parking Ticket"
+        case .numberPlate: "Number Plate"
+        case .heroSunsetRoad: "Sunset Road"
+        case .heroNightCity: "Night City"
+        case .heroCockpit: "Cockpit"
+        case .heroLiveSky: "Live Sky"
+        case .heroNeonGrid: "Neon Grid"
+        case .heroGlassInfo: "Glass Info"
         }
     }
 
@@ -104,8 +135,10 @@ public enum TemplateStyle: String, Codable, Sendable, CaseIterable, Identifiable
         case .sporty, .minimal, .premium, .dashboard, .photo, .myCar,
              .boldTile, .neonRing, .twinGauges, .aurora, .sunsetDrive, .nightDrive, .showroom, .racingStripes,
              .chromeDial, .fuelGauge, .odometer, .highwaySign, .leatherStitch, .digitalCockpit,
-             .headUpDisplay, .frostedGlass, .liveSky, .boardingPass: true
-        case .clockAnalog, .clockDigital, .countdown, .anniversary, .starryNight, .bigDate, .yearProgress, .retroLED, .hero: false
+             .headUpDisplay, .frostedGlass, .liveSky, .boardingPass,
+             .splitFlap, .neonSign, .woodTrim, .carStereo, .navigation, .rainyWindow, .parkingTicket, .numberPlate: true
+        case .clockAnalog, .clockDigital, .countdown, .anniversary, .starryNight, .bigDate, .yearProgress, .retroLED, .hero,
+             .heroSunsetRoad, .heroNightCity, .heroCockpit, .heroLiveSky, .heroNeonGrid, .heroGlassInfo: false
         }
     }
 }
@@ -114,6 +147,8 @@ public enum TemplateStyle: String, Codable, Sendable, CaseIterable, Identifiable
 public enum TemplateGroup: String, CaseIterable, Sendable, Identifiable {
     /// Shown first (Phase 16).
     case realistic
+    /// Panorama designs across Slots 1–3 (Phase 17); always previewed at the panorama shape.
+    case hero
     case data, car, clockDate, special
 
     public var id: String { rawValue }
@@ -121,6 +156,7 @@ public enum TemplateGroup: String, CaseIterable, Sendable, Identifiable {
     public var displayName: String {
         switch self {
         case .realistic: "Realistic"
+        case .hero: "Hero"
         case .data: "Data"
         case .car: "Car"
         case .clockDate: "Clock & Date"
@@ -161,7 +197,7 @@ public enum Templates {
     /// A new design from a template. `photoFile` is used by the Photo template (a Photo Frame file).
     public static func make(_ style: TemplateStyle, source: DataSource = .service, canvas: DesignCanvas = .small, photoFile: String? = nil, eventDate: Date? = nil, eventName: String = "Married") -> CardDesign {
         let bind = TemplateBinding.of(source)
-        let surface = style == .hero ? DesignCanvas.panorama : canvas
+        let surface = style.group == .hero ? DesignCanvas.panorama : canvas
         let wide = surface != .small
         let accent = Theme.Hex.accent
         let white: UInt32 = 0xFFFFFF
@@ -422,8 +458,14 @@ public enum Templates {
             ]
 
         case .chromeDial, .fuelGauge, .odometer, .highwaySign, .leatherStitch, .digitalCockpit,
-             .headUpDisplay, .frostedGlass, .liveSky, .boardingPass:
+             .headUpDisplay, .frostedGlass, .liveSky, .boardingPass,
+             .splitFlap, .neonSign, .woodTrim, .carStereo, .navigation, .rainyWindow, .parkingTicket, .numberPlate:
             let made = realistic(style, bind: bind, wide: wide)
+            background = made.0
+            layers = made.1
+
+        case .heroSunsetRoad, .heroNightCity, .heroCockpit, .heroLiveSky, .heroNeonGrid, .heroGlassInfo:
+            let made = hero(style)
             background = made.0
             layers = made.1
         }
@@ -438,18 +480,18 @@ public enum Templates {
         let second = bind.secondary ?? .yearProgress
         let label = bind.label.uppercased()
         func data(_ field: DataField, _ x: Double, _ y: Double, _ w: Double, _ h: Double, _ font: DesignFont, _ weight: DesignWeight, _ size: Double,
-                  _ color: UInt32, _ align: DesignAlignment, shadow: Bool = false, glow: Bool? = nil) -> DesignLayer {
-            DesignLayer(content: .data(field), x: x, y: y, width: w, height: h, font: font, weight: weight, fontSize: size,
+                  _ color: UInt32, _ align: DesignAlignment, shadow: Bool = false, glow: Bool? = nil, rotation: Double = 0) -> DesignLayer {
+            DesignLayer(content: .data(field), x: x, y: y, width: w, height: h, rotation: rotation, font: font, weight: weight, fontSize: size,
                         colorHex: color, alignment: align, shadow: shadow, glow: glow)
         }
         func text(_ string: String, _ x: Double, _ y: Double, _ w: Double, _ h: Double, _ font: DesignFont, _ weight: DesignWeight, _ size: Double,
-                  _ color: UInt32, _ align: DesignAlignment, opacity: Double = 1, shadow: Bool = false, glow: Bool? = nil) -> DesignLayer {
-            DesignLayer(content: .text(string), x: x, y: y, width: w, height: h, opacity: opacity, font: font, weight: weight, fontSize: size,
+                  _ color: UInt32, _ align: DesignAlignment, opacity: Double = 1, shadow: Bool = false, glow: Bool? = nil, rotation: Double = 0) -> DesignLayer {
+            DesignLayer(content: .text(string), x: x, y: y, width: w, height: h, rotation: rotation, opacity: opacity, font: font, weight: weight, fontSize: size,
                         colorHex: color, alignment: align, shadow: shadow, glow: glow)
         }
         func art(_ content: LayerContent, _ x: Double, _ y: Double, _ w: Double, _ h: Double, _ color: UInt32,
-                 opacity: Double = 1, glow: Bool? = nil, segments: Int? = nil) -> DesignLayer {
-            DesignLayer(content: content, x: x, y: y, width: w, height: h, opacity: opacity, colorHex: color, glow: glow, segments: segments)
+                 opacity: Double = 1, glow: Bool? = nil, segments: Int? = nil, rotation: Double = 0) -> DesignLayer {
+            DesignLayer(content: content, x: x, y: y, width: w, height: h, rotation: rotation, opacity: opacity, colorHex: color, glow: glow, segments: segments)
         }
 
         switch style {
@@ -627,6 +669,247 @@ public enum Templates {
                 data(bind.primary, 0.6, 0.42, 0.72, 0.26, .rajdhani, .bold, 28, ink, .center),
                 text("HOME → WORK", 0.6, 0.63, 0.74, 0.12, .rounded, .heavy, 14, blue, .center),
             ])
+
+        case .splitFlap:
+            let amber: UInt32 = 0xF5B700, grey: UInt32 = 0xB8BEC8
+            if wide {
+                return (.texture(.brushed, 0x15171B), [
+                    art(.symbol(bind.symbol), 0.07, 0.17, 0.06, 0.14, amber),
+                    text(label, 0.36, 0.17, 0.5, 0.13, .rounded, .heavy, 14, amber, .leading),
+                    data(.clock, 0.86, 0.17, 0.22, 0.13, .mono, .bold, 15, grey, .trailing),
+                    art(.splitFlap(bind.primary), 0.5, 0.49, 0.92, 0.32, amber),
+                    art(.splitFlap(second), 0.5, 0.81, 0.92, 0.22, amber),
+                ])
+            }
+            return (.texture(.brushed, 0x15171B), [
+                text(label, 0.5, 0.19, 0.86, 0.12, .rounded, .heavy, 14, amber, .center),
+                art(.splitFlap(bind.primary), 0.5, 0.5, 0.9, 0.34, amber),
+                data(second, 0.5, 0.82, 0.86, 0.13, .rounded, .semibold, 14, grey, .center),
+            ])
+
+        case .neonSign:
+            let pink: UInt32 = 0xFF3FA4, cyan: UInt32 = 0x3DF5FF, yellow: UInt32 = 0xFFE45C
+            if wide {
+                return (.texture(.brick, 0x3A1F1A), [
+                    art(.sticker(.neonTube), 0.5, 0.5, 0.96, 0.9, pink),
+                    text(label, 0.34, 0.31, 0.5, 0.16, .rounded, .heavy, 18, pink, .leading, glow: true),
+                    data(bind.primary, 0.36, 0.62, 0.54, 0.32, .rounded, .bold, 34, cyan, .leading, glow: true),
+                    art(.symbol(bind.symbol), 0.78, 0.33, 0.12, 0.22, yellow, glow: true),
+                    data(second, 0.78, 0.65, 0.3, 0.18, .rounded, .semibold, 16, yellow, .center, glow: true),
+                ])
+            }
+            return (.texture(.brick, 0x3A1F1A), [
+                art(.sticker(.neonTube), 0.5, 0.5, 0.92, 0.92, pink),
+                text(label, 0.5, 0.27, 0.62, 0.13, .rounded, .heavy, 14, pink, .center, glow: true),
+                data(bind.primary, 0.5, 0.56, 0.74, 0.34, .rounded, .bold, 28, cyan, .center, glow: true),
+            ])
+
+        case .woodTrim:
+            let brass: UInt32 = 0xD9B26F, cream: UInt32 = 0xF4E7CB
+            if wide {
+                return (.texture(.wood, 0x4A2A16), [
+                    art(.sticker(.signFrame), 0.5, 0.5, 0.96, 0.9, brass),
+                    art(.symbol(bind.symbol), 0.14, 0.5, 0.12, 0.3, brass),
+                    text(label, 0.57, 0.27, 0.62, 0.13, .playfair, .regular, 16, brass, .leading),
+                    data(bind.primary, 0.57, 0.53, 0.62, 0.3, .playfair, .bold, 36, cream, .leading, shadow: true),
+                    data(second, 0.57, 0.77, 0.62, 0.13, .serif, .regular, 15, brass, .leading),
+                ])
+            }
+            return (.texture(.wood, 0x4A2A16), [
+                art(.sticker(.signFrame), 0.5, 0.5, 0.92, 0.92, brass),
+                text(label, 0.5, 0.26, 0.7, 0.12, .playfair, .regular, 14, brass, .center),
+                data(bind.primary, 0.5, 0.53, 0.76, 0.3, .playfair, .bold, 28, cream, .center, shadow: true),
+                data(second, 0.5, 0.77, 0.72, 0.12, .serif, .regular, 14, brass, .center),
+            ])
+
+        case .carStereo:
+            let amber: UInt32 = 0xFFB020, grey: UInt32 = 0xB8BEC8
+            if wide {
+                return (.texture(.brushed, 0x1C1D20), [
+                    art(.sticker(.tuningScale), 0.5, 0.2, 0.9, 0.26, amber),
+                    art(.sticker(.lcdPanel), 0.37, 0.65, 0.64, 0.5, amber),
+                    data(bind.primary, 0.37, 0.65, 0.56, 0.3, .mono, .bold, 30, amber, .center, glow: true),
+                    text(label, 0.85, 0.52, 0.24, 0.14, .rajdhani, .bold, 15, grey, .center),
+                    data(second, 0.85, 0.74, 0.24, 0.14, .rajdhani, .semibold, 14, amber, .center),
+                ])
+            }
+            return (.texture(.brushed, 0x1C1D20), [
+                text(label, 0.5, 0.17, 0.8, 0.12, .rajdhani, .bold, 14, grey, .center),
+                art(.sticker(.lcdPanel), 0.5, 0.5, 0.88, 0.46, amber),
+                data(bind.primary, 0.5, 0.5, 0.78, 0.3, .mono, .bold, 24, amber, .center, glow: true),
+                data(second, 0.5, 0.84, 0.84, 0.12, .rajdhani, .semibold, 14, grey, .center),
+            ])
+
+        case .navigation:
+            let blue: UInt32 = 0x3B82F6, muted: UInt32 = 0x93A4C3
+            if wide {
+                return (.solid(0x1B2130), [
+                    art(.sticker(.streetMap), 0.31, 0.5, 0.62, 1, blue),
+                    art(.sticker(.roadArrow), 0.81, 0.23, 0.14, 0.28, blue),
+                    data(bind.primary, 0.81, 0.55, 0.32, 0.24, .rounded, .bold, 26, white, .center),
+                    data(second, 0.81, 0.8, 0.32, 0.13, .rounded, .semibold, 14, muted, .center),
+                ])
+            }
+            return (.solid(0x1B2130), [
+                art(.sticker(.streetMap), 0.5, 0.5, 1, 1, blue),
+                art(.sticker(.glassPanel), 0.5, 0.84, 0.86, 0.22, white),
+                data(bind.primary, 0.5, 0.84, 0.78, 0.17, .rounded, .bold, 20, white, .center, shadow: true),
+            ])
+
+        case .rainyWindow:
+            let mist: UInt32 = 0xD6E4FF
+            if wide {
+                return (.rain(0xFF4D6D, 0x3BA7FF), [
+                    art(.symbol(bind.symbol), 0.08, 0.24, 0.07, 0.17, white),
+                    text(label, 0.38, 0.24, 0.52, 0.13, .rounded, .semibold, 15, mist, .leading, shadow: true),
+                    data(.clock, 0.86, 0.24, 0.22, 0.14, .rounded, .semibold, 16, white, .trailing, shadow: true),
+                    data(bind.primary, 0.4, 0.56, 0.72, 0.34, .rounded, .bold, 42, white, .leading, shadow: true),
+                    data(second, 0.4, 0.83, 0.72, 0.13, .rounded, .semibold, 15, mist, .leading, shadow: true),
+                ])
+            }
+            return (.rain(0xFF4D6D, 0x3BA7FF), [
+                text(label, 0.5, 0.22, 0.8, 0.12, .rounded, .semibold, 14, mist, .center, shadow: true),
+                data(bind.primary, 0.5, 0.5, 0.86, 0.32, .rounded, .bold, 32, white, .center, shadow: true),
+                data(second, 0.5, 0.78, 0.84, 0.12, .rounded, .semibold, 14, mist, .center, shadow: true),
+            ])
+
+        case .parkingTicket:
+            let paper: UInt32 = 0xFBFAF5, ink: UInt32 = 0x111111, faded: UInt32 = 0x3A3A3A
+            if wide {
+                // The ticket is turned 4° anticlockwise; text above its centre shifts left, below it right.
+                return (.gradient(0xC9CDD3, 0xA7ACB4), [
+                    art(.sticker(.thermalTicket), 0.5, 0.5, 0.5, 0.92, paper, rotation: -4),
+                    text(label, 0.49, 0.19, 0.42, 0.11, .mono, .bold, 15, ink, .center, rotation: -4),
+                    data(bind.primary, 0.5, 0.5, 0.44, 0.26, .mono, .bold, 28, ink, .center, rotation: -4),
+                    data(second, 0.51, 0.82, 0.42, 0.11, .mono, .semibold, 14, faded, .center, rotation: -4),
+                ])
+            }
+            return (.gradient(0xC9CDD3, 0xA7ACB4), [
+                art(.sticker(.thermalTicket), 0.5, 0.5, 0.82, 0.94, paper),
+                text(label, 0.5, 0.18, 0.7, 0.11, .mono, .bold, 14, ink, .center),
+                data(bind.primary, 0.5, 0.5, 0.72, 0.26, .mono, .bold, 22, ink, .center),
+                data(second, 0.5, 0.82, 0.7, 0.11, .mono, .semibold, 14, faded, .center),
+            ])
+
+        case .numberPlate:
+            let lilac: UInt32 = 0xC7D2FE
+            if wide {
+                return (.gradient(0x1E3A8A, 0x0A1430), [
+                    art(.sticker(.plateFrame), 0.36, 0.55, 0.62, 0.56, 0x0B0C0F),
+                    data(bind.primary, 0.36, 0.58, 0.52, 0.32, .rajdhani, .bold, 36, white, .center),
+                    text(label, 0.84, 0.36, 0.28, 0.14, .rounded, .bold, 15, lilac, .center),
+                    data(second, 0.84, 0.62, 0.28, 0.14, .rounded, .semibold, 15, white, .center),
+                ])
+            }
+            return (.gradient(0x1E3A8A, 0x0A1430), [
+                text(label, 0.5, 0.2, 0.8, 0.12, .rounded, .bold, 14, lilac, .center),
+                art(.sticker(.plateFrame), 0.5, 0.55, 0.92, 0.4, 0x0B0C0F),
+                data(bind.primary, 0.5, 0.57, 0.78, 0.24, .rajdhani, .bold, 26, white, .center),
+                data(second, 0.5, 0.86, 0.84, 0.12, .rounded, .semibold, 14, lilac, .center),
+            ])
+
+        default:
+            return (.solid(0x000000), [])
+        }
+    }
+
+    /// The Phase 17 Hero templates (spec §3 Panorama hero), on the panorama canvas. Text stays inside
+    /// one column (centres 0.16, 0.5 and 0.84, about 0.32 wide) so the gaps never cut it.
+    static func hero(_ style: TemplateStyle) -> (DesignBackground, [DesignLayer]) {
+        let white: UInt32 = 0xFFFFFF
+        let left = 0.16, mid = 0.5, right = 0.84, col = 0.28
+        func data(_ field: DataField, _ x: Double, _ y: Double, _ h: Double, _ font: DesignFont, _ weight: DesignWeight, _ size: Double,
+                  _ color: UInt32, w: Double = col, shadow: Bool = true, glow: Bool? = nil) -> DesignLayer {
+            DesignLayer(content: .data(field), x: x, y: y, width: w, height: h, font: font, weight: weight, fontSize: size,
+                        colorHex: color, alignment: .center, shadow: shadow, glow: glow)
+        }
+        func text(_ string: String, _ x: Double, _ y: Double, _ h: Double, _ size: Double, _ color: UInt32) -> DesignLayer {
+            DesignLayer(content: .text(string), x: x, y: y, width: col, height: h, font: .rajdhani, weight: .bold, fontSize: size,
+                        colorHex: color, alignment: .center)
+        }
+        func art(_ content: LayerContent, _ x: Double, _ y: Double, _ w: Double, _ h: Double, _ color: UInt32, opacity: Double = 1) -> DesignLayer {
+            DesignLayer(content: content, x: x, y: y, width: w, height: h, opacity: opacity, colorHex: color)
+        }
+        let car = DesignLayer(content: .carPhoto, x: mid, y: 0.68, width: 0.3, height: 0.44, colorHex: white)
+
+        switch style {
+        case .heroSunsetRoad:
+            let peach: UInt32 = 0xFFE8D6
+            return (.gradient(0xFF9A4D, 0x3B1466), [
+                art(.sticker(.sun), mid, 0.4, 0.3, 0.46, 0xFFD166),
+                art(.sticker(.road), mid, 0.82, 0.56, 0.36, 0xFFE8A3),
+                car,
+                data(.clock, left, 0.17, 0.17, .rounded, .heavy, 26, white),
+                data(.date, left, 0.32, 0.1, .rounded, .semibold, 14, peach),
+                data(.temperature, right, 0.17, 0.17, .rounded, .heavy, 26, white),
+                data(.weatherPlace, right, 0.32, 0.1, .rounded, .semibold, 14, peach),
+            ])
+
+        case .heroNightCity:
+            let moonlight: UInt32 = 0xFFF1C1
+            return (.gradient(0x1B2A55, 0x05060D), [
+                art(.sticker(.starfield), mid, 0.3, 1, 0.6, white, opacity: 0.7),
+                art(.sticker(.crescent), mid, 0.15, 0.1, 0.18, moonlight),
+                art(.sticker(.skyline), mid, 0.78, 1, 0.48, 0xFFD27A),
+                car,
+                data(.greeting, left, 0.15, 0.2, .rounded, .bold, 16, white),
+                data(.clock, left, 0.35, 0.15, .rounded, .heavy, 24, white),
+                data(.date, right, 0.15, 0.12, .rounded, .bold, 16, moonlight),
+                data(.temperature, right, 0.33, 0.15, .rounded, .heavy, 24, white),
+            ])
+
+        case .heroCockpit:
+            let red: UInt32 = 0xFF3B30, orange: UInt32 = 0xFF7A1A, grey: UInt32 = 0xB7BDC7
+            return (.texture(.carbon, 0x0E1014), [
+                art(.dial(.kmPerLitre, .fuel), left, 0.46, 0.3, 0.64, orange),
+                art(.dial(nil, .instrument), mid, 0.48, 0.31, 0.72, red),
+                art(.dial(.kmToService, .instrument), right, 0.46, 0.3, 0.64, red),
+                data(.clock, mid, 0.72, 0.11, .rajdhani, .bold, 16, white, w: 0.14, shadow: false),
+                data(.kmPerLitre, left, 0.87, 0.12, .rajdhani, .bold, 16, white, shadow: false),
+                data(.weekday, mid, 0.92, 0.1, .rajdhani, .bold, 14, grey, shadow: false),
+                data(.kmToService, right, 0.87, 0.12, .rajdhani, .bold, 16, white, shadow: false),
+            ])
+
+        case .heroLiveSky:
+            return (.sky, [
+                car,
+                data(.temperature, left, 0.2, 0.18, .rounded, .heavy, 30, white),
+                data(.weatherPlace, left, 0.36, 0.1, .rounded, .semibold, 14, white),
+                data(.greeting, mid, 0.14, 0.18, .rounded, .bold, 16, white, w: 0.3),
+                data(.prayerCountdown, right, 0.2, 0.18, .rounded, .heavy, 28, white),
+                data(.nextPrayerName, right, 0.36, 0.1, .rounded, .semibold, 14, white),
+            ])
+
+        case .heroNeonGrid:
+            let cyan: UInt32 = 0x3DF5FF, pink: UInt32 = 0xFF9BD8
+            return (.gradient(0x2A0845, 0x0A0215), [
+                art(.sticker(.stripedSun), mid, 0.36, 0.34, 0.58, 0xFF3FA4),
+                art(.sticker(.neonGrid), mid, 0.8, 1, 0.4, 0xC026D3),
+                car,
+                data(.clock, left, 0.2, 0.17, .orbitron, .heavy, 24, cyan, shadow: false, glow: true),
+                data(.date, left, 0.37, 0.1, .orbitron, .semibold, 14, pink, shadow: false, glow: true),
+                data(.temperature, right, 0.2, 0.17, .orbitron, .heavy, 24, cyan, shadow: false, glow: true),
+                data(.weatherPlace, right, 0.37, 0.1, .orbitron, .semibold, 14, pink, shadow: false, glow: true),
+            ])
+
+        case .heroGlassInfo:
+            let mist: UInt32 = 0xDCE6FF
+            var layers: [DesignLayer] = []
+            for x in [left, mid, right] {
+                layers.append(art(.sticker(.glassPanel), x, 0.5, 0.29, 0.84, white))
+            }
+            layers += [
+                art(.symbol("moon.stars.fill"), left, 0.24, 0.07, 0.14, white),
+                data(.nextPrayerName, left, 0.43, 0.12, .rounded, .semibold, 15, mist, w: 0.25, shadow: false),
+                data(.prayerCountdown, left, 0.64, 0.18, .rounded, .bold, 26, white, w: 0.25, shadow: false),
+                art(.symbol("cloud.sun.fill"), mid, 0.24, 0.07, 0.14, white),
+                data(.weatherPlace, mid, 0.43, 0.12, .rounded, .semibold, 14, mist, w: 0.25, shadow: false),
+                data(.temperature, mid, 0.64, 0.18, .rounded, .bold, 30, white, w: 0.25, shadow: false),
+                art(.symbol("wrench.and.screwdriver.fill"), right, 0.24, 0.07, 0.14, white),
+                text("SERVICE", right, 0.43, 0.12, 15, mist),
+                data(.kmToService, right, 0.64, 0.18, .rounded, .bold, 24, white, w: 0.25, shadow: false),
+            ]
+            return (.frosted(0x8B5CF6, 0x06B6D4), layers)
 
         default:
             return (.solid(0x000000), [])

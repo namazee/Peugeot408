@@ -152,7 +152,8 @@ struct TemplateGalleryView: View {
 
             ForEach(TemplateGroup.allCases) { group in
                 Section(group.displayName) {
-                    let columns = [GridItem(.adaptive(minimum: canvas == .small ? 140 : 300), spacing: 12)]
+                    // Hero designs always preview at the panorama shape across the full width.
+                    let columns = group == .hero ? [GridItem(.flexible())] : [GridItem(.adaptive(minimum: canvas == .small ? 140 : 300), spacing: 12)]
                     LazyVGrid(columns: columns, spacing: 14) {
                         ForEach(group.styles) { style in
                             let design = template(style)
