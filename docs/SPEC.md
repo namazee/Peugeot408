@@ -81,7 +81,15 @@ Work in phases (below). At the end of each phase: commit, push, make sure the CI
    * **Live Sky:** the live sky (§4b) across all three columns with hills and my car photo, the temperature left, the greeting top middle and the next prayer countdown right.
    * **Neon Grid:** a retro purple grid floor in perspective under a striped sun, my car photo in the middle, the clock and date left and the temperature and weather place right, in glowing Orbitron.
    * **Glass Info:** soft colour blobs behind three frosted glass panels, one per column: the next prayer and countdown, the weather, and km to service.
-  New original stickers for these: city skyline, neon grid floor and striped sun. The template gallery gets a **Hero** section (the old Hero template moves there from Car) that always previews at the panorama shape across the full width, whatever the Size picker says. On the Panorama hero screen, "Create a Hero design" lets me pick any Hero template.
+  New original stickers for these: city skyline, neon grid floor and striped sun.
+* Another round of Hero templates (Phase 18), with the same rules:
+   * **Garage:** a dark garage with a brick wall, a warm light cone on my car photo, the clock and date left, the temperature and weather place right.
+   * **Coastal Drive:** a sea horizon at golden hour with waves and palm silhouettes, my car photo in the middle, the greeting and clock left, the temperature and weather place right.
+   * **Rain City:** the rain background across all three columns with my car photo, the clock and date left, the temperature and weather place right.
+   * **Starting Grid:** a carbon panel with five red start lights across the top of the middle column, a chequered strip along the bottom, my car photo, the clock left and km to service right.
+   * **Mountain Pass:** layered misty mountains with a winding road, my car photo, the greeting and clock left, the temperature and weather place right.
+   * **Departure Board:** three split-flap boards, one per column: the next prayer and its time, the weather, and km to service.
+  New stickers: light cone, palms, waves, mountains, start lights and chequered strip. The template gallery gets a **Hero** section (the old Hero template moves there from Car) that always previews at the panorama shape across the full width, whatever the Size picker says. On the Panorama hero screen, "Create a Hero design" lets me pick any Hero template.
 * New data fields:
    * a time-of-day greeting with my name ("Good morning, …" / "Selamat pagi, …");
    * the weather place and condition ("Kuala Lumpur · Sunny").
@@ -249,6 +257,24 @@ Goal: I set things up once in the app, and my car's CarPlay screen reflects it a
    * wood and brick textures;
    * a rain background (two bokeh colours);
    * new original stickers: neon tube frame, thermal ticket, plate frame, radio tuning scale, street map and LCD panel.
+* Another round of realistic templates (Phase 18), added to the Realistic section with the same rules:
+   * **Shift Lights:** a row of shift-light LEDs (green, then amber, then red) lit by the value's progress over a carbon panel, with the value in big digital lettering. Medium adds the label and second value beside it.
+   * **Polaroid:** my My Car photo in a white instant-photo frame pinned to a cork board, with the value as the caption. Medium adds a sticky note with the second value.
+   * **Sticky Note:** a yellow sticky note with tape on a cork board, the label and value in bold marker-style lettering. Medium: two notes (the value and the second value).
+   * **Dot Matrix:** an overhead LED board: a black panel with a fine dot grid and the value in amber dot-style lettering. Medium adds the label and second value on a second line.
+   * **Chalkboard:** a green chalkboard with chalk smudges, the label and value in white chalk lettering and a chalk underline. Medium adds the second value.
+   * **Thermometer:** a glass thermometer whose red column fills with the value's progress, with the value beside it. Medium adds the label and second value.
+   * **Battery:** a big battery shape whose cells fill with the value's progress (green, amber when under 30%, red under 15%), with the value inside. Medium adds the label and second value.
+   * **Speed Sign:** a round white road sign with a red ring and the value in black sign lettering, on a pale roadside sky. Medium adds the label and second value beside the sign. Generic, not copied from any real sign.
+  New pieces: a shift-lights layer, a thermometer layer and a battery layer (each filled by a field's progress); cork and chalkboard textures; stickers: instant-photo frame, sticky note, dot-matrix panel and speed-sign disc.
+* More templates in the other sections (Phase 18), marked "New", each with its own Small and Medium layout:
+   * **Flip Clock** (Clock & Date): the time on split-flap tiles, with the date below.
+   * **Word Clock** (Clock & Date): the time in words to the nearest five minutes ("HALF PAST TEN", "TEN TO ELEVEN"), in big lit capitals over a faint grid of letters. New data field: time in words; the widget timeline has an entry every five minutes.
+   * **Hijri Date** (Clock & Date): today's Islamic date in Malay month names ("6 Jamadilakhir 1448"), calculated with the Umm al-Qura calendar (it can differ by a day from JAKIM's official date, and it changes at midnight, not Maghrib), with a crescent and the Gregorian date. New data field: Hijri date.
+   * **Moon Phase** (Special): tonight's moon drawn in its real phase (calculated from the date) on a starfield, with the phase name ("Waxing crescent"). New layer: moon phase; new data field: moon phase name.
+   * **Vinyl** (Data): a vinyl record with grooves and a coloured centre label, and the value beside it; bindable to any source (Music by default in the gallery preview).
+   * **Comic Pop** (Data): a bold halftone background with a comic burst behind the value; bindable to any source.
+  New pieces: a halftone texture; stickers: vinyl record, comic burst and letter grid.
 * Seasonal packs for Malaysia that the app can switch to automatically on the right dates: Hari Raya Aidilfitri, Ramadan (with an iftar countdown using the prayer module's Maghrib time), Aidiladha, Merdeka/Malaysia Day, Chinese New Year, Deepavali, Christmas, New Year. All original artwork, drawn in SwiftUI shapes/SF Symbols or as bundled assets generated in Remotion; nothing copied from other apps.
 
 ### Custom builder
@@ -337,6 +363,7 @@ Widgets themselves are static SwiftUI, so use Remotion only for the animated ass
 15. App Store release (§10): the DashCraft name in all user-visible text and the "DASHCRAFT" icon wordmark, the `store` build flavour without lyrics, Sample data mode, privacy manifests, the support and privacy pages, store metadata and screenshots, and the `store_metadata` lane. Stop before anything public: I turn on Pages and submit for review myself.
 16. Realistic templates (§4b Templates): the 10 realistic templates in Small and Medium, the new dial, odometer, segmented bar, leather, frosted-glass and live-sky pieces, the Realistic gallery section, and render tests.
 17. More templates (§4b Templates, §3 Panorama hero): 8 more realistic templates, 6 more Hero templates, the Hero gallery section and template picker, the split-flap, wood, brick, rain and new sticker pieces, and render tests.
+18. Another round of templates (§4b Templates, §3 Panorama hero): 8 more realistic templates, 6 more Hero templates, 6 templates in the other sections (Flip Clock, Word Clock, Hijri Date, Moon Phase, Vinyl, Comic Pop), their new layers, fields, textures and stickers, and render tests.
 
 ## 9. Quality bar
 
