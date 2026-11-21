@@ -1130,7 +1130,7 @@ public enum Templates {
             ])
 
         case .heroCockpit:
-            let red: UInt32 = 0xFF3B30, orange: UInt32 = 0xFF7A1A, grey: UInt32 = 0xB7BDC7
+            let red: UInt32 = 0xFF3B30, orange: UInt32 = 0xFF7A1A
             return (.texture(.carbon, 0x0E1014), [
                 art(.dial(.kmPerLitre, .fuel), left, 0.46, 0.3, 0.64, orange),
                 art(.dial(nil, .instrument), mid, 0.48, 0.31, 0.72, red),
