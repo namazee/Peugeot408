@@ -30,13 +30,17 @@ final class ConnectSoundPlayer: NSObject, AVAudioPlayerDelegate, AVSpeechSynthes
     }
 
     /// `disconnect: true` plays the disconnect sound when `sound` is nil.
-    func play(_ sound: ConnectSoundKind? = nil, disconnect: Bool = false, directory: URL = AppGroup.containerURL) async throws {
+    /// `waitForCar: true` (the connect shortcut) first waits for the car to take the iPhone's audio.
+    func play(_ sound: ConnectSoundKind? = nil, disconnect: Bool = false, waitForCar: Bool = false,
+              directory: URL = AppGroup.containerURL) async throws {
         let settings = SoundStores.settings(in: directory).load()
         let chosen = sound.map { settings.resolved($0) } ?? (disconnect ? settings.resolvedDisconnect : settings.resolved(nil))
         stop()
 
-        let spoken = settings.spokenText(chosen)
         let session = AVAudioSession.sharedInstance()
+        if waitForCar { await waitForCarAudio(session) }
+
+        let spoken = settings.spokenText(chosen)
         try session.setCategory(.playback, mode: spoken != nil ? .voicePrompt : .default, options: [.duckOthers])
         try session.setActive(true)
         defer { try? session.setActive(false, options: .notifyOthersOnDeactivation) }
@@ -60,6 +64,25 @@ final class ConnectSoundPlayer: NSObject, AVAudioPlayerDelegate, AVSpeechSynthes
             let url = SoundStores.folder(in: directory).appending(path: item.fileName, directoryHint: .notDirectory)
             try await playFile(url, volume: settings.clampedVolume)
         }
+    }
+
+    /// Spec §4b: the car can take a few seconds after CarPlay connects to switch its audio to
+    /// the iPhone, and anything played before that is lost. Waits up to 6 s for a car output in the
+    /// route (checked before the session is activated, so music isn't ducked while waiting), then
+    /// about 1 s more for the car to settle. Plays anyway if the car never shows up.
+    private func waitForCarAudio(_ session: AVAudioSession) async {
+        let deadline = Date.now.addingTimeInterval(6)
+        while !Self.routeReachesCar(session.currentRoute), Date.now < deadline {
+            try? await Task.sleep(for: .milliseconds(250))
+        }
+        if Self.routeReachesCar(session.currentRoute) {
+            try? await Task.sleep(for: .seconds(1))
+        }
+    }
+
+    static func routeReachesCar(_ route: AVAudioSessionRouteDescription) -> Bool {
+        let carPorts: Set<AVAudioSession.Port> = [.carAudio, .bluetoothA2DP, .bluetoothHFP, .usbAudio]
+        return route.outputs.contains { carPorts.contains($0.portType) }
     }
 
     func stop() {
@@ -146,7 +169,7 @@ struct PlayConnectSoundIntent: AudioPlaybackIntent {
     @MainActor
     func perform() async throws -> some IntentResult {
         let chosen = sound.flatMap { ConnectSoundSettings.sound(entityID: $0.id) }
-        try await ConnectSoundPlayer.shared.play(chosen)
+        try await ConnectSoundPlayer.shared.play(chosen, waitForCar: true)
         return .result()
     }
 }
