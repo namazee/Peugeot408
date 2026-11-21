@@ -314,7 +314,7 @@ Widgets themselves are static SwiftUI, so use Remotion only for the animated ass
 ### Build flavours
 
 * `personal` (default): every push to `main`, as now. Everything in this spec, including LRCLIB lyrics. Goes to TestFlight.
-* `store`: run the iOS workflow by hand with input `flavour: store`. Compiles with the Swift condition `STORE_BUILD`, which leaves out the Lyrics feature completely: the LRCLIB client, the Lyrics widget, the Lyrics data source and card, the Lyrics Live Activity, the Sync Lyrics intent and the lyrics screen. A saved slot that points at Lyrics shows the Music card instead. No hidden switches: the code isn't in the store binary at all.
+* `store`: run the iOS workflow by hand with input `flavour: store`. Compiles with the Swift condition `STORE_BUILD`, which leaves out the Lyrics feature: the LRCLIB client (no lyrics are ever fetched), the Lyrics widget, the Lyrics Live Activity, the Sync Lyrics intent and its Siri phrase, and the lyrics screen; Lyrics is not offered in any picker. Only the `lyrics` data-source identifier and the offline lyrics models stay, so older saved slots and backups still open; such a slot shows the Music card instead. No hidden switches: the lyrics fetching and screens aren't in the store binary at all.
 * Both flavours upload to the same App Store Connect app and share the run-number build numbers; the store build's TestFlight note says "Store build". Only a store build is ever submitted for review (`SETUP.md` says how to pick it).
 
 ### Sample data (for App Review and first look)
