@@ -232,6 +232,7 @@ Goal: I set things up once in the app, and my car's CarPlay screen reflects it a
 
 * iOS doesn't let an app play a sound automatically when CarPlay connects, so implement it the supported way:
    * An App Intent "Play Connect Sound" (with the sound selection as a parameter) that plays through the current audio route (so it comes out of the car speakers), at a set volume, with ducking.
+   * The car can take a few seconds after CarPlay connects to switch its audio to the iPhone, and a sound played before that is lost. So when the shortcut runs (not for "Test sound"), it first waits until the audio route reaches the car (a CarPlay, Bluetooth or USB car audio output), for up to 6 seconds, then waits about 1 more second for the car to settle, then plays. If the car never appears in the route, it plays anyway when the 6 seconds are up.
    * The app guides me step by step to create a Shortcuts personal automation: "When CarPlay connects → Play Connect Sound", set to run immediately without asking. Provide a screen with the exact steps and screenshots, and a "Test sound" button.
 * A bundled library of original sounds (generate them yourself or use clearly licensed free sounds and record the licence in `ASSETS-LICENSES.md`): clean chimes, a soft "welcome" tone, sporty engine-style revs, and a spoken "Welcome back" made with on-device `AVSpeechSynthesizer` in English or Malay with my name.
 * Let me import my own audio file (trim to ≤5 seconds in-app).
