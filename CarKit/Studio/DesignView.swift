@@ -43,7 +43,7 @@ public struct DesignView: View {
             switch layer.content {
             case .text(let text): text
             case .plate(let text): text.isEmpty ? card.plateText : text
-            case .data(let field): "\(field.displayName): \(card.values[field]?.text ?? "")"
+            case .data(let field), .odometer(let field): "\(field.displayName): \(card.values[field]?.text ?? "")"
             default: nil
             }
         }
@@ -114,6 +114,11 @@ public struct DesignBackgroundView: View {
             let hex = card?.stateHex ?? base
             LinearGradient(colors: [Color(hex: ColorMath.mix(hex, 0xFFFFFF, amount: 0.12)), Color(hex: ColorMath.mix(hex, 0x000000, amount: 0.28))],
                            startPoint: .top, endPoint: .bottom)
+        case .frosted(let a, let b):
+            FrostedBackground(a: Color(hex: a), b: Color(hex: b))
+        case .sky:
+            let date = card?.date ?? .now
+            SkyBackground(date: date, sun: card?.sun ?? Sky.sunTimes(on: date, prayerDays: []))
         }
     }
 }
@@ -185,8 +190,12 @@ private struct LayerView: View {
             ProgressRing(color: color, progress: field.flatMap { card.values[$0]?.progress } ?? 1)
                 .widgetAccentable()
         case .progressBar(let field):
-            ProgressBar(color: color, progress: field.flatMap { card.values[$0]?.progress } ?? 1)
+            ProgressBar(color: color, progress: field.flatMap { card.values[$0]?.progress } ?? 1, segments: layer.segments ?? 0)
                 .widgetAccentable()
+        case .dial(let field, let style):
+            DialView(style: style, needle: color, progress: field.flatMap { card.values[$0]?.progress } ?? 0.6)
+        case .odometer(let field):
+            OdometerView(value: card.values[field] ?? ResolvedField(text: "--"), accent: color)
         case .analogClock:
             AnalogClock(date: card.date, color: color)
         case .seasonalArt(let occasion):
@@ -302,12 +311,30 @@ private struct ProgressRing: View {
     }
 }
 
-/// A rounded bar with a track.
+/// A rounded bar with a track, or `segments` separate blocks that light up with the progress.
 private struct ProgressBar: View {
     let color: Color
     let progress: Double
+    var segments: Int = 0
 
     var body: some View {
+        if segments >= 2 {
+            GeometryReader { geo in
+                let lit = Int((min(max(progress, 0), 1) * Double(segments)).rounded())
+                HStack(spacing: max(geo.size.width * 0.012, 1.5)) {
+                    ForEach(0..<segments, id: \.self) { index in
+                        RoundedRectangle(cornerRadius: 1.5).fill(index < lit ? color : color.opacity(0.16))
+                    }
+                }
+                .frame(height: min(geo.size.height, 18))
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+            }
+        } else {
+            smooth
+        }
+    }
+
+    private var smooth: some View {
         GeometryReader { geo in
             let h = min(geo.size.height, 14)
             ZStack(alignment: .leading) {

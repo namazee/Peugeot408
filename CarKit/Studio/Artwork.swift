@@ -35,6 +35,12 @@ public struct ArtworkView: View {
                 case .sun: SettingSun(color: color)
                 case .road: OpenRoad(color: color)
                 case .starfield: Starfield(color: color)
+                case .stitching: Stitching(color: color)
+                case .signFrame: SignFrame(color: color)
+                case .roadArrow: RoadArrow(color: color)
+                case .hudLines: HUDLines(color: color)
+                case .ticket: TicketArt(color: color)
+                case .glassPanel: GlassPanel(color: color)
                 }
             }
             .frame(width: kind.fillsFrame ? geo.size.width : size,
@@ -241,7 +247,7 @@ extension ArtworkKind {
     /// Artwork stretched to the layer's frame rather than kept square.
     var fillsFrame: Bool {
         switch self {
-        case .stripes, .speedLines, .gaugeArc, .road, .starfield: true
+        case .stripes, .speedLines, .gaugeArc, .road, .starfield, .stitching, .signFrame, .hudLines, .ticket, .glassPanel: true
         default: false
         }
     }
@@ -393,6 +399,8 @@ public struct TextureView: View {
                     y += 2
                     i += 1
                 }
+            case .leather:
+                LeatherGrain.draw(&context, size: size)
             case .dots:
                 var y = 6.0
                 while y < size.height {

@@ -232,6 +232,14 @@ struct DesignBuilderView: View {
             layer.width = 0.4
             layer.height = 0.16
             layer.fontSize = 16
+        case .dial:
+            layer.width = design.canvas == .small ? 0.7 : 0.34
+            layer.height = 0.7
+            layer.colorHex = 0xFF3B30
+        case .odometer:
+            layer.width = 0.8
+            layer.height = 0.26
+            layer.colorHex = 0xD92D20
         case .data, .text:
             layer.fontSize = 24
         }
@@ -347,6 +355,9 @@ struct DesignBuilderView: View {
                 Button("Progress ring", systemImage: "circle.dashed") { add(.ring(.kmToService)) }
                 Button("Progress bar", systemImage: "chart.bar.fill") { add(.progressBar(.yearProgress)) }
                 Button("Analogue clock", systemImage: "clock") { add(.analogClock) }
+                Button("Dial", systemImage: "speedometer") { add(.dial(.kmToService, .instrument)) }
+                Button("Fuel gauge", systemImage: "fuelpump") { add(.dial(.kmPerLitre, .fuel)) }
+                Button("Odometer", systemImage: "number.square") { add(.odometer(.kmToService)) }
             } label: {
                 Image(systemName: "plus")
             }
@@ -381,6 +392,8 @@ struct DesignBuilderView: View {
         case .analogClock: "Analogue clock"
         case .plate(let text): "Plate \(text)"
         case .seasonalArt(let occasion): "Art: \(occasion.displayName)"
+        case .dial(let field, let style): "\(style == .fuel ? "Fuel gauge" : "Dial"): \(field?.displayName ?? "decorative")"
+        case .odometer(let field): "Odometer: \(field.displayName)"
         }
     }
 }
@@ -470,6 +483,17 @@ private struct LayerInspector: View {
             progressPicker(field) { layer.content = .ring($0) }
         case .progressBar(let field):
             progressPicker(field) { layer.content = .progressBar($0) }
+            Stepper("Segments: \((layer.segments ?? 0) < 2 ? "smooth" : String(layer.segments ?? 0))",
+                    value: Binding(get: { max(layer.segments ?? 1, 1) }, set: { layer.segments = $0 < 2 ? nil : $0 }), in: 1...20)
+        case .dial(let field, let style):
+            Picker("Style", selection: Binding(get: { style }, set: { layer.content = .dial(field, $0) })) {
+                ForEach(DialStyle.allCases, id: \.self) { Text($0.displayName).tag($0) }
+            }
+            progressPicker(field) { layer.content = .dial($0, style) }
+        case .odometer(let field):
+            Picker("Shows", selection: Binding(get: { field }, set: { layer.content = .odometer($0) })) {
+                ForEach(DataField.allCases) { Text($0.displayName).tag($0) }
+            }
         case .symbol(let name):
             Picker("Icon", selection: Binding(get: { name }, set: { layer.content = .symbol($0) })) {
                 ForEach(SlotDesign.symbolChoices, id: \.self) { Label($0, systemImage: $0).tag($0) }
@@ -526,7 +550,7 @@ private struct BackgroundEditor: View {
     @Binding var background: DesignBackground
     let photos: [PhotoItem]
 
-    private enum Kind: String, CaseIterable { case solid, gradient, aurora, glow, texture, photo, state }
+    private enum Kind: String, CaseIterable { case solid, gradient, aurora, glow, frosted, sky, texture, photo, state }
 
     private var kind: Kind {
         switch background {
@@ -537,6 +561,8 @@ private struct BackgroundEditor: View {
         case .texture: .texture
         case .photo: .photo
         case .stateColor: .state
+        case .frosted: .frosted
+        case .sky: .sky
         }
     }
 
@@ -569,6 +595,16 @@ private struct BackgroundEditor: View {
                 Text("Turns amber when due soon, red when overdue, and the haze band colour for air quality.")
                     .font(.footnote)
                     .foregroundStyle(Theme.secondaryText)
+            case .frosted(let a, let b):
+                ColorPicker("Colour 1", selection: Binding(get: { Color(hex: a) }, set: { background = .frosted($0.hexValue, b) }), supportsOpacity: false)
+                ColorPicker("Colour 2", selection: Binding(get: { Color(hex: b) }, set: { background = .frosted(a, $0.hexValue) }), supportsOpacity: false)
+                Text("Add a Glass panel sticker on top for the frosted look.")
+                    .font(.footnote)
+                    .foregroundStyle(Theme.secondaryText)
+            case .sky:
+                Text("Follows the time of day: dawn, day, dusk and night, with sunrise and sunset from today's Syuruk and Maghrib.")
+                    .font(.footnote)
+                    .foregroundStyle(Theme.secondaryText)
             case .photo(let file):
                 if photos.isEmpty {
                     Text("Add photos in Studio → Photo Frame first.").foregroundStyle(Theme.secondaryText)
@@ -590,6 +626,8 @@ private struct BackgroundEditor: View {
         case .state: background = .stateColor(0x1F4FD8)
         case .texture: background = .texture(.carbon, 0x111318)
         case .photo: background = .photo(photos.first?.fileName ?? "")
+        case .frosted: background = .frosted(0x8B5CF6, 0x06B6D4)
+        case .sky: background = .sky
         }
     }
 }

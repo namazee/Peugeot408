@@ -87,6 +87,30 @@ struct ReadmeSnapshots {
                 in: directory
             )
         }
+
+        // Realistic templates (Phase 16): each in Small and Medium, bound to a source that suits it.
+        let realistic: [(TemplateStyle, DataSource)] = [
+            (.chromeDial, .obd), (.fuelGauge, .fuel), (.odometer, .service), (.highwaySign, .commute), (.leatherStitch, .renewals),
+            (.digitalCockpit, .service), (.headUpDisplay, .weather), (.frostedGlass, .tng), (.liveSky, .weather), (.boardingPass, .commute),
+        ]
+        save(
+            VStack(alignment: .leading, spacing: 12) {
+                ForEach(Array(realistic.enumerated()), id: \.offset) { _, pair in
+                    HStack(spacing: 12) {
+                        ForEach(DesignCanvas.widgetCanvases, id: \.self) { canvas in
+                            let design = Templates.make(pair.0, source: pair.1, canvas: canvas)
+                            DesignView(card: DesignResolver.card(for: design, data: data, studio: .empty, at: now))
+                                .frame(width: 150 * design.canvas.aspectRatio, height: 150)
+                                .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+                        }
+                    }
+                }
+            }
+            .padding(14)
+            .background(Color(hex: 0x000000)),
+            "templates-realistic-both.png",
+            in: directory
+        )
     }
 
     private func carPlayScreen(_ columns: [SlotContent]) -> some View {

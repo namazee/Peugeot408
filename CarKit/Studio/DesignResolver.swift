@@ -42,8 +42,12 @@ public struct StudioCard: Sendable, Equatable {
     public var carPhotoFile: String?
     public var plateText: String
     public var plateFont: PlateFont
+    /// Sunrise and sunset for a Live Sky background (nil for other backgrounds).
+    public var sun: SunTimes?
 
-    public init(design: CardDesign, date: Date, values: [DataField: ResolvedField], directory: URL?, carPhotoFile: String?, plateText: String, plateFont: PlateFont = .classic) {
+    public init(design: CardDesign, date: Date, values: [DataField: ResolvedField], directory: URL?, carPhotoFile: String?, plateText: String,
+                plateFont: PlateFont = .classic, sun: SunTimes? = nil) {
+        self.sun = sun
         self.design = design
         self.date = date
         self.values = values
@@ -71,7 +75,9 @@ public enum DesignResolver {
                 ? ResolvedField(text: greetingText(at: date, name: studio.ownerName, malay: studio.greetingMalay == true, calendar: calendar))
                 : resolve(field, data: data, design: design, at: date, calendar: calendar)
         }
-        return StudioCard(design: design, date: date, values: values, directory: data.directory, carPhotoFile: studio.carPhotoFile, plateText: studio.plateText, plateFont: studio.plateFont ?? .classic)
+        let sun = design.background == .sky ? Sky.sunTimes(on: date, prayerDays: data.prayer.days, calendar: calendar) : nil
+        return StudioCard(design: design, date: date, values: values, directory: data.directory, carPhotoFile: studio.carPhotoFile,
+                          plateText: studio.plateText, plateFont: studio.plateFont ?? .classic, sun: sun)
     }
 
     /// Entry dates for a design: its fields' sources, plus every minute for the next hour if it has an analogue clock.
@@ -83,6 +89,9 @@ public enum DesignResolver {
         dates.formUnion(DayMath.refreshDates(from: start, days: 2, calendar: calendar))
         if design.dataFields.contains(.greeting) {
             dates.formUnion(SlotTimeline.hourBoundaries([5, 12, 15, 18, 19], from: start, calendar: calendar))
+        }
+        if design.background == .sky {
+            dates.formUnion(Sky.changeDates(from: start, prayerDays: data.prayer.days, calendar: calendar))
         }
         if design.layers.contains(where: { $0.content == .analogClock }) {
             let minute = calendar.dateInterval(of: .minute, for: start)?.start ?? start

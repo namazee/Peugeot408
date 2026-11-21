@@ -26,6 +26,17 @@ public enum TemplateStyle: String, Codable, Sendable, CaseIterable, Identifiable
     case retroLED
     /// Panorama hero across Slots 1–3 (always the panorama canvas).
     case hero
+    // Realistic templates (Phase 16): each has its own Small and Medium layout.
+    case chromeDial
+    case fuelGauge
+    case odometer
+    case highwaySign
+    case leatherStitch
+    case digitalCockpit
+    case headUpDisplay
+    case frostedGlass
+    case liveSky
+    case boardingPass
 
     public var id: String { rawValue }
 
@@ -36,6 +47,8 @@ public enum TemplateStyle: String, Codable, Sendable, CaseIterable, Identifiable
         case .myCar, .photo, .nightDrive, .showroom, .sunsetDrive, .hero: .car
         case .clockAnalog, .clockDigital, .bigDate, .retroLED, .yearProgress: .clockDate
         case .countdown, .anniversary, .starryNight: .special
+        case .chromeDial, .fuelGauge, .odometer, .highwaySign, .leatherStitch, .digitalCockpit,
+             .headUpDisplay, .frostedGlass, .liveSky, .boardingPass: .realistic
         }
     }
 
@@ -72,6 +85,16 @@ public enum TemplateStyle: String, Codable, Sendable, CaseIterable, Identifiable
         case .yearProgress: "Year Progress"
         case .retroLED: "Retro LED"
         case .hero: "Hero (Panorama)"
+        case .chromeDial: "Chrome Dial"
+        case .fuelGauge: "Fuel Gauge"
+        case .odometer: "Odometer"
+        case .highwaySign: "Highway Sign"
+        case .leatherStitch: "Leather Stitch"
+        case .digitalCockpit: "Digital Cockpit"
+        case .headUpDisplay: "Head-Up Display"
+        case .frostedGlass: "Frosted Glass"
+        case .liveSky: "Live Sky"
+        case .boardingPass: "Boarding Pass"
         }
     }
 
@@ -79,7 +102,9 @@ public enum TemplateStyle: String, Codable, Sendable, CaseIterable, Identifiable
     public var usesDataSource: Bool {
         switch self {
         case .sporty, .minimal, .premium, .dashboard, .photo, .myCar,
-             .boldTile, .neonRing, .twinGauges, .aurora, .sunsetDrive, .nightDrive, .showroom, .racingStripes: true
+             .boldTile, .neonRing, .twinGauges, .aurora, .sunsetDrive, .nightDrive, .showroom, .racingStripes,
+             .chromeDial, .fuelGauge, .odometer, .highwaySign, .leatherStitch, .digitalCockpit,
+             .headUpDisplay, .frostedGlass, .liveSky, .boardingPass: true
         case .clockAnalog, .clockDigital, .countdown, .anniversary, .starryNight, .bigDate, .yearProgress, .retroLED, .hero: false
         }
     }
@@ -87,12 +112,15 @@ public enum TemplateStyle: String, Codable, Sendable, CaseIterable, Identifiable
 
 /// Template gallery sections.
 public enum TemplateGroup: String, CaseIterable, Sendable, Identifiable {
+    /// Shown first (Phase 16).
+    case realistic
     case data, car, clockDate, special
 
     public var id: String { rawValue }
 
     public var displayName: String {
         switch self {
+        case .realistic: "Realistic"
         case .data: "Data"
         case .car: "Car"
         case .clockDate: "Clock & Date"
@@ -392,10 +420,218 @@ public enum Templates {
                 DesignLayer(content: .data(.clock), x: 0.5, y: 0.45, width: 0.92, height: 0.4, font: .mono, weight: .heavy, fontSize: wide ? 48 : 30, colorHex: amber, alignment: .center, glow: true),
                 DesignLayer(content: .data(.date), x: 0.5, y: 0.76, width: 0.9, height: 0.15, opacity: 0.75, font: .mono, weight: .bold, fontSize: 15, colorHex: amber, alignment: .center),
             ]
+
+        case .chromeDial, .fuelGauge, .odometer, .highwaySign, .leatherStitch, .digitalCockpit,
+             .headUpDisplay, .frostedGlass, .liveSky, .boardingPass:
+            let made = realistic(style, bind: bind, wide: wide)
+            background = made.0
+            layers = made.1
         }
 
         let name = style.usesDataSource ? "\(style.displayName) · \(bind.label)" : style.displayName
         return CardDesign(name: name, canvas: surface, background: background, layers: layers, template: style.rawValue, eventDate: eventDate)
+    }
+
+    /// The realistic templates (spec §4b, Phase 16). Small and Medium each get their own layout.
+    static func realistic(_ style: TemplateStyle, bind: TemplateBinding, wide: Bool) -> (DesignBackground, [DesignLayer]) {
+        let white: UInt32 = 0xFFFFFF
+        let second = bind.secondary ?? .yearProgress
+        let label = bind.label.uppercased()
+        func data(_ field: DataField, _ x: Double, _ y: Double, _ w: Double, _ h: Double, _ font: DesignFont, _ weight: DesignWeight, _ size: Double,
+                  _ color: UInt32, _ align: DesignAlignment, shadow: Bool = false, glow: Bool? = nil) -> DesignLayer {
+            DesignLayer(content: .data(field), x: x, y: y, width: w, height: h, font: font, weight: weight, fontSize: size,
+                        colorHex: color, alignment: align, shadow: shadow, glow: glow)
+        }
+        func text(_ string: String, _ x: Double, _ y: Double, _ w: Double, _ h: Double, _ font: DesignFont, _ weight: DesignWeight, _ size: Double,
+                  _ color: UInt32, _ align: DesignAlignment, opacity: Double = 1, shadow: Bool = false, glow: Bool? = nil) -> DesignLayer {
+            DesignLayer(content: .text(string), x: x, y: y, width: w, height: h, opacity: opacity, font: font, weight: weight, fontSize: size,
+                        colorHex: color, alignment: align, shadow: shadow, glow: glow)
+        }
+        func art(_ content: LayerContent, _ x: Double, _ y: Double, _ w: Double, _ h: Double, _ color: UInt32,
+                 opacity: Double = 1, glow: Bool? = nil, segments: Int? = nil) -> DesignLayer {
+            DesignLayer(content: content, x: x, y: y, width: w, height: h, opacity: opacity, colorHex: color, glow: glow, segments: segments)
+        }
+
+        switch style {
+        case .chromeDial:
+            let needle: UInt32 = 0xFF3B30, ice: UInt32 = 0x7FD4FF, grey: UInt32 = 0xB7BDC7
+            if wide {
+                return (.texture(.brushed, 0x14161B), [
+                    art(.dial(bind.primary, .instrument), 0.19, 0.5, 0.37, 0.94, needle),
+                    art(.dial(second, .instrument), 0.81, 0.5, 0.37, 0.94, needle),
+                    art(.sticker(.glassPanel), 0.5, 0.5, 0.27, 0.66, white),
+                    text(label, 0.5, 0.29, 0.24, 0.12, .rajdhani, .bold, 14, grey, .center),
+                    data(bind.primary, 0.5, 0.5, 0.25, 0.26, .rajdhani, .bold, 26, white, .center),
+                    data(second, 0.5, 0.71, 0.25, 0.14, .rajdhani, .semibold, 14, ice, .center),
+                ])
+            }
+            return (.texture(.brushed, 0x14161B), [
+                art(.dial(bind.primary, .instrument), 0.5, 0.5, 0.96, 0.96, needle),
+                text(label, 0.5, 0.35, 0.4, 0.1, .rajdhani, .bold, 14, grey, .center),
+                data(bind.primary, 0.5, 0.75, 0.52, 0.15, .rajdhani, .bold, 18, white, .center),
+            ])
+
+        case .fuelGauge:
+            let needle: UInt32 = 0xFF7A1A, warm: UInt32 = 0xFFB37A, grey: UInt32 = 0xA9B1BE
+            if wide {
+                return (.spotlight(0x1C2230, 0x07090D), [
+                    art(.dial(bind.primary, .fuel), 0.25, 0.52, 0.46, 0.92, needle),
+                    text(label, 0.72, 0.26, 0.5, 0.13, .rounded, .bold, 14, grey, .leading),
+                    data(bind.primary, 0.72, 0.5, 0.5, 0.3, .rajdhani, .bold, 34, white, .leading),
+                    data(second, 0.72, 0.76, 0.5, 0.14, .rounded, .semibold, 15, warm, .leading),
+                ])
+            }
+            return (.spotlight(0x1C2230, 0x07090D), [
+                art(.dial(bind.primary, .fuel), 0.5, 0.42, 0.92, 0.72, needle),
+                data(bind.primary, 0.5, 0.82, 0.88, 0.17, .rajdhani, .bold, 22, white, .center),
+            ])
+
+        case .odometer:
+            let red: UInt32 = 0xD92D20, engraved: UInt32 = 0xD7DBE2
+            if wide {
+                return (.texture(.brushed, 0x2A2D33), [
+                    art(.symbol(bind.symbol), 0.08, 0.2, 0.06, 0.16, engraved),
+                    text(label, 0.5, 0.2, 0.7, 0.13, .rajdhani, .bold, 16, engraved, .center, shadow: true),
+                    art(.odometer(bind.primary), 0.5, 0.5, 0.86, 0.34, red),
+                    art(.odometer(second), 0.5, 0.82, 0.56, 0.17, red),
+                ])
+            }
+            return (.texture(.brushed, 0x2A2D33), [
+                text(label, 0.5, 0.2, 0.86, 0.13, .rajdhani, .bold, 15, engraved, .center, shadow: true),
+                art(.odometer(bind.primary), 0.5, 0.52, 0.92, 0.3, red),
+                art(.symbol(bind.symbol), 0.5, 0.82, 0.13, 0.13, engraved, opacity: 0.8),
+            ])
+
+        case .highwaySign:
+            let green: UInt32 = 0x0B6E3B
+            if wide {
+                return (.solid(green), [
+                    art(.sticker(.signFrame), 0.5, 0.5, 1, 1, white),
+                    art(.sticker(.roadArrow), 0.11, 0.5, 0.14, 0.56, white),
+                    text(label, 0.45, 0.34, 0.46, 0.2, .system, .bold, 21, white, .leading),
+                    data(bind.primary, 0.81, 0.34, 0.27, 0.2, .system, .heavy, 22, white, .trailing),
+                    data(second, 0.6, 0.69, 0.74, 0.2, .system, .bold, 18, white, .leading),
+                ])
+            }
+            return (.solid(green), [
+                art(.sticker(.signFrame), 0.5, 0.5, 1, 1, white),
+                art(.sticker(.roadArrow), 0.5, 0.27, 0.26, 0.28, white),
+                text(label, 0.5, 0.56, 0.82, 0.15, .system, .bold, 17, white, .center),
+                data(bind.primary, 0.5, 0.77, 0.82, 0.2, .system, .heavy, 24, white, .center),
+            ])
+
+        case .leatherStitch:
+            let thread: UInt32 = 0xD9A44A, pressed: UInt32 = 0xF1E6D6, tan: UInt32 = 0xC9B39A
+            if wide {
+                return (.texture(.leather, 0x2E1E16), [
+                    art(.sticker(.stitching), 0.5, 0.5, 1, 1, thread),
+                    art(.symbol(bind.symbol), 0.14, 0.5, 0.13, 0.34, thread),
+                    text(label, 0.58, 0.27, 0.64, 0.14, .rounded, .bold, 14, thread, .leading),
+                    data(bind.primary, 0.58, 0.52, 0.64, 0.32, .serif, .bold, 36, pressed, .leading, shadow: true),
+                    data(second, 0.58, 0.77, 0.64, 0.14, .rounded, .semibold, 15, tan, .leading),
+                ])
+            }
+            return (.texture(.leather, 0x2E1E16), [
+                art(.sticker(.stitching), 0.5, 0.5, 1, 1, thread),
+                art(.symbol(bind.symbol), 0.5, 0.27, 0.17, 0.17, thread),
+                data(bind.primary, 0.5, 0.58, 0.8, 0.32, .serif, .bold, 30, pressed, .center, shadow: true),
+            ])
+
+        case .digitalCockpit:
+            let cyan: UInt32 = 0x22D3EE, steel: UInt32 = 0x9FB3C8
+            if wide {
+                return (.gradient(0x0A1422, 0x02050A), [
+                    art(.sticker(.signFrame), 0.5, 0.5, 1, 1, cyan, opacity: 0.3),
+                    text(label, 0.3, 0.18, 0.5, 0.12, .rajdhani, .bold, 15, cyan, .leading),
+                    data(bind.primary, 0.3, 0.48, 0.5, 0.34, .rajdhani, .bold, 40, white, .leading),
+                    art(.progressBar(bind.primary), 0.3, 0.8, 0.5, 0.1, cyan, glow: true, segments: 14),
+                    data(second, 0.8, 0.36, 0.32, 0.18, .rajdhani, .semibold, 17, steel, .center),
+                    art(.symbol(bind.symbol), 0.69, 0.7, 0.06, 0.15, cyan, glow: true),
+                    art(.symbol("gauge.with.dots.needle.33percent"), 0.8, 0.7, 0.06, 0.15, steel),
+                    art(.symbol("checkmark.circle.fill"), 0.91, 0.7, 0.06, 0.15, 0x34D399),
+                ])
+            }
+            return (.gradient(0x0A1422, 0x02050A), [
+                art(.sticker(.signFrame), 0.5, 0.5, 1, 1, cyan, opacity: 0.3),
+                text(label, 0.5, 0.18, 0.8, 0.12, .rajdhani, .bold, 15, cyan, .leading),
+                data(bind.primary, 0.5, 0.47, 0.82, 0.32, .rajdhani, .bold, 32, white, .leading),
+                art(.progressBar(bind.primary), 0.5, 0.78, 0.8, 0.1, cyan, glow: true, segments: 10),
+            ])
+
+        case .headUpDisplay:
+            let hud: UInt32 = 0x4ADE80, pale: UInt32 = 0xBBF7D0
+            if wide {
+                return (.gradient(0x1B2A3A, 0x03060A), [
+                    art(.sticker(.hudLines), 0.5, 0.5, 1, 1, hud, opacity: 0.7),
+                    data(bind.primary, 0.27, 0.27, 0.46, 0.32, .rajdhani, .bold, 36, hud, .center, glow: true),
+                    text(label, 0.75, 0.18, 0.42, 0.13, .rajdhani, .bold, 15, hud, .center, glow: true),
+                    data(second, 0.75, 0.32, 0.42, 0.14, .rajdhani, .semibold, 15, pale, .center),
+                ])
+            }
+            return (.gradient(0x1B2A3A, 0x03060A), [
+                art(.sticker(.hudLines), 0.5, 0.5, 1, 1, hud, opacity: 0.7),
+                text(label, 0.5, 0.12, 0.8, 0.12, .rajdhani, .bold, 14, hud, .center, opacity: 0.85),
+                data(bind.primary, 0.5, 0.29, 0.9, 0.26, .rajdhani, .bold, 30, hud, .center, glow: true),
+            ])
+
+        case .frostedGlass:
+            if wide {
+                return (.frosted(0x8B5CF6, 0x06B6D4), [
+                    art(.sticker(.glassPanel), 0.32, 0.5, 0.58, 0.84, white),
+                    art(.symbol(bind.symbol), 0.11, 0.25, 0.07, 0.17, white),
+                    data(bind.primary, 0.32, 0.53, 0.5, 0.32, .rounded, .heavy, 36, white, .leading),
+                    text(bind.label, 0.32, 0.78, 0.5, 0.12, .rounded, .semibold, 14, white, .leading, opacity: 0.85),
+                    art(.sticker(.glassPanel), 0.81, 0.5, 0.32, 0.84, white),
+                    data(second, 0.81, 0.5, 0.26, 0.5, .rounded, .bold, 17, white, .center),
+                ])
+            }
+            return (.frosted(0x8B5CF6, 0x06B6D4), [
+                art(.sticker(.glassPanel), 0.5, 0.5, 0.86, 0.86, white),
+                art(.symbol(bind.symbol), 0.25, 0.25, 0.15, 0.15, white),
+                data(bind.primary, 0.5, 0.55, 0.72, 0.3, .rounded, .heavy, 30, white, .leading),
+                text(bind.label, 0.5, 0.78, 0.72, 0.12, .rounded, .semibold, 14, white, .leading, opacity: 0.85),
+            ])
+
+        case .liveSky:
+            if wide {
+                return (.sky, [
+                    data(second, 0.3, 0.27, 0.52, 0.14, .rounded, .semibold, 15, white, .leading, shadow: true),
+                    data(bind.primary, 0.3, 0.52, 0.52, 0.34, .rounded, .heavy, 40, white, .leading, shadow: true),
+                    text(label, 0.3, 0.76, 0.52, 0.12, .rounded, .bold, 14, white, .leading, shadow: true),
+                ])
+            }
+            return (.sky, [
+                art(.symbol(bind.symbol), 0.17, 0.17, 0.14, 0.14, white),
+                data(bind.primary, 0.5, 0.6, 0.88, 0.3, .rounded, .heavy, 32, white, .center, shadow: true),
+                text(label, 0.5, 0.8, 0.88, 0.12, .rounded, .bold, 14, white, .center, shadow: true),
+            ])
+
+        case .boardingPass:
+            let paper: UInt32 = 0xF8F4EA, ink: UInt32 = 0x0F172A, muted: UInt32 = 0x55657D, blue: UInt32 = 0x1F4FD8
+            if wide {
+                return (.solid(paper), [
+                    art(.sticker(.ticket), 0.5, 0.5, 1, 1, 0x000000),
+                    text("BOARDING PASS", 0.24, 0.14, 0.42, 0.11, .rounded, .heavy, 14, blue, .leading),
+                    text("FROM", 0.14, 0.34, 0.22, 0.1, .rounded, .bold, 14, muted, .leading),
+                    text("HOME", 0.15, 0.53, 0.24, 0.22, .system, .heavy, 30, ink, .leading),
+                    art(.symbol("car.side.fill"), 0.335, 0.53, 0.07, 0.15, blue),
+                    text("TO", 0.48, 0.34, 0.2, 0.1, .rounded, .bold, 14, muted, .leading),
+                    text("WORK", 0.49, 0.53, 0.24, 0.22, .system, .heavy, 30, ink, .leading),
+                    text(label, 0.33, 0.8, 0.6, 0.12, .rounded, .bold, 14, muted, .leading),
+                    text("DEPARTS", 0.85, 0.2, 0.24, 0.1, .rounded, .bold, 14, muted, .center),
+                    data(bind.primary, 0.85, 0.44, 0.26, 0.24, .rajdhani, .bold, 24, ink, .center),
+                ])
+            }
+            return (.solid(paper), [
+                art(.sticker(.ticket), 0.5, 0.5, 1, 1, 0x000000),
+                text("DEPARTS", 0.6, 0.18, 0.7, 0.11, .rounded, .bold, 14, muted, .center),
+                data(bind.primary, 0.6, 0.42, 0.72, 0.26, .rajdhani, .bold, 28, ink, .center),
+                text("HOME → WORK", 0.6, 0.63, 0.74, 0.12, .rounded, .heavy, 14, blue, .center),
+            ])
+
+        default:
+            return (.solid(0x000000), [])
+        }
     }
 
     /// Each source's own colour for Bold Tile (it turns amber or red when the value needs attention).

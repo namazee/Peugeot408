@@ -2,7 +2,16 @@
 
 Fresh session? Read `docs/SPEC.md`, then this file, then continue from **Current phase**.
 
-## Current phase: 15 (App Store release as DashCraft) — built, waiting for your manual store steps (SETUP.md §15). Phase 8 split cards still waiting for your car test.
+## Current phase: 16 (Realistic templates) — built, waiting for you to try the new templates. Phase 15 store steps (SETUP.md §15) and the Phase 8 car test are still yours.
+
+## Phase 16 — Realistic templates
+### Done
+- **10 realistic templates** in a new **Realistic** section at the top of the template gallery, each with its own Small and Medium layout and bindable to any data source: Chrome Dial (Medium: two dials around a digital readout), Fuel Gauge, Odometer, Highway Sign, Leather Stitch, Digital Cockpit, Head-Up Display, Frosted Glass, Live Sky and Boarding Pass (Small: the stub only).
+- **New design pieces** (all in the builder too): a Dial layer (Instrument or Fuel E–F, with ticks, numbers and a needle at the value's progress), an Odometer layer (rolling-counter wheels), segments on the progress bar, a Leather texture, Frosted and Live Sky backgrounds, and stickers: Stitching, Sign frame, Road arrow, HUD horizon, Ticket and Glass panel. All drawn in code (`RealisticArt.swift`). Older design files still load.
+- **Live Sky** shows dawn, day, dusk or night from today's Syuruk and Maghrib (7:15 am / 7:20 pm without prayer times), with the sun moving along its arc; the widget timeline has entries at each change and every hour while the sun is up.
+- `RealisticTemplateTests` (both sizes: no linter warnings, JSON round trip, render; sky phases and timeline). README snapshots add `templates-realistic-both.png`.
+### Not verified yet
+- How the templates look on the head unit; check the `readme-snapshots` artifact and the gallery.
 
 ## Phase 15 — App Store release as DashCraft
 ### Done

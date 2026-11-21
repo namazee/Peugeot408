@@ -21,7 +21,7 @@ The files are renamed only (no glyph or table changes), so they are not "Modifie
 
 ## Studio artwork (Phase 5)
 
-All seasonal artwork and stickers are original: drawn in code with SwiftUI shapes and SF Symbols (`CarKit/Studio/Artwork.swift`). No Peugeot logos or lion emblem, nothing copied from other apps.
+All seasonal artwork and stickers are original: drawn in code with SwiftUI shapes and SF Symbols (`CarKit/Studio/Artwork.swift`, and `CarKit/Studio/RealisticArt.swift` for the realistic templates' dials, odometer, sky, glass, leather, sign, HUD and ticket art). No Peugeot logos or lion emblem, nothing copied from other apps.
 
 ## Connect sounds (Phase 6, packs in Phase 12)
 

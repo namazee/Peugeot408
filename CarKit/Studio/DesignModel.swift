@@ -203,6 +203,13 @@ public enum ArtworkKind: String, Codable, Sendable, CaseIterable {
     case sun
     case road
     case starfield
+    // Realistic templates (Phase 16).
+    case stitching
+    case signFrame
+    case roadArrow
+    case hudLines
+    case ticket
+    case glassPanel
 
     public var displayName: String {
         switch self {
@@ -222,11 +229,18 @@ public enum ArtworkKind: String, Codable, Sendable, CaseIterable {
         case .sun: "Setting sun"
         case .road: "Open road"
         case .starfield: "Starfield"
+        case .stitching: "Stitching"
+        case .signFrame: "Sign frame"
+        case .roadArrow: "Road arrow"
+        case .hudLines: "HUD horizon"
+        case .ticket: "Ticket"
+        case .glassPanel: "Glass panel"
         }
     }
 
     /// Shown in the sticker picker (the rest are used by seasonal packs and templates).
-    public static let stickers: [ArtworkKind] = [.ketupat, .crescent, .lantern, .diya, .tree, .fireworks, .heart, .star, .flag, .speedLines, .sun, .road, .starfield]
+    public static let stickers: [ArtworkKind] = [.ketupat, .crescent, .lantern, .diya, .tree, .fireworks, .heart, .star, .flag, .speedLines, .sun, .road, .starfield,
+                                                   .stitching, .signFrame, .roadArrow, .hudLines, .ticket, .glassPanel]
 }
 
 /// What a layer draws.
@@ -249,6 +263,25 @@ public enum LayerContent: Codable, Sendable, Equatable, Hashable {
     /// Seasonal-pack artwork rendered in Remotion (`Resources/Seasonal/seasonal-<occasion>.png`),
     /// with the drawn `ArtworkKind` as a fallback.
     case seasonalArt(SeasonalOccasion)
+    /// A realistic dial with ticks, numbers and a needle at a field's progress; `nil` parks the needle at 60%.
+    case dial(DataField?, DialStyle)
+    /// A field's value on rolling-counter wheels.
+    case odometer(DataField)
+}
+
+/// Dial layer styles (Phase 16).
+public enum DialStyle: String, Codable, Sendable, CaseIterable {
+    /// Instrument dial: 270° sweep, numbered 0–8, red zone at the top end.
+    case instrument
+    /// Fuel gauge: half dial marked E, ½ and F with a pump icon.
+    case fuel
+
+    public var displayName: String {
+        switch self {
+        case .instrument: "Instrument"
+        case .fuel: "Fuel (E–F)"
+        }
+    }
 }
 
 /// One layer. Position and size are fractions of the canvas (0…1), so a design scales to any widget.
@@ -274,6 +307,8 @@ public struct DesignLayer: Codable, Sendable, Equatable, Hashable, Identifiable 
     public var caption: String?
     /// Neon glow around the layer (nil in older files = off).
     public var glow: Bool?
+    /// Progress bars: split into this many segments (nil or < 2 = one smooth bar).
+    public var segments: Int?
 
     public init(
         id: UUID = UUID(),
@@ -282,7 +317,7 @@ public struct DesignLayer: Codable, Sendable, Equatable, Hashable, Identifiable 
         rotation: Double = 0, opacity: Double = 1,
         font: DesignFont = .rounded, weight: DesignWeight = .bold, fontSize: Double = 28,
         colorHex: UInt32 = 0xFFFFFF, alignment: DesignAlignment = .leading,
-        shadow: Bool = false, locked: Bool = false, caption: String? = nil, glow: Bool? = nil
+        shadow: Bool = false, locked: Bool = false, caption: String? = nil, glow: Bool? = nil, segments: Int? = nil
     ) {
         self.id = id
         self.content = content
@@ -301,12 +336,14 @@ public struct DesignLayer: Codable, Sendable, Equatable, Hashable, Identifiable 
         self.locked = locked
         self.caption = caption
         self.glow = glow
+        self.segments = segments
     }
 
     public var dataField: DataField? {
         switch content {
         case .data(let field): field
-        case .gauge(let field), .ring(let field), .progressBar(let field): field
+        case .gauge(let field), .ring(let field), .progressBar(let field), .dial(let field, _): field
+        case .odometer(let field): field
         default: nil
         }
     }
@@ -323,6 +360,7 @@ public enum DesignTexture: String, Codable, Sendable, CaseIterable {
     case carbon
     case brushed
     case dots
+    case leather
 
     public var displayName: String { rawValue.capitalized }
 }
@@ -340,6 +378,11 @@ public enum DesignBackground: Codable, Sendable, Equatable, Hashable {
     /// A solid colour that follows the state of the design's first data field
     /// (amber when due soon, red when overdue, the AQI band colour for haze); `base` otherwise.
     case stateColor(UInt32)
+    /// Soft, blurred colour blobs on a dark base (put a glass-panel sticker on top).
+    case frosted(UInt32, UInt32)
+    /// A sky that follows the time of day (dawn, day, dusk, night), with sunrise and sunset from
+    /// today's Syuruk and Maghrib.
+    case sky
 
     /// Approximate colour behind the text, for the contrast check (nil for photos: unknown).
     public var approximateHex: UInt32? {
@@ -351,6 +394,8 @@ public enum DesignBackground: Codable, Sendable, Equatable, Hashable {
         case .aurora(let a, let b, let c): ColorMath.mix(ColorMath.mix(a, c), b)
         case .spotlight(let centre, let edge): ColorMath.mix(centre, edge)
         case .stateColor(let hex): hex
+        case .frosted(let a, let b): ColorMath.mix(ColorMath.mix(a, b), 0x0B1020)
+        case .sky: nil
         }
     }
 }
