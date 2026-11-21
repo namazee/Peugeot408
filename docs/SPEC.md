@@ -208,6 +208,24 @@ Goal: I set things up once in the app, and my car's CarPlay screen reflects it a
    * calendar fields (weekday, day of month, month, year progress);
    * new original stickers (sun, road, starfield).
   All of these are optional fields, so saved designs still load. The gallery groups templates (Data, Car, Clock & Date, Special) so the new ones are easy to find, and every new template is also available in the builder.
+* Realistic templates (Phase 16), added to the ones above. Each has its own Small and Medium layout (not the small one stretched), shows my real data in the gallery preview, and can be bound to any data source like the others:
+   * **Chrome Dial:** a realistic instrument dial: black face, numbered tick marks, a red needle pointing at the value's progress, a chrome bezel and the value in the centre. Medium: two dials (the main and second values) either side of a digital readout, like an instrument cluster.
+   * **Fuel Gauge:** a half dial marked E, ½ and F with a fuel-pump icon and a needle at the value's progress, with the value under it. Medium: the gauge on the left, the value, label and second value on the right.
+   * **Odometer:** the value on rolling-counter wheels (white digits in dark boxes, the last box red) on brushed metal, with the label engraved above. Medium adds the second value as a smaller counter.
+   * **Highway Sign:** a green road-direction sign with a white border, an arrow, and the label and value in white sign lettering (e.g. "SERVICE  1,240 km", "HOME  24 min"). Medium: two lines (main and second value), like a two-destination sign. Generic, not copied from any real sign.
+   * **Leather Stitch:** dark leather grain with a stitched border and the value in pressed lettering. Medium adds the label and second value.
+   * **Digital Cockpit:** a dark glass display with thin cyan lines, the label top-left, a big value in Rajdhani and a segmented bar that fills with the value's progress. Medium adds the second value and a row of small status icons.
+   * **Head-Up Display:** a dark windscreen gradient with a faint horizon and lane lines in perspective, and the value in glowing green HUD lettering. Medium puts the value left and the label and second value right.
+   * **Frosted Glass:** soft, blurred colour blobs behind a frosted glass panel with the icon, a big value and the label. Medium adds the second value on its own glass panel.
+   * **Live Sky:** a sky that follows the time of day (dawn, day, dusk, night, with sun or moon and stars), using today's Syuruk and Maghrib prayer times for sunrise and sunset (fixed 7:15 am and 7:20 pm when there are no prayer times), behind the value. It changes on its own through the day.
+   * **Boarding Pass:** a ticket with notches and a perforated line: "FROM" and "TO" in big letters (Home and Work by default, editable), the value as the "departs" time on the stub. Medium is the full ticket; Small shows the stub only.
+  To draw these, the design model gains (all optional or new cases, so saved designs still load, and every new piece is also available in the builder):
+   * a dial layer with two styles (instrument and fuel), drawing its own ticks, numbers and needle;
+   * an odometer layer that draws the value's characters on counter wheels;
+   * a segment count on the progress bar layer;
+   * a leather texture, a frosted-glass background and a live sky background;
+   * new original stickers: stitching, sign frame, road arrow, HUD horizon lines, ticket notches and perforation.
+  The gallery shows these first, in a new **Realistic** section, marked "New". Every realistic template gets a render test from JSON in both sizes.
 * Seasonal packs for Malaysia that the app can switch to automatically on the right dates: Hari Raya Aidilfitri, Ramadan (with an iftar countdown using the prayer module's Maghrib time), Aidiladha, Merdeka/Malaysia Day, Chinese New Year, Deepavali, Christmas, New Year. All original artwork, drawn in SwiftUI shapes/SF Symbols or as bundled assets generated in Remotion; nothing copied from other apps.
 
 ### Custom builder
@@ -294,6 +312,7 @@ Widgets themselves are static SwiftUI, so use Remotion only for the animated ass
 13. Synced lyrics (§4 item 13): the Lyrics widget, card and Live Activity from the Apple Music system player and LRCLIB.
 14. Panorama hero (§3): one wide design across Slots 1–3, the Hero template, and the greeting and weather-place fields.
 15. App Store release (§10): the DashCraft name in all user-visible text and the "DASHCRAFT" icon wordmark, the `store` build flavour without lyrics, Sample data mode, privacy manifests, the support and privacy pages, store metadata and screenshots, and the `store_metadata` lane. Stop before anything public: I turn on Pages and submit for review myself.
+16. Realistic templates (§4b Templates): the 10 realistic templates in Small and Medium, the new dial, odometer, segmented bar, leather, frosted-glass and live-sky pieces, the Realistic gallery section, and render tests.
 
 ## 9. Quality bar
 
