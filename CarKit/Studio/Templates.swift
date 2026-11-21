@@ -467,8 +467,8 @@ public enum Templates {
             }
             return (.texture(.brushed, 0x14161B), [
                 art(.dial(bind.primary, .instrument), 0.5, 0.5, 0.96, 0.96, needle),
-                text(label, 0.5, 0.35, 0.4, 0.1, .rajdhani, .bold, 14, grey, .center),
-                data(bind.primary, 0.5, 0.75, 0.52, 0.15, .rajdhani, .bold, 18, white, .center),
+                text(label, 0.5, 0.64, 0.3, 0.09, .rajdhani, .bold, 14, grey, .center),
+                data(bind.primary, 0.5, 0.82, 0.34, 0.13, .rajdhani, .bold, 16, white, .center),
             ])
 
         case .fuelGauge:
@@ -476,9 +476,9 @@ public enum Templates {
             if wide {
                 return (.spotlight(0x1C2230, 0x07090D), [
                     art(.dial(bind.primary, .fuel), 0.25, 0.52, 0.46, 0.92, needle),
-                    text(label, 0.72, 0.26, 0.5, 0.13, .rounded, .bold, 14, grey, .leading),
-                    data(bind.primary, 0.72, 0.5, 0.5, 0.3, .rajdhani, .bold, 34, white, .leading),
-                    data(second, 0.72, 0.76, 0.5, 0.14, .rounded, .semibold, 15, warm, .leading),
+                    text(label, 0.76, 0.26, 0.44, 0.13, .rounded, .bold, 14, grey, .leading),
+                    data(bind.primary, 0.76, 0.5, 0.44, 0.3, .rajdhani, .bold, 34, white, .leading),
+                    data(second, 0.76, 0.76, 0.44, 0.14, .rounded, .semibold, 15, warm, .leading),
                 ])
             }
             return (.spotlight(0x1C2230, 0x07090D), [
@@ -601,7 +601,6 @@ public enum Templates {
                 ])
             }
             return (.sky, [
-                art(.symbol(bind.symbol), 0.17, 0.17, 0.14, 0.14, white),
                 data(bind.primary, 0.5, 0.6, 0.88, 0.3, .rounded, .heavy, 32, white, .center, shadow: true),
                 text(label, 0.5, 0.8, 0.88, 0.12, .rounded, .bold, 14, white, .center, shadow: true),
             ])
@@ -614,7 +613,7 @@ public enum Templates {
                     text("BOARDING PASS", 0.24, 0.14, 0.42, 0.11, .rounded, .heavy, 14, blue, .leading),
                     text("FROM", 0.14, 0.34, 0.22, 0.1, .rounded, .bold, 14, muted, .leading),
                     text("HOME", 0.15, 0.53, 0.24, 0.22, .system, .heavy, 30, ink, .leading),
-                    art(.symbol("car.side.fill"), 0.335, 0.53, 0.07, 0.15, blue),
+                    art(.symbol("car.side.fill"), 0.325, 0.53, 0.05, 0.12, blue),
                     text("TO", 0.48, 0.34, 0.2, 0.1, .rounded, .bold, 14, muted, .leading),
                     text("WORK", 0.49, 0.53, 0.24, 0.22, .system, .heavy, 30, ink, .leading),
                     text(label, 0.33, 0.8, 0.6, 0.12, .rounded, .bold, 14, muted, .leading),

@@ -252,8 +252,8 @@ struct SkyBackground: View {
                         .frame(width: h * 0.8, height: h * 0.8)
                         .position(x: x, y: y)
                     Circle().fill(Color(hex: 0xFFFBEA)).frame(width: h * 0.18, height: h * 0.18).position(x: x, y: y)
-                    Cloud().frame(width: h * 0.62, height: h * 0.22).position(x: w * (progress < 0.5 ? 0.74 : 0.26), y: h * 0.3)
-                    Cloud().frame(width: h * 0.42, height: h * 0.15).opacity(0.8).position(x: w * (progress < 0.5 ? 0.5 : 0.56), y: h * 0.16)
+                    Cloud().frame(width: h * 0.5, height: h * 0.17).position(x: w * (progress < 0.5 ? 0.76 : 0.24), y: h * 0.12)
+                    Cloud().frame(width: h * 0.32, height: h * 0.11).opacity(0.75).position(x: w * 0.52, y: h * 0.08)
                 }
                 Hills(dark: phase != .day)
             }
@@ -406,7 +406,7 @@ struct HUDLines: View {
             line.move(to: CGPoint(x: w * 0.6, y: horizon))
             line.addLine(to: CGPoint(x: w * 0.96, y: horizon))
             context.stroke(line, with: .color(color.opacity(0.55)), lineWidth: 1)
-            for dy in [-0.12, 0.12] {
+            for dy in [0.1, 0.2] {
                 var ladder = Path()
                 ladder.move(to: CGPoint(x: w * 0.42, y: horizon + h * dy))
                 ladder.addLine(to: CGPoint(x: w * 0.47, y: horizon + h * dy))
