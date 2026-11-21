@@ -224,7 +224,7 @@ Goal: I set things up once in the app, and my car's CarPlay screen reflects it a
    * an odometer layer that draws the value's characters on counter wheels;
    * a segment count on the progress bar layer;
    * a leather texture, a frosted-glass background and a live sky background;
-   * new original stickers: stitching, sign frame, road arrow, HUD horizon lines, ticket notches and perforation.
+   * new original stickers: stitching, sign frame, road arrow, HUD horizon lines, ticket (with notches and perforation) and a frosted glass panel (the frosted-glass background draws only the blurred colour blobs, so a design can have one or two panels).
   The gallery shows these first, in a new **Realistic** section, marked "New". Every realistic template gets a render test from JSON in both sizes.
 * Seasonal packs for Malaysia that the app can switch to automatically on the right dates: Hari Raya Aidilfitri, Ramadan (with an iftar countdown using the prayer module's Maghrib time), Aidiladha, Merdeka/Malaysia Day, Chinese New Year, Deepavali, Christmas, New Year. All original artwork, drawn in SwiftUI shapes/SF Symbols or as bundled assets generated in Remotion; nothing copied from other apps.
 
