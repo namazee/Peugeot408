@@ -11,11 +11,38 @@ final class ConnectSoundPlayer: NSObject, AVAudioPlayerDelegate, AVSpeechSynthes
 
     enum PlayError: Error, LocalizedError {
         case missingFile(String)
+        case audioRefused(Int)
 
         var errorDescription: String? {
             switch self {
             case .missingFile(let name): "The sound \"\(name)\" is missing."
+            case .audioRefused(let code): "iOS didn't let DashCraft start the sound (audio error \(code))."
             }
+        }
+    }
+
+    /// Spec §4b: the shortcut runs DashCraft in the background, where iOS only starts audio that
+    /// mixes with others. Duck + mix; retry for up to 3 s (the car may be switching audio), then
+    /// once more without ducking. A final failure reports iOS's error code.
+    private func activate(_ session: AVAudioSession, mode: AVAudioSession.Mode) async throws {
+        let ducking: AVAudioSession.CategoryOptions = [.mixWithOthers, .duckOthers]
+        var lastError: Error?
+        let deadline = Date.now.addingTimeInterval(3)
+        repeat {
+            do {
+                try session.setCategory(.playback, mode: mode, options: ducking)
+                try session.setActive(true)
+                return
+            } catch {
+                lastError = error
+                try? await Task.sleep(for: .milliseconds(500))
+            }
+        } while Date.now < deadline
+        do {
+            try session.setCategory(.playback, mode: .default, options: [.mixWithOthers])
+            try session.setActive(true)
+        } catch {
+            throw PlayError.audioRefused((error as NSError).code != 0 ? (error as NSError).code : ((lastError as NSError?)?.code ?? 0))
         }
     }
 
@@ -41,8 +68,7 @@ final class ConnectSoundPlayer: NSObject, AVAudioPlayerDelegate, AVSpeechSynthes
         if waitForCar { await waitForCarAudio(session) }
 
         let spoken = settings.spokenText(chosen)
-        try session.setCategory(.playback, mode: spoken != nil ? .voicePrompt : .default, options: [.duckOthers])
-        try session.setActive(true)
+        try await activate(session, mode: spoken != nil ? .voicePrompt : .default)
         defer { try? session.setActive(false, options: .notifyOthersOnDeactivation) }
 
         switch chosen {

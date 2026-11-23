@@ -4,6 +4,12 @@ Fresh session? Read `docs/SPEC.md`, then this file, then continue from **Current
 
 ## Current phase: 18 (Another round of templates) — built, waiting for you to try the new templates. Phase 15 store steps (SETUP.md §15) and the Phase 8 car test are still yours.
 
+## Fix — connect sound "Session activation failed"
+### Done
+- The CarPlay automation's Play Connect Sound failed every time with "Session activation failed": the shortcut runs DashCraft in the background, and iOS refused to start audio that only ducked others. The audio session now ducks and mixes with others, retries for up to 3 s, then tries once without ducking; a final failure names iOS's audio error code. Same for the disconnect sound.
+### Not verified yet
+- In the car (needs a new TestFlight build).
+
 ## Store listing language
 ### Done
 - App Store Connect: the app record is renamed **DashCraft**, subtitle "Car widgets & dashboard" (done in the browser).
