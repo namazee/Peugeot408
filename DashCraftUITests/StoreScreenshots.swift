@@ -11,7 +11,10 @@ final class StoreScreenshots: XCTestCase {
     @MainActor
     func testStoreScreenshots() {
         shoot("1-slots", ["-screenshotTab", "slots", "-screenshotLook", "bold", "-screenshotPanorama", "off"])
-        shoot("2-neon", ["-screenshotTab", "slots", "-screenshotLook", "neon", "-screenshotPanorama", "off"])
+        // Bold vs Neon side by side on the same cards (spec §10).
+        shoot("2-neon", ["-screenshotTab", "settings", "-screenshotLook", "neon"]) { app in
+            self.open("Appearance", in: app)
+        }
         shoot("3-panorama", ["-screenshotTab", "slots", "-screenshotLook", "bold", "-screenshotPanorama", "on"])
         shoot("4-templates", ["-screenshotTab", "studio", "-screenshotLook", "bold", "-screenshotPanorama", "off"]) { app in
             self.open("Template gallery", in: app)
@@ -45,6 +48,8 @@ final class StoreScreenshots: XCTestCase {
     private func shoot(_ name: String, _ arguments: [String], then: ((XCUIApplication) -> Void)? = nil) {
         let app = XCUIApplication()
         app.launchArguments = ["-screenshots", "-hasCompletedOnboarding", "YES"] + arguments
+        // Malaysia time, so the clocks and the time-of-day greeting agree (CI runs on UTC).
+        app.launchEnvironment["TZ"] = "Asia/Kuala_Lumpur"
         app.launch()
         XCTAssertTrue(app.tabBars.firstMatch.waitForExistence(timeout: 20) || app.buttons.firstMatch.waitForExistence(timeout: 5))
         then?(app)
