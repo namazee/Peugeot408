@@ -7,6 +7,7 @@ Fresh session? Read `docs/SPEC.md`, then this file, then continue from **Current
 ## Store listing language
 ### Done
 - App Store Connect: the app record is renamed **DashCraft**, subtitle "Car widgets & dashboard" (done in the browser).
+- Store screenshots run in Malaysia time, so the Panorama shot no longer says "Good evening" beside a 4 AM clock, and shot 2 now shows Settings → Appearance with Bold and Neon side by side, as the spec asks, instead of a second Slots screen.
 - The English store text moved from `fastlane/metadata/en-US` to `en-GB`, and the framed screenshots render into `en-GB`, to match the record's primary language, English (U.K.). Otherwise the upload would have added a separate US listing and left the UK one empty.
 
 ## Fix — Panorama hero blank in the car
