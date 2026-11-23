@@ -6,6 +6,7 @@
     "studio": "remotion studio",
     "icon": "node scripts/render-icon.mjs",
     "store": "node scripts/render-store.mjs",
+    "header": "remotion still StoreHeader out/store-header.png --image-format=png",
     "check-icon": "node scripts/check-icon-alpha.mjs out/AppIcon-1024.png",
     "typecheck": "tsc --noEmit",
     "videos": "node scripts/render-videos.mjs"

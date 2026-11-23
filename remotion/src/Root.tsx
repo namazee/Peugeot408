@@ -8,6 +8,7 @@ import {AppPreview, PREVIEW_FPS, PREVIEW_FRAMES} from './preview/AppPreview';
 import {FLASH_FRAMES, ONBOARDING_FPS, OnboardingFlash, OnboardingSetup, OnboardingWelcome, SETUP_FRAMES, WELCOME_FRAMES} from './onboarding/Onboarding';
 import {SeasonalArt, type SeasonalArtProps} from './seasonal/SeasonalArt';
 import {STORE_HEIGHT, STORE_WIDTH, StoreScreenshot, type StoreScreenshotProps} from './store/StoreScreenshot';
+import {HEADER_HEIGHT, HEADER_WIDTH, StoreHeader} from './store/StoreHeader';
 
 export const RemotionRoot: React.FC = () => (
 	<>
@@ -33,6 +34,7 @@ export const RemotionRoot: React.FC = () => (
 			height={STORE_HEIGHT}
 			defaultProps={{file: '1-slots.png', headline: 'Your car screen, your way', subline: 'Five slots you design on your iPhone'} satisfies StoreScreenshotProps}
 		/>
+		<Still id="StoreHeader" component={StoreHeader} width={HEADER_WIDTH} height={HEADER_HEIGHT} />
 		<Still id="SeasonalArt" component={SeasonalArt} width={600} height={600} defaultProps={{occasion: 'hariRaya'} satisfies SeasonalArtProps} />
 		<Composition id="AppPreview" component={AppPreview} fps={PREVIEW_FPS} durationInFrames={PREVIEW_FRAMES} width={886} height={1920} />
 		<Composition id="WidgetShowcase" component={WidgetShowcase} fps={SHOWCASE_FPS} durationInFrames={SHOWCASE_FRAMES} width={1920} height={720} />
