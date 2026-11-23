@@ -4,6 +4,11 @@ Fresh session? Read `docs/SPEC.md`, then this file, then continue from **Current
 
 ## Current phase: 18 (Another round of templates) — built, waiting for you to try the new templates. Phase 15 store steps (SETUP.md §15) and the Phase 8 car test are still yours.
 
+## Store listing language
+### Done
+- App Store Connect: the app record is renamed **DashCraft**, subtitle "Car widgets & dashboard" (done in the browser).
+- The English store text moved from `fastlane/metadata/en-US` to `en-GB`, and the framed screenshots render into `en-GB`, to match the record's primary language, English (U.K.). Otherwise the upload would have added a separate US listing and left the UK one empty.
+
 ## Fix — Panorama hero blank in the car
 ### Done
 - Slots 1–3 now draw their part of the Hero as the widget's content on black, instead of only as the widget background, which CarPlay can drop (it showed blank on the head unit).

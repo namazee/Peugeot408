@@ -13,27 +13,27 @@ const out = join(root, 'out', 'store');
 
 const shots = {
 	'1-slots': {
-		'en-US': ['Your car screen, your way', 'Five slots you design on your iPhone'],
+		'en-GB': ['Your car screen, your way', 'Five slots you design on your iPhone'],
 		ms: ['Skrin kereta, cara anda', 'Lima slot yang anda reka di iPhone'],
 	},
 	'2-neon': {
-		'en-US': ['Bold or Neon', 'Two looks for every card, any colour'],
+		'en-GB': ['Bold or Neon', 'Two looks for every card, any colour'],
 		ms: ['Bold atau Neon', 'Dua gaya untuk setiap kad, apa-apa warna'],
 	},
 	'3-panorama': {
-		'en-US': ['One picture, three columns', 'Your car, a greeting and the clock'],
+		'en-GB': ['One picture, three columns', 'Your car, a greeting and the clock'],
 		ms: ['Satu gambar, tiga lajur', 'Kereta anda, ucapan dan jam'],
 	},
 	'4-templates': {
-		'en-US': ['Ready-made templates', 'Or build your own from scratch'],
+		'en-GB': ['Ready-made templates', 'Or build your own from scratch'],
 		ms: ['Templat siap sedia', 'Atau bina sendiri dari awal'],
 	},
 	'5-car': {
-		'en-US': ['Never miss a service', 'Service, fuel, road tax and more'],
+		'en-GB': ['Never miss a service', 'Service, fuel, road tax and more'],
 		ms: ['Jangan terlepas servis', 'Servis, minyak, cukai jalan dan lagi'],
 	},
 	'6-sounds': {
-		'en-US': ['Start with a roar', 'Engine and EV sounds when CarPlay connects'],
+		'en-GB': ['Start with a roar', 'Engine and EV sounds when CarPlay connects'],
 		ms: ['Mula dengan deruman', 'Bunyi enjin dan EV bila CarPlay disambung'],
 	},
 };
