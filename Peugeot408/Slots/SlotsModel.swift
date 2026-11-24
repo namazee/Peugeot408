@@ -61,6 +61,19 @@ final class SlotsModel {
         commit(next, reloadingSlots: Array(1...PanoramaGeometry.columns))
     }
 
+    /// Spec §4b (Phase 19): fills all five slots with a ready-made setup; "Undo setup" brings them back.
+    func apply(_ setup: ReadySetup, designs: [CardDesign]) {
+        var next = state
+        next.apply(setup, designs: designs)
+        commit(next, reloading: SlotsState.slotNumbers)
+    }
+
+    func undoSetup() {
+        var next = state
+        guard next.undoLastSetup() else { return }
+        commit(next, reloading: SlotsState.slotNumbers)
+    }
+
     func reloadAllWidgets() {
         WidgetCenter.shared.reloadAllTimelines()
     }

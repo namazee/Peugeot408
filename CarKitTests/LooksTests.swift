@@ -80,7 +80,7 @@ struct LooksTests {
             }
         }
         #expect(TemplateGroup.allCases.flatMap(\.styles).count == TemplateStyle.allCases.count)
-        #expect(TemplateStyle.allCases.filter(\.isNew).count == 57)
+        #expect(TemplateStyle.allCases.filter(\.isNew).count == 71)
     }
 
     @Test func calendarFields() {

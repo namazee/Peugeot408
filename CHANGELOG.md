@@ -2,7 +2,18 @@
 
 Fresh session? Read `docs/SPEC.md`, then this file, then continue from **Current phase**.
 
-## Current phase: 18 (Another round of templates) — built, waiting for you to try the new templates. Phase 15 store steps (SETUP.md §15) and the Phase 8 car test are still yours.
+## Current phase: 19 (One-tap templates) — built, waiting for you to try it. Phase 18's templates, the Phase 15 store steps (SETUP.md §15) and the Phase 8 car test are still yours.
+
+## Phase 19 — One-tap templates
+### Done
+- **One-tap use:** tapping a template in Studio → Template gallery now asks what to do: **Use on Slot 1–5** (saves it as a design with the chosen data and size and puts it on that slot; a Split or Quad slot's button says it replaces its cards) or **Customise** (the builder, as before). Hero templates offer **Use as Panorama** (saves it, selects it and turns Panorama on; the dialog says it replaces Slots 1–3).
+- **Setups:** a new section at the top of the gallery fills all five slots in one tap, after a confirmation: **Daily Driver**, **Night Cruise** (Neon look, Digital Clock), **Road Trip** and **Ramadan** (iftar countdown and Hijri Date designs). Panorama is turned off. **Undo setup** on the Slots tab brings back what was there (kept in `slots.json` as `undoSetup`, optional, so older files load). Setups reuse their designs if you've saved them before instead of adding copies.
+- **6 Hero templates:** Highway Lights, Paddy Fields, Rainforest, Monsoon Storm, Pit Lane, Blueprint.
+- **8 templates:** Tachometer, Compass, Cassette, Neon Tube, Glow Orb, Postage Stamp (Realistic, any data source), Tear-off Calendar and LCD Watch (Clock & Date), each with its own Small and Medium layout.
+- New pieces: a tachometer dial style, compass and glow-orb layers (also in the builder's + menu), and 12 stickers (light trails, paddy terraces, rainforest canopy, lightning bolt, strip lights, tyre stack, dimension lines, cassette tape, neon tube clips, calendar rings, postmark, perforated stamp). All drawn in code (`RoundFourArt.swift`).
+- Tests: grouping, the glanceability linter for every source and size, Hero text inside one column, render from JSON, setups fill five slots and undo, design reuse, older slot files.
+### Not verified yet
+- How the new art looks on the phone and in the car (CI only renders it).
 
 ## More OBD2 values
 ### Done

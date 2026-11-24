@@ -23,6 +23,7 @@ struct DialView: View {
             switch style {
             case .instrument: Self.instrument(&context, size: size, needle: needle, progress: progress)
             case .fuel: Self.fuel(&context, size: size, needle: needle, progress: progress)
+            case .tachometer: Self.tachometer(&context, size: size, needle: needle, progress: progress)
             }
         }
         .accessibilityHidden(true)
@@ -102,6 +103,50 @@ struct DialView: View {
 
         drawNeedle(&context, centre: c, length: fr * 0.86, tail: fr * 0.1, width: r * 0.045, angle: angle(min(max(progress, 0), 1)), color: needle, glow: r * 0.04)
         drawHub(&context, centre: c, radius: r * 0.1)
+    }
+
+    /// Rev counter (Phase 19): thin dark bezel, black face, 0–8 with a wide red zone from 6,
+    /// "×1000 r/min" under the hub and an orange glow ring behind the needle.
+    private static func tachometer(_ context: inout GraphicsContext, size: CGSize, needle: Color, progress: Double) {
+        let s = min(size.width, size.height)
+        let c = CGPoint(x: size.width / 2, y: size.height / 2)
+        let r = s * 0.48
+        context.fill(Path(ellipseIn: CGRect(x: c.x - r, y: c.y - r, width: r * 2, height: r * 2)),
+                     with: .linearGradient(Gradient(colors: [Color(hex: 0x3A3F47), Color(hex: 0x0B0C0F)]),
+                                           startPoint: CGPoint(x: c.x, y: c.y - r), endPoint: CGPoint(x: c.x, y: c.y + r)))
+        let fr = r * 0.93
+        let face = CGRect(x: c.x - fr, y: c.y - fr, width: fr * 2, height: fr * 2)
+        context.fill(Path(ellipseIn: face), with: .radialGradient(Gradient(colors: [Color(hex: 0x1A1C21), Color(hex: 0x030304)]),
+                                                                  center: c, startRadius: 0, endRadius: fr))
+        let start = 135.0, sweep = 270.0
+        func angle(_ f: Double) -> Double { (start + sweep * f) * .pi / 180 }
+        let value = min(max(progress, 0), 1)
+        // Glow ring up to the needle.
+        var lit = Path()
+        lit.addArc(center: c, radius: fr * 0.97, startAngle: .radians(angle(0)), endAngle: .radians(angle(value)), clockwise: false)
+        context.drawLayer { layer in
+            layer.addFilter(.shadow(color: needle.opacity(0.9), radius: s * 0.03))
+            layer.stroke(lit, with: .color(needle.opacity(0.85)), style: StrokeStyle(lineWidth: fr * 0.035, lineCap: .round))
+        }
+        var redZone = Path()
+        redZone.addArc(center: c, radius: fr * 0.86, startAngle: .radians(angle(0.75)), endAngle: .radians(angle(1)), clockwise: false)
+        context.stroke(redZone, with: .color(dialRed), lineWidth: fr * 0.1)
+        for i in 0...80 {
+            let f = Double(i) / 80, a = angle(f), major = i % 10 == 0, half = i % 5 == 0
+            var tick = Path()
+            tick.move(to: point(c, fr * (major ? 0.72 : (half ? 0.8 : 0.85)), a))
+            tick.addLine(to: point(c, fr * 0.91, a))
+            let tint: Color = f >= 0.75 ? dialRed : .white.opacity(major ? 1 : 0.55)
+            context.stroke(tick, with: .color(tint), style: StrokeStyle(lineWidth: major ? s * 0.018 : s * 0.006, lineCap: .round))
+            if major {
+                context.draw(Text("\(i / 10)").font(.system(size: s * 0.1, weight: .bold, design: .rounded)).foregroundColor(f >= 0.75 ? dialRed : .white),
+                             at: point(c, fr * 0.56, a))
+            }
+        }
+        context.draw(Text("×1000 r/min").font(.system(size: s * 0.05, weight: .semibold, design: .rounded)).foregroundColor(.white.opacity(0.55)),
+                     at: CGPoint(x: c.x, y: c.y + fr * 0.32))
+        drawNeedle(&context, centre: c, length: fr * 0.88, tail: fr * 0.18, width: s * 0.02, angle: angle(value), color: needle, glow: s * 0.03)
+        drawHub(&context, centre: c, radius: s * 0.06)
     }
 
     private static func drawNeedle(_ context: inout GraphicsContext, centre c: CGPoint, length: Double, tail: Double, width: Double,

@@ -208,6 +208,10 @@ private struct LayerView: View {
             BatteryView(progress: field.flatMap { card.values[$0]?.progress } ?? 0.8)
         case .moonPhase:
             MoonPhaseView(date: card.date, color: color)
+        case .compass(let field):
+            CompassView(progress: field.flatMap { card.values[$0]?.progress } ?? 0.125, color: color)
+        case .glowOrb(let field):
+            GlowOrbView(progress: field.flatMap { card.values[$0]?.progress } ?? 0.65, color: color)
         case .analogClock:
             AnalogClock(date: card.date, color: color)
         case .seasonalArt(let occasion):

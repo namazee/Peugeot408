@@ -107,6 +107,12 @@ struct ReadmeSnapshots {
             (.flipClock, .service), (.wordClock, .service), (.hijriDate, .service), (.moonPhase, .service),
         ]
         saveBoth(round3, data: data, now: now, "templates-round3.png", in: directory)
+        // Phase 19: the third round.
+        let round4: [(TemplateStyle, DataSource)] = [
+            (.tachometer, .obd), (.compass, .commute), (.cassette, .music), (.neonTube, .weather),
+            (.glowOrb, .fuel), (.postageStamp, .renewals), (.tearOffCalendar, .service), (.lcdWatch, .service),
+        ]
+        saveBoth(round4, data: data, now: now, "templates-round4.png", in: directory)
         // Hero templates (Phase 17), each across the three visible columns.
         save(
             VStack(spacing: 10) {

@@ -346,6 +346,8 @@ public struct SlotsState: Codable, Sendable, Equatable {
     /// Panorama hero across Slots 1–3 (Phase 14). Their own designs are kept underneath and come
     /// back when it's turned off. Nil in older files.
     public var panorama: PanoramaSettings?
+    /// What the slots showed before the last ready-made setup (Phase 19), for "Undo setup". Nil in older files.
+    public var undoSetup: SetupUndo?
 
     /// The panorama design shown by Slots 1–3, when turned on.
     public var activePanoramaID: UUID? {

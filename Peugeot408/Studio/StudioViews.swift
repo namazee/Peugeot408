@@ -129,15 +129,42 @@ struct DesignRow: View {
 /// Every template with live previews from your real data, bindable to any data source.
 struct TemplateGalleryView: View {
     @Environment(StudioModel.self) private var studio
+    @Environment(SlotsModel.self) private var slots
     @Environment(CarDataModel.self) private var cars
     @Environment(\.dismiss) private var dismiss
     let onPick: (CardDesign) -> Void
 
     @State private var source: DataSource = .service
     @State private var canvas: DesignCanvas = .small
+    /// Phase 19 one-tap use: the template that was tapped, a setup waiting for confirmation, and the result.
+    @State private var picked: CardDesign?
+    @State private var setupToApply: ReadySetup?
+    @State private var done: String?
 
     var body: some View {
         List {
+            Section {
+                ForEach(ReadySetup.allCases) { setup in
+                    Button {
+                        setupToApply = setup
+                    } label: {
+                        Label {
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(setup.displayName).font(.body.weight(.semibold))
+                                Text(setup.summary).font(.footnote).foregroundStyle(Theme.secondaryText)
+                            }
+                        } icon: {
+                            Image(systemName: setup.symbol).foregroundStyle(Theme.accent)
+                        }
+                    }
+                    .buttonStyle(.plain)
+                }
+            } header: {
+                Text("Setups")
+            } footer: {
+                Text("Fills all five slots in one tap. You can undo it on the Slots tab.")
+            }
+
             Section {
                 Picker("Size", selection: $canvas) {
                     ForEach(DesignCanvas.widgetCanvases, id: \.self) { Text($0.displayName).tag($0) }
@@ -147,7 +174,7 @@ struct TemplateGalleryView: View {
                     ForEach(DataSource.available) { Label($0.displayName, systemImage: $0.symbol).tag($0) }
                 }
             } footer: {
-                Text("Previews use your real data. Pick one to open it in the builder.")
+                Text("Previews use your real data. Tap one to put it on a slot right away, or Customise it in the builder.")
             }
 
             ForEach(TemplateGroup.allCases) { group in
@@ -158,8 +185,7 @@ struct TemplateGalleryView: View {
                         ForEach(group.styles) { style in
                             let design = template(style)
                             Button {
-                                onPick(design)
-                                dismiss()
+                                picked = design
                             } label: {
                                 VStack(alignment: .leading, spacing: 6) {
                                     DesignView(card: DesignResolver.card(for: design, data: cars.data, studio: studio.state, at: .now))
@@ -187,6 +213,68 @@ struct TemplateGalleryView: View {
             }
         }
         .navigationTitle("Templates")
+        .confirmationDialog(picked?.name ?? "Template", isPresented: isShown($picked), titleVisibility: .visible, presenting: picked) { design in
+            if design.canvas == .panorama {
+                Button("Use as Panorama") { useAsPanorama(design) }
+            } else {
+                ForEach(SlotsState.slotNumbers, id: \.self) { number in
+                    let current = slots.design(for: number)
+                    Button(TemplateUse.replacesCards(current)
+                           ? "Use on Slot \(number) (replaces its \(current.effectiveLayout.cardCount) cards)"
+                           : "Use on Slot \(number)") {
+                        use(design, on: number)
+                    }
+                }
+            }
+            Button("Customise") {
+                onPick(design)
+                dismiss()
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: { design in
+            Text(design.canvas == .panorama
+                 ? "Use as Panorama replaces what Slots 1–3 show in the car until you turn it off. Their own designs are kept."
+                 : "Put it on a slot now, or open it in the builder first. A Split or Quad slot becomes one card.")
+        }
+        .confirmationDialog("Apply \(setupToApply?.displayName ?? "setup")?", isPresented: isShown($setupToApply), titleVisibility: .visible, presenting: setupToApply) { setup in
+            Button("Apply \(setup.displayName)") { apply(setup) }
+            Button("Cancel", role: .cancel) {}
+        } message: { _ in
+            Text("It replaces what all five slots show, and turns Panorama off. You can undo it on the Slots tab.")
+        }
+        .alert(done ?? "", isPresented: isShown($done)) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text("CarPlay may take a moment to redraw; reconnecting the phone redraws it fastest.")
+        }
+    }
+
+    private func isShown<Value>(_ value: Binding<Value?>) -> Binding<Bool> {
+        Binding(get: { value.wrappedValue != nil }, set: { if !$0 { value.wrappedValue = nil } })
+    }
+
+    /// Spec §4b (Phase 19): saves the template as a design and puts it on the slot as one card.
+    private func use(_ design: CardDesign, on slot: Int) {
+        studio.save(design)
+        slots.save(TemplateUse.slotDesign(showing: design), for: slot)
+        let covered = slots.state.activePanoramaID != nil && SlotsState.isPanoramaSlot(slot)
+        done = covered
+            ? "\(design.name) is on Slot \(slot). Panorama is on, so Slot \(slot) shows the Hero until you turn it off."
+            : "\(design.name) is now on Slot \(slot)."
+    }
+
+    /// Spec §3 (Phase 19): saves the Hero design, selects it and turns Panorama on.
+    private func useAsPanorama(_ design: CardDesign) {
+        studio.save(design)
+        slots.setPanorama(PanoramaSettings(enabled: true, designID: design.id))
+        done = "\(design.name) now spans Slots 1–3."
+    }
+
+    private func apply(_ setup: ReadySetup) {
+        let resolved = setup.resolveDesigns(existing: studio.state.designs)
+        for design in resolved.new { studio.save(design) }
+        slots.apply(setup, designs: resolved.use)
+        done = "\(setup.displayName) is on your slots."
     }
 
     private func template(_ style: TemplateStyle) -> CardDesign {

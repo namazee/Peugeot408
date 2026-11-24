@@ -242,6 +242,19 @@ public enum ArtworkKind: String, Codable, Sendable, CaseIterable {
     case mountains
     case startLights
     case chequeredStrip
+    // Phase 19
+    case lightTrails
+    case paddyTerraces
+    case rainforest
+    case lightning
+    case stripLights
+    case tyreStack
+    case dimensionLines
+    case cassette
+    case tubeClips
+    case calendarRings
+    case postmark
+    case stampEdge
 
     public var displayName: String {
         switch self {
@@ -289,6 +302,18 @@ public enum ArtworkKind: String, Codable, Sendable, CaseIterable {
         case .mountains: "Mountains"
         case .startLights: "Start lights"
         case .chequeredStrip: "Chequered strip"
+        case .lightTrails: "Light trails"
+        case .paddyTerraces: "Paddy terraces"
+        case .rainforest: "Rainforest canopy"
+        case .lightning: "Lightning bolt"
+        case .stripLights: "Strip lights"
+        case .tyreStack: "Tyre stack"
+        case .dimensionLines: "Dimension lines"
+        case .cassette: "Cassette tape"
+        case .tubeClips: "Neon tube clips"
+        case .calendarRings: "Calendar rings"
+        case .postmark: "Postmark"
+        case .stampEdge: "Perforated stamp"
         }
     }
 
@@ -297,7 +322,9 @@ public enum ArtworkKind: String, Codable, Sendable, CaseIterable {
                                                    .stitching, .signFrame, .roadArrow, .hudLines, .ticket, .glassPanel,
                                                    .neonTube, .thermalTicket, .plateFrame, .tuningScale, .streetMap, .lcdPanel,
                                                    .skyline, .neonGrid, .stripedSun,
-                                                   .polaroidFrame, .stickyNote, .dotMatrix, .speedSign, .letterGrid, .vinylRecord, .comicBurst, .lightCone, .palms, .waves, .mountains, .startLights, .chequeredStrip]
+                                                   .polaroidFrame, .stickyNote, .dotMatrix, .speedSign, .letterGrid, .vinylRecord, .comicBurst, .lightCone, .palms, .waves, .mountains, .startLights, .chequeredStrip,
+                                                   .lightTrails, .paddyTerraces, .rainforest, .lightning, .stripLights, .tyreStack, .dimensionLines,
+                                                   .cassette, .tubeClips, .calendarRings, .postmark, .stampEdge]
 }
 
 /// What a layer draws.
@@ -334,6 +361,10 @@ public enum LayerContent: Codable, Sendable, Equatable, Hashable {
     case battery(DataField?)
     /// Tonight's moon in its phase, calculated from the date (Phase 18).
     case moonPhase
+    /// A compass rose whose needle points by a field's progress (Phase 19); `nil` points north-east.
+    case compass(DataField?)
+    /// A glass sphere filled with glowing liquid by a field's progress (Phase 19); `nil` fills 65%.
+    case glowOrb(DataField?)
 }
 
 /// Dial layer styles (Phase 16).
@@ -342,11 +373,14 @@ public enum DialStyle: String, Codable, Sendable, CaseIterable {
     case instrument
     /// Fuel gauge: half dial marked E, ½ and F with a pump icon.
     case fuel
+    /// Rev counter (Phase 19): black face, 0–8 with a wide red zone from 6, "×1000 r/min" and an orange needle glow.
+    case tachometer
 
     public var displayName: String {
         switch self {
         case .instrument: "Instrument"
         case .fuel: "Fuel (E–F)"
+        case .tachometer: "Tachometer"
         }
     }
 }
@@ -410,7 +444,8 @@ public struct DesignLayer: Codable, Sendable, Equatable, Hashable, Identifiable 
         switch content {
         case .data(let field): field
         case .gauge(let field), .ring(let field), .progressBar(let field), .dial(let field, _),
-             .shiftLights(let field), .thermometer(let field), .battery(let field): field
+             .shiftLights(let field), .thermometer(let field), .battery(let field),
+             .compass(let field), .glowOrb(let field): field
         case .odometer(let field), .splitFlap(let field): field
         default: nil
         }

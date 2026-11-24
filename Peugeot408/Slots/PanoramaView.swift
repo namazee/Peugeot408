@@ -85,7 +85,7 @@ struct PanoramaView: View {
             } header: {
                 Text("Design")
             } footer: {
-                Text("Pick a Hero template: the classic Hero (your My Car photo with big \"MY CAR\" lettering behind it), Sunset Road, Night City, Cockpit, Live Sky, Neon Grid or Glass Info. Any design you make on the Panorama canvas in the builder shows up here too.")
+                Text("Pick any Hero template, from the classic Hero (your My Car photo with big \"MY CAR\" lettering behind it) to Highway Lights, Paddy Fields or Blueprint. In Studio → Template gallery, \"Use as Panorama\" does it in one tap. Any design you make on the Panorama canvas in the builder shows up here too.")
             }
 
             Section {

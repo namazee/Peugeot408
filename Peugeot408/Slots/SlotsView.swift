@@ -35,6 +35,18 @@ struct SlotsView: View {
                     Text("Drag to reorder. The design moves; the widget in the car stays where you put it.")
                 }
 
+                if let undo = slots.state.undoSetup {
+                    Section {
+                        Button {
+                            slots.undoSetup()
+                        } label: {
+                            Label("Undo setup (\(undo.setupName))", systemImage: "arrow.uturn.backward.circle")
+                        }
+                    } footer: {
+                        Text("Brings back what your five slots showed before you applied \(undo.setupName).")
+                    }
+                }
+
                 Section {
                     NavigationLink {
                         PanoramaView()

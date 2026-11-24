@@ -63,6 +63,18 @@ public struct ArtworkView: View {
                 case .mountains: Mountains(color: color)
                 case .startLights: StartLights(color: color)
                 case .chequeredStrip: ChequeredStrip(color: color)
+                case .lightTrails: LightTrails(color: color)
+                case .paddyTerraces: PaddyTerraces(color: color)
+                case .rainforest: Rainforest(color: color)
+                case .lightning: LightningBolt(color: color)
+                case .stripLights: StripLights(color: color)
+                case .tyreStack: TyreStack(color: color)
+                case .dimensionLines: DimensionLines(color: color)
+                case .cassette: CassetteTape(color: color)
+                case .tubeClips: TubeClips(color: color)
+                case .calendarRings: CalendarRings(color: color)
+                case .postmark: Postmark(color: color)
+                case .stampEdge: StampEdge(color: color)
                 }
             }
             .frame(width: kind.fillsFrame ? geo.size.width : size,
@@ -272,7 +284,9 @@ extension ArtworkKind {
         case .stripes, .speedLines, .gaugeArc, .road, .starfield, .stitching, .signFrame, .hudLines, .ticket, .glassPanel,
              .neonTube, .thermalTicket, .plateFrame, .tuningScale, .streetMap, .lcdPanel, .skyline, .neonGrid,
              .polaroidFrame, .stickyNote, .dotMatrix, .letterGrid, .comicBurst, .lightCone, .palms, .waves, .mountains,
-             .startLights, .chequeredStrip: true
+             .startLights, .chequeredStrip,
+             .lightTrails, .paddyTerraces, .rainforest, .lightning, .stripLights, .tyreStack, .dimensionLines,
+             .cassette, .tubeClips, .calendarRings, .postmark, .stampEdge: true
         default: false
         }
     }

@@ -73,6 +73,24 @@ public enum TemplateStyle: String, Codable, Sendable, CaseIterable, Identifiable
     case heroStartingGrid
     case heroMountainPass
     case heroDepartureBoard
+    // Phase 19: a third round of realistic, Clock & Date and Hero templates.
+    case tachometer
+    case compass
+    case cassette
+    case neonTube
+    case glowOrb
+    case postageStamp
+    case tearOffCalendar
+    case lcdWatch
+    case heroHighwayLights
+    case heroPaddyFields
+    case heroRainforest
+    case heroMonsoon
+    case heroPitLane
+    case heroBlueprint
+
+    /// Phase 19 Hero templates.
+    public static let roundFourHeroes: [TemplateStyle] = [.heroHighwayLights, .heroPaddyFields, .heroRainforest, .heroMonsoon, .heroPitLane, .heroBlueprint]
 
     public var id: String { rawValue }
 
@@ -85,6 +103,9 @@ public enum TemplateStyle: String, Codable, Sendable, CaseIterable, Identifiable
         case .vinyl, .comicPop: .data
         case .flipClock, .wordClock, .hijriDate: .clockDate
         case .moonPhase: .special
+        case .tachometer, .compass, .cassette, .neonTube, .glowOrb, .postageStamp: .realistic
+        case .tearOffCalendar, .lcdWatch: .clockDate
+        case .heroHighwayLights, .heroPaddyFields, .heroRainforest, .heroMonsoon, .heroPitLane, .heroBlueprint: .hero
         case .hero, .heroSunsetRoad, .heroNightCity, .heroCockpit, .heroLiveSky, .heroNeonGrid, .heroGlassInfo: .hero
         case .clockAnalog, .clockDigital, .bigDate, .retroLED, .yearProgress: .clockDate
         case .countdown, .anniversary, .starryNight: .special
@@ -172,6 +193,20 @@ public enum TemplateStyle: String, Codable, Sendable, CaseIterable, Identifiable
         case .heroStartingGrid: "Starting Grid"
         case .heroMountainPass: "Mountain Pass"
         case .heroDepartureBoard: "Departure Board"
+        case .tachometer: "Tachometer"
+        case .compass: "Compass"
+        case .cassette: "Cassette"
+        case .neonTube: "Neon Tube"
+        case .glowOrb: "Glow Orb"
+        case .postageStamp: "Postage Stamp"
+        case .tearOffCalendar: "Tear-off Calendar"
+        case .lcdWatch: "LCD Watch"
+        case .heroHighwayLights: "Highway Lights"
+        case .heroPaddyFields: "Paddy Fields"
+        case .heroRainforest: "Rainforest"
+        case .heroMonsoon: "Monsoon Storm"
+        case .heroPitLane: "Pit Lane"
+        case .heroBlueprint: "Blueprint"
         }
     }
 
@@ -183,7 +218,10 @@ public enum TemplateStyle: String, Codable, Sendable, CaseIterable, Identifiable
              .chromeDial, .fuelGauge, .odometer, .highwaySign, .leatherStitch, .digitalCockpit,
              .headUpDisplay, .frostedGlass, .liveSky, .boardingPass,
              .splitFlap, .neonSign, .woodTrim, .carStereo, .navigation, .rainyWindow, .parkingTicket, .numberPlate,
-             .shiftLight, .polaroid, .stickyNote, .dotMatrix, .chalkboard, .thermometer, .battery, .speedSign, .vinyl, .comicPop: true
+             .shiftLight, .polaroid, .stickyNote, .dotMatrix, .chalkboard, .thermometer, .battery, .speedSign, .vinyl, .comicPop,
+             .tachometer, .compass, .cassette, .neonTube, .glowOrb, .postageStamp: true
+        case .tearOffCalendar, .lcdWatch,
+             .heroHighwayLights, .heroPaddyFields, .heroRainforest, .heroMonsoon, .heroPitLane, .heroBlueprint: false
         case .clockAnalog, .clockDigital, .countdown, .anniversary, .starryNight, .bigDate, .yearProgress, .retroLED, .hero,
              .heroSunsetRoad, .heroNightCity, .heroCockpit, .heroLiveSky, .heroNeonGrid, .heroGlassInfo,
              .flipClock, .wordClock, .hijriDate, .moonPhase, .heroGarage, .heroCoastal, .heroRainCity, .heroStartingGrid, .heroMountainPass, .heroDepartureBoard: false
@@ -508,13 +546,15 @@ public enum Templates {
         case .chromeDial, .fuelGauge, .odometer, .highwaySign, .leatherStitch, .digitalCockpit,
              .headUpDisplay, .frostedGlass, .liveSky, .boardingPass,
              .splitFlap, .neonSign, .woodTrim, .carStereo, .navigation, .rainyWindow, .parkingTicket, .numberPlate,
-             .shiftLight, .polaroid, .stickyNote, .dotMatrix, .chalkboard, .thermometer, .battery, .speedSign, .vinyl, .comicPop, .flipClock, .wordClock, .hijriDate, .moonPhase:
+             .shiftLight, .polaroid, .stickyNote, .dotMatrix, .chalkboard, .thermometer, .battery, .speedSign, .vinyl, .comicPop, .flipClock, .wordClock, .hijriDate, .moonPhase,
+             .tachometer, .compass, .cassette, .neonTube, .glowOrb, .postageStamp, .tearOffCalendar, .lcdWatch:
             let made = realistic(style, bind: bind, wide: wide)
             background = made.0
             layers = made.1
 
         case .heroSunsetRoad, .heroNightCity, .heroCockpit, .heroLiveSky, .heroNeonGrid, .heroGlassInfo,
-             .heroGarage, .heroCoastal, .heroRainCity, .heroStartingGrid, .heroMountainPass, .heroDepartureBoard:
+             .heroGarage, .heroCoastal, .heroRainCity, .heroStartingGrid, .heroMountainPass, .heroDepartureBoard,
+             .heroHighwayLights, .heroPaddyFields, .heroRainforest, .heroMonsoon, .heroPitLane, .heroBlueprint:
             let made = hero(style)
             background = made.0
             layers = made.1
@@ -1079,6 +1119,136 @@ public enum Templates {
                 data(.moonPhaseName, 0.5, 0.86, 0.9, 0.13, .rounded, .semibold, 15, mist, .center),
             ])
 
+        // Phase 19 (spec §4b Templates, third round).
+        case .tachometer:
+            let orange: UInt32 = 0xFF7A1A, grey: UInt32 = 0xB7BDC7
+            if wide {
+                return (.texture(.carbon, 0x0E1014), [
+                    art(.dial(bind.primary, .tachometer), 0.24, 0.5, 0.44, 0.94, orange),
+                    text(label, 0.7, 0.3, 0.52, 0.13, .rajdhani, .bold, 15, grey, .leading),
+                    data(bind.primary, 0.7, 0.53, 0.52, 0.26, .rajdhani, .bold, 30, white, .leading),
+                    data(second, 0.7, 0.76, 0.52, 0.13, .rajdhani, .semibold, 15, 0xFFB27A, .leading),
+                ])
+            }
+            return (.texture(.carbon, 0x0E1014), [
+                art(.dial(bind.primary, .tachometer), 0.5, 0.45, 0.9, 0.86, orange),
+                art(.sticker(.glassPanel), 0.5, 0.86, 0.56, 0.16, white),
+                data(bind.primary, 0.5, 0.86, 0.52, 0.14, .rajdhani, .bold, 16, white, .center),
+            ])
+
+        case .compass:
+            let ink: UInt32 = 0x2B2418, brown: UInt32 = 0x6B4A1F, red: UInt32 = 0xB42318
+            if wide {
+                return (.gradient(0xEADFC3, 0xCDBB92), [
+                    art(.compass(bind.primary), 0.24, 0.5, 0.44, 0.94, red),
+                    text(label, 0.7, 0.3, 0.52, 0.13, .serif, .bold, 15, brown, .leading),
+                    data(bind.primary, 0.7, 0.53, 0.52, 0.26, .playfair, .bold, 28, ink, .leading),
+                    data(second, 0.7, 0.76, 0.52, 0.13, .serif, .semibold, 15, brown, .leading),
+                ])
+            }
+            return (.gradient(0xEADFC3, 0xCDBB92), [
+                art(.compass(bind.primary), 0.5, 0.5, 0.94, 0.94, red),
+                data(bind.primary, 0.5, 0.66, 0.5, 0.12, .rounded, .heavy, 15, ink, .center),
+            ])
+
+        case .cassette:
+            let ink: UInt32 = 0x1B1B1B, red: UInt32 = 0xE5484D
+            if wide {
+                return (.gradient(0xF2C14E, 0xE39B36), [
+                    art(.sticker(.cassette), 0.3, 0.5, 0.56, 0.9, red),
+                    data(bind.primary, 0.3, 0.27, 0.44, 0.18, .rounded, .heavy, 22, ink, .center),
+                    text(label, 0.8, 0.34, 0.34, 0.14, .rounded, .heavy, 16, ink, .center),
+                    data(second, 0.8, 0.6, 0.34, 0.16, .rounded, .semibold, 15, ink, .center),
+                ])
+            }
+            return (.gradient(0xF2C14E, 0xE39B36), [
+                text(label, 0.5, 0.11, 0.86, 0.12, .rounded, .heavy, 14, ink, .center),
+                art(.sticker(.cassette), 0.5, 0.57, 0.94, 0.7, red),
+                data(bind.primary, 0.5, 0.38, 0.7, 0.15, .rounded, .heavy, 18, ink, .center),
+            ])
+
+        case .neonTube:
+            let pink: UInt32 = 0xFF5FD2, cyan: UInt32 = 0x5FF4FF, steel: UInt32 = 0xB0B4BA
+            if wide {
+                return (.texture(.brick, 0x2A1C18), [
+                    art(.sticker(.tubeClips), 0.5, 0.42, 0.86, 0.12, steel),
+                    data(bind.primary, 0.5, 0.42, 0.86, 0.34, .rounded, .bold, 38, pink, .center, glow: true),
+                    text(label, 0.5, 0.78, 0.8, 0.14, .rounded, .bold, 18, cyan, .center, glow: true),
+                ])
+            }
+            return (.texture(.brick, 0x2A1C18), [
+                art(.sticker(.tubeClips), 0.5, 0.44, 0.9, 0.1, steel),
+                data(bind.primary, 0.5, 0.44, 0.9, 0.32, .rounded, .bold, 28, pink, .center, glow: true),
+                text(label, 0.5, 0.8, 0.86, 0.13, .rounded, .bold, 15, cyan, .center, glow: true),
+            ])
+
+        case .glowOrb:
+            let cyan: UInt32 = 0x22D3EE, mist: UInt32 = 0xA5B4FC
+            if wide {
+                return (.gradient(0x0E1630, 0x03050C), [
+                    art(.glowOrb(bind.primary), 0.2, 0.5, 0.36, 0.9, cyan),
+                    text(label, 0.66, 0.3, 0.56, 0.13, .rounded, .semibold, 15, mist, .leading),
+                    data(bind.primary, 0.66, 0.53, 0.56, 0.26, .rounded, .bold, 30, white, .leading),
+                    data(second, 0.66, 0.76, 0.56, 0.13, .rounded, .semibold, 15, mist, .leading),
+                ])
+            }
+            return (.gradient(0x0E1630, 0x03050C), [
+                art(.glowOrb(bind.primary), 0.5, 0.4, 0.66, 0.66, cyan),
+                data(bind.primary, 0.5, 0.85, 0.86, 0.16, .rounded, .bold, 20, white, .center),
+            ])
+
+        case .postageStamp:
+            let ink: UInt32 = 0x2B2418, red: UInt32 = 0x8A1C12, frame: UInt32 = 0xB42318
+            if wide {
+                return (.gradient(0xEDE3CF, 0xD6C7A8), [
+                    art(.sticker(.stampEdge), 0.24, 0.5, 0.36, 0.86, frame),
+                    art(.carPhoto, 0.24, 0.42, 0.28, 0.46, white),
+                    data(bind.primary, 0.24, 0.8, 0.3, 0.14, .serif, .bold, 16, red, .center),
+                    art(.sticker(.postmark), 0.46, 0.26, 0.3, 0.3, 0x3B3B3B, opacity: 0.7),
+                    text(label, 0.76, 0.42, 0.42, 0.14, .serif, .bold, 17, ink, .center),
+                    data(second, 0.76, 0.64, 0.42, 0.14, .serif, .semibold, 15, ink, .center),
+                ])
+            }
+            return (.gradient(0xEDE3CF, 0xD6C7A8), [
+                art(.sticker(.stampEdge), 0.46, 0.53, 0.7, 0.84, frame),
+                art(.carPhoto, 0.46, 0.45, 0.54, 0.48, white),
+                data(bind.primary, 0.46, 0.8, 0.6, 0.13, .serif, .bold, 15, red, .center),
+                art(.sticker(.postmark), 0.78, 0.2, 0.4, 0.26, 0x3B3B3B, opacity: 0.7),
+            ])
+
+        case .tearOffCalendar:
+            let ink: UInt32 = 0x1B1B1B, red: UInt32 = 0xD92D20
+            if wide {
+                return (.gradient(0x6E95A6, 0x5B8496), [
+                    art(.sticker(.calendarRings), 0.3, 0.52, 0.5, 0.92, red),
+                    data(.weekday, 0.3, 0.25, 0.44, 0.12, .rounded, .heavy, 16, white, .center),
+                    data(.dayOfMonth, 0.3, 0.57, 0.44, 0.34, .playfair, .bold, 50, ink, .center),
+                    data(.hijriDate, 0.3, 0.85, 0.46, 0.1, .rounded, .semibold, 14, ink, .center),
+                    data(.monthName, 0.78, 0.5, 0.38, 0.2, .playfair, .bold, 26, white, .center),
+                ])
+            }
+            return (.gradient(0x6E95A6, 0x5B8496), [
+                art(.sticker(.calendarRings), 0.5, 0.53, 0.9, 0.92, red),
+                data(.weekday, 0.5, 0.26, 0.8, 0.12, .rounded, .heavy, 15, white, .center),
+                data(.dayOfMonth, 0.5, 0.65, 0.8, 0.4, .playfair, .bold, 48, ink, .center),
+            ])
+
+        case .lcdWatch:
+            let segment: UInt32 = 0x1C2418
+            if wide {
+                return (.gradient(0xB4C2A8, 0x95A58A), [
+                    text("88:88", 0.5, 0.5, 0.86, 0.5, .mono, .heavy, 60, segment, .center, opacity: 0.08),
+                    data(.clock, 0.5, 0.5, 0.86, 0.5, .mono, .heavy, 60, segment, .center),
+                    data(.weekday, 0.22, 0.15, 0.36, 0.14, .mono, .bold, 15, segment, .leading),
+                    data(.date, 0.7, 0.86, 0.52, 0.14, .mono, .bold, 15, segment, .trailing),
+                ])
+            }
+            return (.gradient(0xB4C2A8, 0x95A58A), [
+                text("88:88", 0.5, 0.45, 0.92, 0.4, .mono, .heavy, 34, segment, .center, opacity: 0.08),
+                data(.clock, 0.5, 0.45, 0.92, 0.4, .mono, .heavy, 34, segment, .center),
+                data(.date, 0.5, 0.82, 0.9, 0.14, .mono, .bold, 14, segment, .center),
+            ])
+
         default:
             return (.solid(0x000000), [])
         }
@@ -1250,6 +1420,81 @@ public enum Templates {
                 text("SERVICE", right, 0.18, 0.1, 15, amber),
                 art(.splitFlap(.kmToService), right, 0.44, 0.29, 0.2, amber),
                 data(.serviceItem, right, 0.72, 0.12, .rounded, .semibold, 14, grey, shadow: false),
+            ])
+
+        // Phase 19 (spec §3 Panorama hero, third round).
+        case .heroHighwayLights:
+            let warm: UInt32 = 0xFFD9A8
+            return (.gradient(0x24204A, 0x05060C), [
+                art(.sticker(.starfield), mid, 0.2, 1, 0.4, white, opacity: 0.5),
+                art(.sticker(.lightTrails), mid, 0.74, 1, 0.52, 0xFFF1D0),
+                car,
+                data(.clock, left, 0.18, 0.17, .rounded, .heavy, 26, white),
+                data(.date, left, 0.33, 0.1, .rounded, .semibold, 14, warm),
+                data(.temperature, right, 0.18, 0.17, .rounded, .heavy, 26, white),
+                data(.weatherPlace, right, 0.33, 0.1, .rounded, .semibold, 14, warm),
+            ])
+
+        case .heroPaddyFields:
+            let peach: UInt32 = 0xFFE6C7
+            return (.gradient(0x5B7DB8, 0x1B3A5C), [
+                art(.sticker(.sun), mid, 0.36, 0.22, 0.34, 0xFFC56B),
+                art(.sticker(.paddyTerraces), mid, 0.78, 1, 0.48, 0x5FA83A),
+                DesignLayer(content: .carPhoto, x: mid, y: 0.7, width: 0.3, height: 0.42, colorHex: white),
+                data(.greeting, left, 0.15, 0.2, .rounded, .bold, 16, white),
+                data(.clock, left, 0.35, 0.15, .rounded, .heavy, 24, white),
+                data(.temperature, right, 0.17, 0.17, .rounded, .heavy, 26, white),
+                data(.weatherPlace, right, 0.32, 0.1, .rounded, .semibold, 14, peach),
+            ])
+
+        case .heroRainforest:
+            let leaf: UInt32 = 0xD9F99D
+            return (.gradient(0x2F6B3C, 0x06140A), [
+                art(.sticker(.rainforest), mid, 0.5, 1, 1, 0xFFF3B0),
+                car,
+                data(.clock, left, 0.5, 0.17, .rounded, .heavy, 26, white),
+                data(.date, left, 0.65, 0.1, .rounded, .semibold, 14, leaf),
+                data(.prayerCountdown, right, 0.5, 0.17, .rounded, .heavy, 26, white),
+                data(.nextPrayerName, right, 0.65, 0.1, .rounded, .semibold, 14, leaf),
+            ])
+
+        case .heroMonsoon:
+            let rain: UInt32 = 0xA9C1E8
+            var layers: [DesignLayer] = [.init(content: .sticker(.lightning), x: mid + 0.07, y: 0.26, width: 0.12, height: 0.46, colorHex: 0xDCE7FF)]
+            for x in [left, mid, right] {
+                layers.append(DesignLayer(content: .sticker(.speedLines), x: x, y: 0.55, width: 0.5, height: 0.24, rotation: 72, opacity: 0.3, colorHex: rain))
+            }
+            layers += [
+                car,
+                data(.clock, left, 0.18, 0.17, .rounded, .heavy, 26, white),
+                data(.date, left, 0.33, 0.1, .rounded, .semibold, 14, rain),
+                data(.temperature, right, 0.18, 0.17, .rounded, .heavy, 26, white),
+                data(.rainToday, right, 0.33, 0.1, .rounded, .semibold, 14, rain),
+            ]
+            return (.frosted(0x64748B, 0x1E293B), layers)
+
+        case .heroPitLane:
+            let yellow: UInt32 = 0xFFD60A, grey: UInt32 = 0xB7BDC7
+            return (.gradient(0x2A2E36, 0x0B0C0F), [
+                art(.sticker(.stripLights), mid, 0.16, 1, 0.3, 0xBFE3FF),
+                art(.sticker(.tyreStack), mid, 0.62, 1, 0.76, yellow),
+                art(.progressBar(nil), mid, 0.94, 0.5, 0.025, yellow),
+                DesignLayer(content: .carPhoto, x: mid, y: 0.66, width: 0.3, height: 0.46, colorHex: white),
+                text("TIME", left, 0.3, 0.1, 14, grey),
+                data(.clock, left, 0.44, 0.17, .rajdhani, .bold, 28, white, shadow: false),
+                text("SERVICE", right, 0.3, 0.1, 14, grey),
+                data(.kmToService, right, 0.44, 0.17, .rajdhani, .bold, 26, white, shadow: false),
+            ])
+
+        case .heroBlueprint:
+            let line: UInt32 = 0xA8C8F0
+            return (.texture(.dots, 0x163E75), [
+                art(.sticker(.dimensionLines), mid, 0.62, 0.36, 0.62, line),
+                DesignLayer(content: .carPhoto, x: mid, y: 0.62, width: 0.3, height: 0.44, opacity: 0.92, colorHex: white),
+                data(.clock, left, 0.18, 0.17, .rajdhani, .bold, 28, white, shadow: false),
+                data(.date, left, 0.33, 0.1, .rajdhani, .semibold, 15, line, shadow: false),
+                text("SERVICE", right, 0.18, 0.1, 15, line),
+                data(.kmToService, right, 0.33, 0.17, .rajdhani, .bold, 26, white, shadow: false),
             ])
 
         default:
