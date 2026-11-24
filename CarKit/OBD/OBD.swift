@@ -6,8 +6,16 @@ public enum OBDValue: String, Codable, Sendable, CaseIterable, Identifiable {
     case coolant
     case boost
     case voltage
+    case speed
+    case intakeAir
+    case throttle
+    case engineLoad
+    case fuelLevel
 
     public var id: String { rawValue }
+
+    /// The original four, shown by the Live Activity and the Live OBD2 widget (spec §4 item 5).
+    public static let core: [OBDValue] = [.rpm, .coolant, .boost, .voltage]
 
     public var displayName: String {
         switch self {
@@ -15,6 +23,11 @@ public enum OBDValue: String, Codable, Sendable, CaseIterable, Identifiable {
         case .coolant: "Coolant"
         case .boost: "Boost"
         case .voltage: "Battery"
+        case .speed: "Speed"
+        case .intakeAir: "Intake air"
+        case .throttle: "Throttle"
+        case .engineLoad: "Engine load"
+        case .fuelLevel: "Fuel level"
         }
     }
 
@@ -24,6 +37,11 @@ public enum OBDValue: String, Codable, Sendable, CaseIterable, Identifiable {
         case .coolant: "thermometer.medium"
         case .boost: "tornado"
         case .voltage: "minus.plus.batteryblock.fill"
+        case .speed: "speedometer"
+        case .intakeAir: "wind"
+        case .throttle: "pedal.accelerator.fill"
+        case .engineLoad: "engine.combustion.fill"
+        case .fuelLevel: "fuelpump.fill"
         }
     }
 }
@@ -35,6 +53,11 @@ public enum OBDCommand: String, Sendable, CaseIterable {
     case intakePressure = "010B"
     case barometric = "0133"
     case voltage = "ATRV"
+    case speed = "010D"
+    case intakeAir = "010F"
+    case throttle = "0111"
+    case engineLoad = "0104"
+    case fuelLevel = "012F"
 
     /// Setup sent once after connecting: reset, echo off, linefeeds off, spaces off,
     /// headers off, automatic protocol.
@@ -52,13 +75,27 @@ public struct OBDReading: Codable, Sendable, Equatable {
     /// Intake manifold pressure minus barometric pressure, in bar (negative = vacuum).
     public var boostBar: Double?
     public var voltage: Double?
+    /// km/h. Nil in older files (like the other extra values below).
+    public var speedKmh: Int?
+    public var intakeAirC: Int?
+    /// 0–100 %.
+    public var throttlePercent: Int?
+    public var engineLoadPercent: Int?
+    public var fuelLevelPercent: Int?
     public var date: Date
 
-    public init(rpm: Int? = nil, coolantC: Int? = nil, boostBar: Double? = nil, voltage: Double? = nil, date: Date) {
+    public init(rpm: Int? = nil, coolantC: Int? = nil, boostBar: Double? = nil, voltage: Double? = nil,
+                speedKmh: Int? = nil, intakeAirC: Int? = nil, throttlePercent: Int? = nil, engineLoadPercent: Int? = nil,
+                fuelLevelPercent: Int? = nil, date: Date) {
         self.rpm = rpm
         self.coolantC = coolantC
         self.boostBar = boostBar
         self.voltage = voltage
+        self.speedKmh = speedKmh
+        self.intakeAirC = intakeAirC
+        self.throttlePercent = throttlePercent
+        self.engineLoadPercent = engineLoadPercent
+        self.fuelLevelPercent = fuelLevelPercent
         self.date = date
     }
 
@@ -68,6 +105,26 @@ public struct OBDReading: Codable, Sendable, Equatable {
         case .coolant: coolantC.map { "\($0)°C" } ?? "--"
         case .boost: boostBar.map { String(format: "%+.2f bar", $0) } ?? "--"
         case .voltage: voltage.map { String(format: "%.1f V", $0) } ?? "--"
+        case .speed: speedKmh.map { "\($0) km/h" } ?? "--"
+        case .intakeAir: intakeAirC.map { "\($0)°C" } ?? "--"
+        case .throttle: throttlePercent.map { "\($0)%" } ?? "--"
+        case .engineLoad: engineLoadPercent.map { "\($0)%" } ?? "--"
+        case .fuelLevel: fuelLevelPercent.map { "\($0)%" } ?? "--"
+        }
+    }
+
+    /// The number alone, its unit and a 0…1 position for a gauge (Split/Quad cards, spec §4b).
+    public func gauge(_ value: OBDValue) -> (number: String?, unit: String, progress: Double?) {
+        switch value {
+        case .boost: (boostBar.map { String(format: "%+.2f", $0) }, "bar", boostBar.map { ($0 + 1) / 2.5 })
+        case .rpm: (rpm.map { $0.formatted() }, "rpm", rpm.map { Double($0) / 7_000 })
+        case .coolant: (coolantC.map(String.init), "°C", coolantC.map { Double($0 - 40) / 80 })
+        case .voltage: (voltage.map { String(format: "%.1f", $0) }, "V", voltage.map { ($0 - 11) / 4 })
+        case .speed: (speedKmh.map(String.init), "km/h", speedKmh.map { Double($0) / 200 })
+        case .intakeAir: (intakeAirC.map(String.init), "°C", intakeAirC.map { Double($0) / 80 })
+        case .throttle: (throttlePercent.map(String.init), "%", throttlePercent.map { Double($0) / 100 })
+        case .engineLoad: (engineLoadPercent.map(String.init), "%", engineLoadPercent.map { Double($0) / 100 })
+        case .fuelLevel: (fuelLevelPercent.map(String.init), "%", fuelLevelPercent.map { Double($0) / 100 })
         }
     }
 }
@@ -145,6 +202,23 @@ public enum OBDParser {
 
     /// Sea-level barometric pressure, used until PID 33 has been read (or when the car doesn't report it).
     public static let standardBarometricKPa = 101
+
+    /// PID 0D: A km/h.
+    public static func speed(_ bytes: [UInt8]) throws -> Int {
+        guard let a = bytes.first else { throw OBDParseError.unreadable }
+        return Int(a)
+    }
+
+    /// PID 0F: A − 40 °C (same as coolant).
+    public static func intakeAir(_ bytes: [UInt8]) throws -> Int {
+        try coolant(bytes)
+    }
+
+    /// PIDs 04, 11, 2F: A × 100 / 255 %, rounded.
+    public static func percent(_ bytes: [UInt8]) throws -> Int {
+        guard let a = bytes.first else { throw OBDParseError.unreadable }
+        return Int((Double(a) * 100 / 255).rounded())
+    }
 }
 
 /// Simulated values for testing without a dongle: idle, then a rev every 20 seconds.
@@ -171,11 +245,18 @@ public enum OBDDemo {
         // Coolant warms from 40 °C to 90 °C over the first 8 minutes.
         let coolant = 40 + min(t / 480, 1) * 50
         let voltage = 14.1 + 0.15 * sin(t / 7)
+        // Throttle and load follow the rev; speed follows rpm in one gear; fuel drains slowly.
+        let effort = min(max((rpm - 1_750) / 3_750, 0), 1)
         return OBDReading(
             rpm: Int(rpm.rounded()),
             coolantC: Int(coolant.rounded()),
             boostBar: (boost * 100).rounded() / 100,
             voltage: (voltage * 10).rounded() / 10,
+            speedKmh: Int((rpm / 30).rounded()),
+            intakeAirC: Int((38 + 4 * sin(t / 30)).rounded()),
+            throttlePercent: Int((12 + 80 * effort).rounded()),
+            engineLoadPercent: Int((22 + 70 * effort).rounded()),
+            fuelLevelPercent: max(62 - Int(t / 300), 0),
             date: date
         )
     }

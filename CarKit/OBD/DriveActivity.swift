@@ -84,6 +84,11 @@ public struct OBDTile: View {
             return (reading.boostBar ?? 0) > 0.2 ? Theme.accent.mix(with: .white, by: 0.35) : Theme.primaryText
         case .rpm:
             return (reading.rpm ?? 0) > 5_500 ? Theme.dueSoon : Theme.primaryText
+        case .fuelLevel:
+            guard let f = reading.fuelLevelPercent else { return Theme.primaryText }
+            return f <= 10 ? Theme.overdue : f <= 20 ? Theme.dueSoon : Theme.primaryText
+        case .speed, .intakeAir, .throttle, .engineLoad:
+            return Theme.primaryText
         }
     }
 }
@@ -106,7 +111,7 @@ struct OBDCard: View {
                 Spacer(minLength: 0)
                 if size == .medium {
                     HStack(spacing: 10) {
-                        ForEach(OBDValue.allCases) { value in
+                        ForEach(OBDValue.core) { value in
                             OBDTile(value: value, reading: reading, big: 22, unsupported: summary.unsupported.contains(value))
                         }
                     }
@@ -161,7 +166,7 @@ public struct DriveActivityView: View {
                         .foregroundStyle(Theme.secondaryText)
                 }
                 HStack(spacing: 12) {
-                    ForEach(OBDValue.allCases) { value in
+                    ForEach(OBDValue.core) { value in
                         OBDTile(value: value, reading: reading, big: 24)
                     }
                 }

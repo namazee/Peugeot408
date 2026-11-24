@@ -4,6 +4,14 @@ Fresh session? Read `docs/SPEC.md`, then this file, then continue from **Current
 
 ## Current phase: 18 (Another round of templates) — built, waiting for you to try the new templates. Phase 15 store steps (SETUP.md §15) and the Phase 8 car test are still yours.
 
+## More OBD2 values
+### Done
+- Drive sessions also read **speed** (PID 0D), **intake air temp** (0F), **throttle** (11), **engine load** (04) and **fuel level** (2F). Speed is read every poll, throttle and load every 2nd, intake air every 5th, fuel every 10th, so a poll stays quick. Values the car doesn't report show n/a, as before.
+- They show under the four big values on Car → Live OBD2 and can be picked in a Split/Quad card's **Value** picker. The Live Activity and the Live OBD2 widget keep the original four.
+- Demo mode simulates all nine. Older saved readings still load (the new values start empty).
+### Not verified yet
+- Which of the new PIDs the 408 answers (fuel level often isn't reported by PSA/Stellantis ECUs).
+
 ## Fix — OBD2 readings dropping out; per-card OBD2 value
 ### Done
 - **Dongle timeouts:** every command's timeout now applies to that command only. Before, a late timer from an earlier command (e.g. the 4 s `ATZ` reset) cancelled whatever command was waiting, so the slow first RPM request (while the adapter searches for the car's protocol) often failed: RPM read on one start and not the next. The same went for the 12 s connect timer after a quick reconnect, and for live sessions at a short "Read every". After setup the app now sends `0100` once with a 6 s timeout so the protocol search finishes before the first reading.

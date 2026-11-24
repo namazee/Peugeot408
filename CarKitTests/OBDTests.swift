@@ -105,4 +105,39 @@ struct OBDTests {
         #expect(second.compact.value == .text("+0.75 bar"))
         #expect(first.face?.unit == "rpm")
     }
+
+    /// Spec §4 item 5: the extra PIDs' SAE J1979 formulas.
+    @Test func extraValueFormulas() throws {
+        #expect(try OBDParser.speed(OBDParser.dataBytes(for: "010D", in: "410D3C\r\r>")) == 60)
+        #expect(try OBDParser.intakeAir(OBDParser.dataBytes(for: "010F", in: "410F4E\r>")) == 38)  // 78 − 40
+        #expect(try OBDParser.percent(OBDParser.dataBytes(for: "0111", in: "4111FF")) == 100)
+        #expect(try OBDParser.percent(OBDParser.dataBytes(for: "0104", in: "41 04 80")) == 50)    // 128 × 100 / 255
+        #expect(try OBDParser.percent(OBDParser.dataBytes(for: "012F", in: "412F00")) == 0)
+    }
+
+    @Test func extraValueText() {
+        let reading = OBDReading(speedKmh: 72, intakeAirC: 35, throttlePercent: 18, engineLoadPercent: 41, fuelLevelPercent: 55, date: .now)
+        #expect(reading.text(.speed) == "72 km/h")
+        #expect(reading.text(.intakeAir) == "35°C")
+        #expect(reading.text(.fuelLevel) == "55%")
+        #expect(reading.gauge(.throttle).unit == "%")
+        #expect(reading.gauge(.speed).number == "72")
+    }
+
+    /// Older obd.json files (four values only) still load; the extra values are nil.
+    @Test func decodesOlderReadings() throws {
+        let json = #"{"rpm":800,"coolantC":90,"boostBar":-0.3,"voltage":14.1,"date":0}"#
+        let reading = try JSONDecoder().decode(OBDReading.self, from: Data(json.utf8))
+        #expect(reading.rpm == 800)
+        #expect(reading.speedKmh == nil)
+        #expect(reading.text(.fuelLevel) == "--")
+    }
+
+    @Test func demoFillsEveryValue() {
+        let start = Date.now
+        let reading = OBDDemo.reading(at: start.addingTimeInterval(13), sessionStart: start)
+        for value in OBDValue.allCases {
+            #expect(reading.text(value) != "--", "demo has no \(value.displayName)")
+        }
+    }
 }

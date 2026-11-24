@@ -127,9 +127,8 @@ final class DriveSession {
 
     /// One poll of every supported PID (barometric once at the start, voltage every 5th cycle).
     private func pollOnce(cycle: Int) async -> OBDReading {
-        var result = OBDReading(
-            rpm: reading?.rpm, coolantC: reading?.coolantC, boostBar: reading?.boostBar, voltage: reading?.voltage, date: .now
-        )
+        var result = reading ?? OBDReading(date: .now)
+        result.date = .now
         if !unsupported.contains(.rpm), let bytes = await ask(.rpm, for: .rpm) {
             result.rpm = try? OBDParser.rpm(bytes)
         }
@@ -141,6 +140,22 @@ final class DriveSession {
         }
         if !unsupported.contains(.boost), let bytes = await ask(.intakePressure, for: .boost), let map = try? OBDParser.kilopascals(bytes) {
             result.boostBar = OBDParser.boostBar(manifoldKPa: map, barometricKPa: barometricKPa)
+        }
+        // Extra values (spec §4 item 5): speed every poll, the rest less often to keep polls quick.
+        if !unsupported.contains(.speed), let bytes = await ask(.speed, for: .speed) {
+            result.speedKmh = try? OBDParser.speed(bytes)
+        }
+        if cycle % 2 == 0, !unsupported.contains(.throttle), let bytes = await ask(.throttle, for: .throttle) {
+            result.throttlePercent = try? OBDParser.percent(bytes)
+        }
+        if cycle % 2 == 0, !unsupported.contains(.engineLoad), let bytes = await ask(.engineLoad, for: .engineLoad) {
+            result.engineLoadPercent = try? OBDParser.percent(bytes)
+        }
+        if cycle % 5 == 0, !unsupported.contains(.intakeAir), let bytes = await ask(.intakeAir, for: .intakeAir) {
+            result.intakeAirC = try? OBDParser.intakeAir(bytes)
+        }
+        if cycle % 10 == 0, !unsupported.contains(.fuelLevel), let bytes = await ask(.fuelLevel, for: .fuelLevel) {
+            result.fuelLevelPercent = try? OBDParser.percent(bytes)
         }
         if cycle % 5 == 0, !unsupported.contains(.voltage) {
             if let reply = try? await link.send(OBDCommand.voltage.rawValue), let volts = try? OBDParser.voltage(reply) {

@@ -20,6 +20,13 @@ struct OBDView: View {
                         OBDTile(value: .coolant, reading: reading, big: 30, unsupported: session.unsupported.contains(.coolant))
                         OBDTile(value: .voltage, reading: reading, big: 30, unsupported: session.unsupported.contains(.voltage))
                     }
+                    // Extra values (spec §4 item 5), smaller, three per row.
+                    let extras: [OBDValue] = [.speed, .throttle, .engineLoad, .intakeAir, .fuelLevel]
+                    LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 10), count: 3), alignment: .leading, spacing: 12) {
+                        ForEach(extras) { value in
+                            OBDTile(value: value, reading: reading, big: 20, unsupported: session.unsupported.contains(value))
+                        }
+                    }
                 }
                 .padding(.vertical, 6)
                 LabeledContent("Status", value: session.status)

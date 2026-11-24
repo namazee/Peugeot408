@@ -263,23 +263,17 @@ public extension DataCard {
             let rows = [CardFace.Row("Coolant", reading.text(.coolant)), CardFace.Row("Battery", reading.text(.voltage)),
                         CardFace.Row("RPM", reading.text(.rpm))]
             // Spec §4b: the card's value, icon and gauge follow its "Value" choice (Boost by default).
-            let value: String?, unit: String, detail: String, progress: Double?
-            switch s.focus {
-            case .boost:
-                value = reading.boostBar.map { String(format: "%+.2f", $0) }
-                unit = "bar"; detail = reading.text(.coolant); progress = reading.boostBar.map { ($0 + 1) / 2.5 }
-            case .rpm:
-                value = reading.rpm.map { $0.formatted() }
-                unit = "rpm"; detail = reading.text(.boost); progress = reading.rpm.map { Double($0) / 7_000 }
-            case .coolant:
-                value = reading.coolantC.map(String.init)
-                unit = "°C"; detail = reading.text(.voltage); progress = reading.coolantC.map { Double($0 - 40) / 80 }
-            case .voltage:
-                value = reading.voltage.map { String(format: "%.1f", $0) }
-                unit = "V"; detail = reading.text(.coolant); progress = reading.voltage.map { ($0 - 11) / 4 }
+            let gauge = reading.gauge(s.focus)
+            let detail: String = switch s.focus {
+            case .boost, .voltage: reading.text(.coolant)
+            case .coolant: reading.text(.voltage)
+            case .rpm, .throttle, .engineLoad: reading.text(.boost)
+            case .speed: reading.text(.rpm)
+            case .intakeAir: reading.text(.coolant)
+            case .fuelLevel: reading.text(.speed)
             }
-            return CardFace(symbol: s.focusSymbol, label: s.focus.displayName, value: .text(value ?? "--"), unit: unit,
-                            detail: detail, progress: progress, meter: .gauge, urgency: s.urgency, rows: rows)
+            return CardFace(symbol: s.focusSymbol, label: s.focus.displayName, value: .text(gauge.number ?? "--"), unit: gauge.unit,
+                            detail: detail, progress: gauge.progress, meter: .gauge, urgency: s.urgency, rows: rows)
 
         case .map, .photos, .music, .lyrics:
             return nil
