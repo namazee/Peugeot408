@@ -134,7 +134,7 @@ For each widget: an app screen to enter or configure the data, a timeline provid
    * Widget: location name, floor/bay, "parked 2h 14m ago" (live relative time).
 5. Live OBD2 (Live Activity): build this last.
    * CoreBluetooth client for a BLE ELM327-type OBD2 dongle (e.g. Vgate iCar Pro BLE / OBDLink CX). Make the BLE service/characteristic UUIDs configurable and add a dongle scan screen.
-   * Read: coolant temp (PID 0x05), intake manifold pressure (0x0B) minus barometric pressure (0x33) = boost in bar, battery voltage (`ATRV`), RPM (0x0C). Poll at a modest rate and handle unsupported PIDs gracefully (PSA/Stellantis ECUs may not report every PID).
+   * Read: coolant temp (PID 0x05), intake manifold pressure (0x0B) minus barometric pressure (0x33) = boost in bar, battery voltage (`ATRV`), RPM (0x0C). Poll at a modest rate and handle unsupported PIDs gracefully (PSA/Stellantis ECUs may not report every PID). Each command's timeout applies to that command only; a late timeout from an earlier command must never cancel a newer one (the first PID after connecting can take several seconds while the adapter searches for the car's protocol).
    * Show the values in an ActivityKit Live Activity (which CarPlay displays) while a "Drive session" is running. Also write the latest values to the App Group so a normal widget can show the last-known values with a timestamp.
    * Add a demo mode with simulated values so the Live Activity can be tested without a dongle.
 
@@ -196,6 +196,7 @@ Goal: I set things up once in the app, and my car's CarPlay screen reflects it a
    * Each card in a layout is assigned its own data source or design (any widget from section 4 or the Studio), so 3 visible slots in Split = 6 cards on screen.
    * Split card design: icon + short label + one large value, with minimum font sizes so it stays readable on the car screen; a thin divider or gap between cards; the "due soon/overdue" colours still apply per card.
    * Quad: icon + value only, no labels; the app warns that it's harder to read while driving.
+   * A Live OBD2 card in a Split or Quad layout has a "Value" picker: RPM, Coolant, Boost or Battery (Boost by default, as before), so two OBD2 cards can show different values. The card's icon, label and gauge follow the chosen value.
    * The Slots tab mock CarPlay screen shows the real 3-column layout with split cards, and I can tap any card to change it.
    * Default setup: Slot 1 = Next prayer / Road tax, Slot 2 = Service tracker / Fuel log, Slot 3 = Weather & haze / Parking.
    * Slots 4 and 5 stay available for stacking behind the visible columns (Smart Rotate).
