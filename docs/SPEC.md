@@ -90,6 +90,15 @@ Work in phases (below). At the end of each phase: commit, push, make sure the CI
    * **Mountain Pass:** layered misty mountains with a winding road, my car photo, the greeting and clock left, the temperature and weather place right.
    * **Departure Board:** three split-flap boards, one per column: the next prayer and its time, the weather, and km to service.
   New stickers: light cone, palms, waves, mountains, start lights and chequered strip. The template gallery gets a **Hero** section (the old Hero template moves there from Car) that always previews at the panorama shape across the full width, whatever the Size picker says. On the Panorama hero screen, "Create a Hero design" lets me pick any Hero template.
+* A third round of Hero templates (Phase 19), with the same rules (my car photo in the middle, text kept inside one column):
+   * **Highway Lights:** a night highway in perspective with red and white light trails, the clock and date left, the temperature and weather place right.
+   * **Paddy Fields:** green paddy terraces under a sunrise with a low sun and mist, the greeting and clock left, the temperature and weather place right.
+   * **Rainforest:** layered rainforest canopy with light rays coming through, the clock and date left, the next prayer countdown right.
+   * **Monsoon Storm:** dark storm clouds with a lightning bolt and rain streaks, the clock and date left, the temperature and rain line right.
+   * **Pit Lane:** a garage with overhead strip lights, tyre stacks and a painted pit box line, the clock left and km to service right.
+   * **Blueprint:** a blue technical-drawing grid with dimension lines around my car photo (drawn as white outlines where possible), the clock and date left, km to service right.
+  New stickers: light trails, paddy terraces, rainforest canopy, lightning bolt, strip lights, tyre stack and dimension lines. All original artwork.
+* One-tap Hero (Phase 19): in the template gallery, tapping a Hero template offers **Use as Panorama** (saves it as a design, selects it on the Panorama hero screen and turns Panorama on, after the same "replaces Slots 1–3" confirmation) and **Customise** (opens the builder, as before).
 * New data fields:
    * a time-of-day greeting with my name ("Good morning, …" / "Selamat pagi, …");
    * the weather place and condition ("Kuala Lumpur · Sunny").
@@ -277,6 +286,23 @@ Goal: I set things up once in the app, and my car's CarPlay screen reflects it a
    * **Vinyl** (Data): a vinyl record with grooves and a coloured centre label, and the value beside it; bindable to any source (the README preview shows it with Music).
    * **Comic Pop** (Data): a bold halftone background with a comic burst behind the value; bindable to any source.
   New pieces: a halftone texture; stickers: vinyl record, comic burst and letter grid.
+* A third round of templates (Phase 19), marked "New", each with its own Small and Medium layout:
+   * **Tachometer** (Realistic): a big rev-counter dial (0–8 with a red zone) whose needle follows the value's progress, the value in a small window. Medium adds the label and second value. Any data source.
+   * **Compass** (Realistic): a compass rose with the needle pointing by the value's progress and the value in the centre. Medium adds the label and second value. Any data source.
+   * **Cassette** (Realistic): a cassette tape with the label and value written on its paper label and reels. Medium adds the second value. Any data source.
+   * **Neon Tube** (Realistic): the value in bent glowing glass-tube lettering on a dark brick wall with mounting clips. Medium adds the label in a second colour. Any data source.
+   * **Glow Orb** (Realistic): a glass sphere that fills with glowing liquid by the value's progress, the value below it. Medium adds the label and second value. Any data source.
+   * **Postage Stamp** (Realistic): a stamp with a perforated edge, a small illustration (my car photo if set), the value as the denomination and a round postmark. Medium adds the label and second value. Any data source.
+   * **Tear-off Calendar** (Clock & Date): a paper day-calendar page with rings at the top, the weekday, a big day number and the month, plus the Hijri date small at the bottom.
+   * **LCD Watch** (Clock & Date): a retro digital watch face with grey LCD segments, the time, weekday and date.
+  New pieces: a tachometer dial (needle by progress), a compass rose, a glow orb (fill by progress), a perforated stamp edge; stickers: cassette tape, neon tube clips, calendar rings and postmark.
+* One-tap use (Phase 19): tapping a template in the gallery offers **Use on Slot 1–5** (saves it as a design with the chosen data source and size, puts it on that slot and reloads the widgets; on a Split or Quad slot it replaces the slot with a Single layout after a warning) and **Customise** (opens the builder, as before).
+* Ready-made setups (Phase 19): a **Setups** section at the top of the gallery, each filling all five slots in one tap, after a confirmation. Before applying, the current slots (and Panorama setting) are saved, and an **Undo setup** button on the Slots tab brings them back until another setup is applied. The setups:
+   * **Daily Driver:** Slot 1 Prayer / Weather, Slot 2 Service / Fuel, Slot 3 Parking / Road tax (all Split), Slot 4 Commute, Slot 5 Touch 'n Go. App look.
+   * **Night Cruise:** Neon look on every slot; Slot 1 the Digital Clock template, Slot 2 Weather / Live OBD2, Slot 3 Fuel / Parking (Split), Slot 4 Prayer, Slot 5 Music.
+   * **Road Trip:** Slot 1 Commute / Weather, Slot 2 Fuel / Touch 'n Go, Slot 3 Parking / Service (all Split), Slot 4 Map, Slot 5 Prayer.
+   * **Ramadan:** Slot 1 the Ramadan seasonal design (iftar countdown), Slot 2 the Hijri Date template, Slot 3 Prayer / Weather (Split), Slot 4 Service, Slot 5 Fuel.
+  Setups turn Panorama off (it would cover Slots 1–3).
 * Seasonal packs for Malaysia that the app can switch to automatically on the right dates: Hari Raya Aidilfitri, Ramadan (with an iftar countdown using the prayer module's Maghrib time), Aidiladha, Merdeka/Malaysia Day, Chinese New Year, Deepavali, Christmas, New Year. All original artwork, drawn in SwiftUI shapes/SF Symbols or as bundled assets generated in Remotion; nothing copied from other apps.
 
 ### Custom builder
@@ -367,6 +393,7 @@ Widgets themselves are static SwiftUI, so use Remotion only for the animated ass
 16. Realistic templates (§4b Templates): the 10 realistic templates in Small and Medium, the new dial, odometer, segmented bar, leather, frosted-glass and live-sky pieces, the Realistic gallery section, and render tests.
 17. More templates (§4b Templates, §3 Panorama hero): 8 more realistic templates, 6 more Hero templates, the Hero gallery section and template picker, the split-flap, wood, brick, rain and new sticker pieces, and render tests.
 18. Another round of templates (§4b Templates, §3 Panorama hero): 8 more realistic templates, 6 more Hero templates, 6 templates in the other sections (Flip Clock, Word Clock, Hijri Date, Moon Phase, Vinyl, Comic Pop), their new layers, fields, textures and stickers, and render tests.
+19. One-tap templates (§4b Templates, §3 Panorama hero): Use on Slot / Use as Panorama from the gallery, the four ready-made Setups with Undo, 6 more Hero templates, 8 more templates (Tachometer, Compass, Cassette, Neon Tube, Glow Orb, Postage Stamp, Tear-off Calendar, LCD Watch), their new pieces and stickers, and render tests.
 
 ## 9. Quality bar
 
