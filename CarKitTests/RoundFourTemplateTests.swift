@@ -116,11 +116,13 @@ struct RoundFourTemplateTests {
             // Studio designs the setup points at are the ones it asked to save.
             let ids = Set(state.slots.compactMap(\.studioDesignID))
             #expect(ids == Set(resolved.use.map(\.id)), "\(setup)")
-            #expect(state.undoLastSetup())
+            let undone = state.undoLastSetup()
+            #expect(undone)
             #expect(state.slots == before.slots, "\(setup) undo")
             #expect(state.panorama?.enabled == true)
             #expect(state.undoSetup == nil)
-            #expect(!state.undoLastSetup())
+            let undoneAgain = state.undoLastSetup()
+            #expect(!undoneAgain)
         }
     }
 
