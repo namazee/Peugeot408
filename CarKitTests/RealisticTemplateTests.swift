@@ -14,7 +14,7 @@ struct RealisticTemplateTests {
 
     @Test func realisticGroupComesFirstWithAllItsTemplates() {
         #expect(TemplateGroup.allCases.first == .realistic)
-        #expect(TemplateGroup.realistic.styles.count == 26)
+        #expect(TemplateGroup.realistic.styles.count == 32)  // 10 + 8 (Phase 17) + 8 (Phase 18) + 6 (Phase 19)
         #expect(TemplateGroup.realistic.styles.allSatisfy { $0.isNew && $0.usesDataSource })
     }
 
