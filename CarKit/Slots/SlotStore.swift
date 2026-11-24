@@ -116,7 +116,7 @@ public enum SlotTimeline {
         }
         if design.effectiveLayout != .single {
             let parts = design.layoutCards.map { card in
-                choiceContent(card.primaryChoice, data: data, studio: studio, at: date, calendar: calendar) ?? .design(card)
+                focused(choiceContent(card.primaryChoice, data: data, studio: studio, at: date, calendar: calendar), on: card.obdValue) ?? .design(card)
             }
             return .cards(design.effectiveLayout, parts)
         }
@@ -129,6 +129,12 @@ public enum SlotTimeline {
     }
 
     /// Single layout: puts the slot's centre picture into a data card (not the image cards).
+    /// Split/Quad: a Live OBD2 card shows the value picked for it (spec §4b).
+    static func focused(_ content: SlotContent?, on value: OBDValue?) -> SlotContent? {
+        guard let value, case .data(.obd(let summary)) = content else { return content }
+        return .data(.obd(summary.focused(on: value)))
+    }
+
     static func withCentrePicture(_ content: SlotContent, design: SlotDesign) -> SlotContent {
         guard let file = design.centerImageFile, case .data(let card) = content,
               ![DataSource.map, .photos, .music].contains(card.source) else { return content }

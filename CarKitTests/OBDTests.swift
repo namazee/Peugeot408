@@ -85,4 +85,24 @@ struct OBDTests {
         #expect(reading.text(.voltage) == "14.1 V")
         #expect(OBDReading(date: .now).text(.rpm) == "--")
     }
+
+    /// Spec §4b: two Live OBD2 cards in one slot can show different values; no choice = Boost.
+    @Test func splitCardsShowTheirChosenValue() {
+        let data = CarData(obd: OBDState(last: OBDReading(rpm: 2_150, coolantC: 88, boostBar: 0.75, voltage: 14.1, date: .now)))
+        var top = SlotDesign.card(.obd)
+        top.obdValue = .rpm
+        var design = SlotDesign.starter(for: 2)
+        design.layout = .split
+        design.cards = [top, .card(.obd)]
+        let content = SlotTimeline.content(at: .now, design: design, rotations: [], seasonal: false, data: data, studio: .empty)
+        guard case .cards(_, let parts) = content,
+              case .data(let first) = parts[0], case .data(let second) = parts[1] else {
+            Issue.record("expected two data cards"); return
+        }
+        #expect(first.compact.label == "RPM")
+        #expect(first.compact.value == .text("2,150") || first.compact.value == .text("2150"))
+        #expect(second.compact.label == "Boost")
+        #expect(second.compact.value == .text("+0.75 bar"))
+        #expect(first.face?.unit == "rpm")
+    }
 }

@@ -136,6 +136,8 @@ public struct SlotDesign: Codable, Sendable, Equatable, Hashable {
     /// Custom text: size of the big value and of the label, 0.7…1.5 (nil = 1).
     public var valueScale: Double?
     public var labelScale: Double?
+    /// Live OBD2 card in a Split/Quad layout: which value it shows big (nil = Boost). Nil in older files.
+    public var obdValue: OBDValue?
 
     public init(value: String, title: String, symbol: String, style: SlotStyle = .dark, source: DataSource? = nil, studioDesignID: UUID? = nil, rotations: [SlotRotation]? = nil, layout: SlotLayout? = nil, cards: [SlotDesign]? = nil, imageFile: String? = nil, look: CardLook? = nil, backgroundHex: UInt32? = nil, centerImageFile: String? = nil, textAlignment: SlotTextAlignment? = nil, valueScale: Double? = nil, labelScale: Double? = nil) {
         self.value = value

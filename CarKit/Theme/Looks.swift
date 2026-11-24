@@ -260,12 +260,26 @@ public extension DataCard {
 
         case .obd(let s):
             guard let reading = s.reading else { return nil }
-            let boost = reading.boostBar
-            return CardFace(symbol: "gauge.with.dots.needle.67percent", label: "Boost",
-                            value: .text(boost.map { String(format: "%+.2f", $0) } ?? "--"), unit: "bar",
-                            detail: reading.text(.coolant), progress: boost.map { ($0 + 1) / 2.5 }, meter: .gauge, urgency: s.urgency,
-                            rows: [CardFace.Row("Coolant", reading.text(.coolant)), CardFace.Row("Battery", reading.text(.voltage)),
-                                   CardFace.Row("RPM", reading.text(.rpm))])
+            let rows = [CardFace.Row("Coolant", reading.text(.coolant)), CardFace.Row("Battery", reading.text(.voltage)),
+                        CardFace.Row("RPM", reading.text(.rpm))]
+            // Spec §4b: the card's value, icon and gauge follow its "Value" choice (Boost by default).
+            let value: String?, unit: String, detail: String, progress: Double?
+            switch s.focus {
+            case .boost:
+                value = reading.boostBar.map { String(format: "%+.2f", $0) }
+                unit = "bar"; detail = reading.text(.coolant); progress = reading.boostBar.map { ($0 + 1) / 2.5 }
+            case .rpm:
+                value = reading.rpm.map { $0.formatted() }
+                unit = "rpm"; detail = reading.text(.boost); progress = reading.rpm.map { Double($0) / 7_000 }
+            case .coolant:
+                value = reading.coolantC.map(String.init)
+                unit = "°C"; detail = reading.text(.voltage); progress = reading.coolantC.map { Double($0 - 40) / 80 }
+            case .voltage:
+                value = reading.voltage.map { String(format: "%.1f", $0) }
+                unit = "V"; detail = reading.text(.coolant); progress = reading.voltage.map { ($0 - 11) / 4 }
+            }
+            return CardFace(symbol: s.focusSymbol, label: s.focus.displayName, value: .text(value ?? "--"), unit: unit,
+                            detail: detail, progress: progress, meter: .gauge, urgency: s.urgency, rows: rows)
 
         case .map, .photos, .music, .lyrics:
             return nil

@@ -79,7 +79,7 @@ public extension DataCard {
             case .idle: return CompactCard(symbol: "quote.bubble.fill", label: "Lyrics", value: .text("Nothing playing"))
             }
         case .obd(let s):
-            return CompactCard(symbol: "gauge.with.dots.needle.67percent", label: "Boost", value: .text(s.reading?.text(.boost) ?? "--"), urgency: s.urgency)
+            return CompactCard(symbol: s.focusSymbol, label: s.focus.displayName, value: .text(s.reading?.text(s.focus) ?? "--"), urgency: s.urgency)
         }
     }
 }

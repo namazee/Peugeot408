@@ -146,6 +146,17 @@ struct SlotEditorView: View {
         ForEach(Array(names.enumerated()), id: \.offset) { index, name in
             Section {
                 ChoicePicker(title: "Shows", choice: cardChoice(index), allowsText: true, designs: studio.state.designs)
+                if draft.card(index).source == .obd && draft.card(index).studioDesignID == nil {
+                    // Spec §4b: each Live OBD2 card picks the value it shows big.
+                    Picker("Value", selection: Binding(
+                        get: { draft.card(index).obdValue ?? .boost },
+                        set: { value in updateCard(index) { $0.obdValue = value } }
+                    )) {
+                        ForEach(OBDValue.allCases) { value in
+                            Label(value.displayName, systemImage: value.symbol).tag(value)
+                        }
+                    }
+                }
                 if draft.card(index).source == nil && draft.card(index).studioDesignID == nil {
                     TextField("Big value (optional)", text: cardText(index, \.value))
                     TextField("Short label (optional)", text: cardText(index, \.title))

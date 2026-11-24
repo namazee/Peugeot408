@@ -39,6 +39,10 @@ public enum OBDCommand: String, Sendable, CaseIterable {
     /// Setup sent once after connecting: reset, echo off, linefeeds off, spaces off,
     /// headers off, automatic protocol.
     public static let initSequence = ["ATZ", "ATE0", "ATL0", "ATS0", "ATH0", "ATSP0"]
+
+    /// Mode 01 PID 00 (supported PIDs 01–20). Sent once after setup so the adapter finds the
+    /// car's protocol before the first real reading.
+    public static let supportedPIDs = "0100"
 }
 
 /// One poll result.
@@ -254,12 +258,26 @@ public struct OBDSummary: Sendable, Equatable {
     public let isDemo: Bool
     public let sessionActive: Bool
     public let unsupported: Set<OBDValue>
+    /// The value a Split/Quad card shows big (spec §4b "Value" picker). Boost unless chosen.
+    public var focus: OBDValue
 
-    public init(reading: OBDReading?, isDemo: Bool, sessionActive: Bool, unsupported: Set<OBDValue>) {
+    public init(reading: OBDReading?, isDemo: Bool, sessionActive: Bool, unsupported: Set<OBDValue>, focus: OBDValue = .boost) {
         self.reading = reading
         self.isDemo = isDemo
         self.sessionActive = sessionActive
         self.unsupported = unsupported
+        self.focus = focus
+    }
+
+    public func focused(on value: OBDValue) -> OBDSummary {
+        var copy = self
+        copy.focus = value
+        return copy
+    }
+
+    /// Icon for the focused value (Boost keeps the gauge it always had).
+    public var focusSymbol: String {
+        focus == .boost ? "gauge.with.dots.needle.67percent" : focus.symbol
     }
 
     /// Amber when hot or the battery is low.

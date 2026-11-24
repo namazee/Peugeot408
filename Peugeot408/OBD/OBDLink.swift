@@ -61,6 +61,10 @@ final class OBDLink: NSObject {
     @ObservationIgnored private var pending: CheckedContinuation<String, Error>?
     @ObservationIgnored private var connectWaiters: [CheckedContinuation<Bool, Never>] = []
     @ObservationIgnored private var poweredOnWaiters: [CheckedContinuation<Void, Never>] = []
+    /// Spec §4 item 5: each timeout only applies to its own command / connect attempt. These count
+    /// up on every send and connect, and a timer whose number is no longer current does nothing.
+    @ObservationIgnored private var commandNumber = 0
+    @ObservationIgnored private var connectNumber = 0
 
     private func makeCentral() -> CBCentralManager {
         if let central { return central }
@@ -115,12 +119,15 @@ final class OBDLink: NSObject {
         peripheral = target
         target.delegate = self
         state = .connecting
+        connectNumber += 1
+        let attempt = connectNumber
         let connected = await withCheckedContinuation { continuation in
             connectWaiters.append(continuation)
             central.connect(target)
             Task { @MainActor [weak self] in
                 try? await Task.sleep(for: .seconds(12))
-                self?.resolveConnect(false, message: "The dongle didn't answer. Is the ignition on?")
+                guard let self, self.connectNumber == attempt else { return }
+                self.resolveConnect(false, message: "The dongle didn't answer. Is the ignition on?")
             }
         }
         guard connected else { return false }
@@ -128,6 +135,10 @@ final class OBDLink: NSObject {
             for command in OBDCommand.initSequence {
                 _ = try await send(command, timeout: command == "ATZ" ? 4 : 2)
             }
+            // The first PID makes the adapter search for the car's protocol, which can take
+            // several seconds; do it here with a long timeout so the first real reading isn't lost.
+            // No answer is fine (ignition off): the session's own reads report that.
+            _ = try? await send(OBDCommand.supportedPIDs, timeout: 6)
             state = .ready
             return true
         } catch {
@@ -160,6 +171,8 @@ final class OBDLink: NSObject {
         guard let peripheral, let writeCharacteristic else { throw LinkError.notReady }
         failPending(LinkError.timeout("previous command"))
         buffer = ""
+        commandNumber += 1
+        let number = commandNumber
         let data = Data((command + "\r").utf8)
         let type: CBCharacteristicWriteType = writeCharacteristic.properties.contains(.writeWithoutResponse) ? .withoutResponse : .withResponse
         return try await withCheckedThrowingContinuation { continuation in
@@ -167,7 +180,9 @@ final class OBDLink: NSObject {
             peripheral.writeValue(data, for: writeCharacteristic, type: type)
             Task { @MainActor [weak self] in
                 try? await Task.sleep(for: .seconds(timeout))
-                self?.failPending(LinkError.timeout(command))
+                // A newer command has been sent since: its own timer handles it.
+                guard let self, self.commandNumber == number else { return }
+                self.failPending(LinkError.timeout(command))
             }
         }
     }
