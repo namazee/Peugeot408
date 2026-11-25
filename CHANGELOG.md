@@ -4,6 +4,13 @@ Fresh session? Read `docs/SPEC.md`, then this file, then continue from **Current
 
 ## Current phase: 19 (One-tap templates) — built, waiting for you to try it. Phase 18's templates, the Phase 15 store steps (SETUP.md §15) and the Phase 8 car test are still yours.
 
+## Fix — OBD2 slow on the car screen
+### Done
+- During a drive session, the Live OBD2 widget and every slot showing OBD2 are now asked to redraw: every 5 s while DashCraft is open on the iPhone, every 60 s in the background. Before, they were only redrawn when the session started and stopped.
+- The Live OBD2 screen explains that the iPhone does the reading and that the Live Activity is the quickest view.
+### Not verified yet
+- In the car: slots showing OBD2 update every few seconds with DashCraft open on the phone, and about once a minute with the phone locked.
+
 ## Phase 19 — One-tap templates
 ### Done
 - **One-tap use:** tapping a template in Studio → Template gallery now asks what to do: **Use on Slot 1–5** (saves it as a design with the chosen data and size and puts it on that slot; a Split or Quad slot's button says it replaces its cards) or **Customise** (the builder, as before). Hero templates offer **Use as Panorama** (saves it, selects it and turns Panorama on; the dialog says it replaces Slots 1–3).

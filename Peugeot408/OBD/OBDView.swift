@@ -58,7 +58,7 @@ struct OBDView: View {
                     }
                 }
             } footer: {
-                Text("While a session runs, a Live Activity shows the values on the Lock Screen and in CarPlay. Keep DashCraft open or in the background; the last values are saved for the Live OBD2 widget.")
+                Text("Your iPhone reads the dongle; the car screen only shows what the phone sends. The Live Activity is the quickest view (every 2 s). Widgets and slot cards redraw every 5 s while DashCraft is open on the iPhone, and about once a minute in the background, when iOS allows.")
             }
 
             Section {

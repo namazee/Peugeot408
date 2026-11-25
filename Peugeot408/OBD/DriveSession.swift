@@ -2,6 +2,7 @@ import ActivityKit
 import CarKit
 import Foundation
 import Observation
+import UIKit
 import WidgetKit
 
 /// Runs a drive session: polls the dongle (or the demo), shows the values in a Live Activity
@@ -25,12 +26,17 @@ final class DriveSession {
     @ObservationIgnored private let directory: URL
     @ObservationIgnored private var lastActivityUpdate = Date.distantPast
     @ObservationIgnored private var lastSave = Date.distantPast
+    @ObservationIgnored private var lastWidgetReload = Date.distantPast
     /// Barometric pressure is read once per session (it barely changes); sea level until then.
     @ObservationIgnored private var barometricKPa = OBDParser.standardBarometricKPa
     @ObservationIgnored private var misses: [OBDValue: Int] = [:]
 
     /// Live Activity updates are rate-limited by iOS; every 2 s is plenty for glancing.
     static let activityInterval: TimeInterval = 2
+    /// Widgets and slots showing OBD2 are redrawn this often during a session (spec §4 item 5):
+    /// quickly while the app is open (not counted against the widget budget), gently in the background.
+    static let foregroundWidgetInterval: TimeInterval = 5
+    static let backgroundWidgetInterval: TimeInterval = 60
 
     init(directory: URL = AppGroup.containerURL) {
         self.directory = directory
@@ -58,6 +64,7 @@ final class DriveSession {
         lastError = nil
         isDemo = demo
         misses = [:]
+        lastWidgetReload = .distantPast
         barometricKPa = OBDParser.standardBarometricKPa
         let started = Date()
 
@@ -119,7 +126,7 @@ final class DriveSession {
             }
             reading = next
             await pushActivity()
-            save(force: false, sessionActive: true)
+            refreshWidgets()
             cycle += 1
             try? await Task.sleep(for: .seconds(interval))
         }
@@ -230,7 +237,17 @@ final class DriveSession {
         await current?.end(ActivityContent(state: state, staleDate: nil), dismissalPolicy: .after(.now.addingTimeInterval(15 * 60)))
     }
 
-    /// Saves the last values (every 10 s while running) so the OBD2 widget shows them with a time.
+    /// Saves the latest values and asks the OBD2 widgets and slots to redraw, at most every
+    /// 5 s while DashCraft is open on the iPhone and every 60 s in the background.
+    private func refreshWidgets() {
+        let interval = UIApplication.shared.applicationState == .active ? Self.foregroundWidgetInterval : Self.backgroundWidgetInterval
+        guard Date().timeIntervalSince(lastWidgetReload) >= interval else { return }
+        lastWidgetReload = .now
+        save(force: true, sessionActive: true)
+        reloadWidgets()
+    }
+
+    /// Saves the last values so the OBD2 widget shows them with a time.
     private func save(force: Bool, sessionActive: Bool) {
         guard force || Date().timeIntervalSince(lastSave) >= 10 else { return }
         lastSave = .now
