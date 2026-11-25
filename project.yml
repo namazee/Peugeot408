@@ -19,7 +19,7 @@ settings:
     DEVELOPMENT_TEAM: YCS7MW628Y          # CI can override with the TEAM_ID secret
     APP_GROUP_ID: group.$(BUNDLE_PREFIX).peugeot408
     FLAVOUR_CONDITION: ""                 # "STORE_BUILD" for the App Store build (spec §10); CI sets it
-    MARKETING_VERSION: "1.1"
+    MARKETING_VERSION: "1.2"
     CURRENT_PROJECT_VERSION: "1"          # CI sets this from the GitHub run number
     # ----------------------------------------------------------------------
     SWIFT_VERSION: "6.0"

@@ -4,6 +4,9 @@ Fresh session? Read `docs/SPEC.md`, then this file, then continue from **Current
 
 ## Current phase: 19 (One-tap templates) — built, waiting for you to try it. Phase 18's templates, the Phase 15 store steps (SETUP.md §15) and the Phase 8 car test are still yours.
 
+## Version 1.2
+- Apple approved version 1.1 (store build 64), so TestFlight no longer accepts 1.1 builds. New builds are 1.2. Nothing is submitted to the App Store until you create a 1.2 version in App Store Connect.
+
 ## Fix — OBD2 slow on the car screen
 ### Done
 - During a drive session, the Live OBD2 widget and every slot showing OBD2 are now asked to redraw: every 5 s while DashCraft is open on the iPhone, every 60 s in the background. Before, they were only redrawn when the session started and stopped.
