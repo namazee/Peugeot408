@@ -2,7 +2,17 @@
 
 Fresh session? Read `docs/SPEC.md`, then this file, then continue from **Current phase**.
 
-## Current phase: 19 (One-tap templates) — built, waiting for you to try it. Phase 18's templates, the Phase 15 store steps (SETUP.md §15) and the Phase 8 car test are still yours.
+## Current phase: 20 (Simpler car screen) — built, waiting for you to try it. Phase 18–19 templates, the Phase 15 store steps (SETUP.md §15) and the Phase 8 car test are still yours.
+
+## Phase 20 — Simpler car screen
+### Done
+- Drive panel values: Car → Live OBD2 → "Drive panel in the car" picks the four values on the Drive session panel (CarPlay, Lock Screen, Dynamic Island) from all nine. Picking one that's already there swaps them. Panel values are read at least every 2nd poll (fuel every 5th).
+- "Start Drive Session" and "Stop Drive Session" Shortcut actions. The connect and disconnect automation guides have an optional step for them, and Live OBD2 has a "Start automatically in the car" row.
+- Slots screen: the car-screen mock, Undo setup, Panorama hero and "More options" (slot order and the flash test).
+- Slot editor: "Pick what it shows" grid of big live previews of every data widget and Studio design; tap, then Save. Everything else is under "More options".
+- Tests: DrivePanelTests.
+### Not verified yet
+- In the car: changing panel values during a drive; the Start/Stop Drive Session automations, including starting from the background when CarPlay connects; the new Slots screen and editor.
 
 ## Version 1.2
 - Apple approved version 1.1 (store build 64), so TestFlight no longer accepts 1.1 builds. New builds are 1.2. Nothing is submitted to the App Store until you create a 1.2 version in App Store Connect.

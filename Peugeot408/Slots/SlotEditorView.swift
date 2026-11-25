@@ -12,6 +12,8 @@ struct SlotEditorView: View {
     let slot: Int
     let focusCard: Int
     @State private var draft: SlotDesign
+    /// Spec §4b (Phase 20): everything beyond the quick pick sits under "More options", collapsed at first.
+    @State private var showMore = false
 
     init(slot: Int, initial: SlotDesign, focusCard: Int = 0) {
         self.slot = slot
@@ -56,41 +58,30 @@ struct SlotEditorView: View {
                     }
                 }
 
+                quickPickSection
+
                 Section {
-                    Picker("Look", selection: $draft.look) {
-                        Text("App (\(appearance.look.displayName))").tag(CardLook?.none)
-                        ForEach(CardLook.allCases) { Text($0.displayName).tag(CardLook?.some($0)) }
+                    Button {
+                        withAnimation { showMore.toggle() }
+                    } label: {
+                        HStack {
+                            Label("More options", systemImage: "slider.horizontal.3")
+                            Spacer()
+                            Image(systemName: showMore ? "chevron.up" : "chevron.down")
+                                .font(.footnote.weight(.semibold))
+                                .foregroundStyle(Theme.secondaryText)
+                        }
+                        .contentShape(Rectangle())
                     }
-                    .pickerStyle(.segmented)
+                    .buttonStyle(.plain)
                 } footer: {
-                    Text("Bold: full-colour tiles. Neon: dark tiles with glowing numbers. \"App\" follows Settings → Appearance.")
-                }
-
-                Section {
-                    Picker("Layout", selection: layout) {
-                        ForEach(SlotLayout.allCases) { Text($0.displayName).tag($0) }
-                    }
-                    .pickerStyle(.segmented)
-                } footer: {
-                    switch draft.effectiveLayout {
-                    case .single: Text("One card fills the column.")
-                    case .split: Text("Two cards stacked: icon, short label and one big value each.")
-                    case .quad:
-                        Label("Quad shows icon + value only, with no labels. It's harder to read while driving; prefer Split for anything you check on the move.", systemImage: "exclamationmark.triangle.fill")
-                            .foregroundStyle(Theme.dueSoon)
+                    if !showMore {
+                        Text("Look, two or four cards in one slot, custom text, pictures, the OBD2 value and time-of-day rotation.")
                     }
                 }
 
-                if isSplit {
-                    cardSections
-                } else {
-                    singleSections
-                }
-
-                Section {
-                    Button("Reset to default", role: .destructive) {
-                        draft = SlotDesign.splitDefault(for: slot) ?? .starter(for: slot)
-                    }
+                if showMore {
+                    moreSections
                 }
             }
             .navigationTitle("Car Slot \(slot)")
@@ -107,6 +98,106 @@ struct SlotEditorView: View {
                     .disabled(!canSave)
                 }
             }
+        }
+    }
+
+    /// Everything except the quick pick (spec §4b, Phase 20).
+    @ViewBuilder
+    private var moreSections: some View {
+        Section {
+            Picker("Look", selection: $draft.look) {
+                Text("App (\(appearance.look.displayName))").tag(CardLook?.none)
+                ForEach(CardLook.allCases) { Text($0.displayName).tag(CardLook?.some($0)) }
+            }
+            .pickerStyle(.segmented)
+        } footer: {
+            Text("Bold: full-colour tiles. Neon: dark tiles with glowing numbers. \"App\" follows Settings → Appearance.")
+        }
+
+        Section {
+            Picker("Layout", selection: layout) {
+                ForEach(SlotLayout.allCases) { Text($0.displayName).tag($0) }
+            }
+            .pickerStyle(.segmented)
+        } footer: {
+            switch draft.effectiveLayout {
+            case .single: Text("One card fills the column.")
+            case .split: Text("Two cards stacked: icon, short label and one big value each.")
+            case .quad:
+                Label("Quad shows icon + value only, with no labels. It's harder to read while driving; prefer Split for anything you check on the move.", systemImage: "exclamationmark.triangle.fill")
+                    .foregroundStyle(Theme.dueSoon)
+            }
+        }
+
+        if isSplit {
+            cardSections
+        } else {
+            singleSections
+        }
+
+        Section {
+            Button("Reset to default", role: .destructive) {
+                draft = SlotDesign.splitDefault(for: slot) ?? .starter(for: slot)
+            }
+        }
+    }
+
+    // MARK: Quick pick
+
+    /// Every data widget, then every saved Studio design.
+    private var quickChoices: [SlotChoice] {
+        DataSource.available.map { SlotChoice(source: $0) } + studio.state.designs.map { SlotChoice(studioDesignID: $0.id) }
+    }
+
+    /// In a Split/Quad slot the quick pick sets the tapped card (the first if the slot was tapped).
+    private var targetCard: Int { min(max(focusCard, 0), draft.effectiveLayout.cardCount - 1) }
+
+    private var currentChoice: SlotChoice? {
+        if isSplit {
+            let card = draft.card(targetCard)
+            return card.source == nil && card.studioDesignID == nil ? nil : card.primaryChoice
+        }
+        return draft.source == nil && draft.studioDesignID == nil ? nil : draft.primaryChoice
+    }
+
+    private func pick(_ choice: SlotChoice) {
+        if isSplit {
+            cardChoice(targetCard).wrappedValue = choice
+        } else {
+            primaryChoice.wrappedValue = choice
+        }
+    }
+
+    private func name(of choice: SlotChoice) -> String {
+        if let source = choice.source { return source.displayName }
+        return studio.state.designs.first { $0.id == choice.studioDesignID }?.name ?? "Design"
+    }
+
+    private func previewDesign(_ choice: SlotChoice) -> SlotDesign {
+        if let source = choice.source { return .card(source) }
+        return SlotDesign(value: "", title: "", symbol: "paintpalette.fill", studioDesignID: choice.studioDesignID)
+    }
+
+    private var quickPickSection: some View {
+        Section {
+            LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 10), count: 3), spacing: 14) {
+                ForEach(quickChoices, id: \.self) { choice in
+                    QuickPickTile(
+                        name: name(of: choice),
+                        selected: currentChoice == choice,
+                        content: SlotTimeline.content(at: .now, design: previewDesign(choice), rotations: [], seasonal: false, data: cars.data, studio: studio.state),
+                        slot: slot
+                    ) {
+                        pick(choice)
+                    }
+                }
+            }
+            .environment(\.cardLook, draft.look ?? appearance.look)
+            .padding(.vertical, 6)
+        } header: {
+            Text(isSplit ? "Pick what the \(draft.effectiveLayout.cardNames[targetCard].lowercased()) card shows" : "Pick what it shows")
+        } footer: {
+            Text("Tap one, then Save. The car screen follows within a few seconds.")
         }
     }
 
@@ -376,6 +467,45 @@ struct SlotEditorView: View {
             }
             .padding(.vertical, 6)
         }
+    }
+}
+
+/// One big live preview in the slot editor's quick pick, with a checkmark when chosen.
+private struct QuickPickTile: View {
+    let name: String
+    let selected: Bool
+    let content: SlotContent
+    let slot: Int
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            VStack(spacing: 5) {
+                SlotTile(slot: slot, content: content)
+                    .aspectRatio(0.72, contentMode: .fit)
+                    .allowsHitTesting(false)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 18, style: .continuous)
+                            .strokeBorder(selected ? Theme.accent : Color.clear, lineWidth: 3)
+                    )
+                    .overlay(alignment: .topTrailing) {
+                        if selected {
+                            Image(systemName: "checkmark.circle.fill")
+                                .font(.title3)
+                                .foregroundStyle(Color.white, Theme.accent)
+                                .padding(4)
+                        }
+                    }
+                Text(name)
+                    .font(.caption.weight(selected ? .semibold : .regular))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.8)
+            }
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(name)
+        .accessibilityAddTraits(selected ? .isSelected : [])
     }
 }
 

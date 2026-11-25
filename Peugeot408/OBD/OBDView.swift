@@ -6,6 +6,7 @@ struct OBDView: View {
     @Environment(DriveSession.self) private var session
     @Environment(CarDataModel.self) private var cars
     @State private var demo = false
+    @State private var panel = OBDPanel.defaultValues
 
     var body: some View {
         List {
@@ -62,6 +63,39 @@ struct OBDView: View {
             }
 
             Section {
+                ForEach(Array(panel.enumerated()), id: \.offset) { index, value in
+                    Picker(selection: Binding(
+                        get: { value },
+                        set: { newValue in
+                            let updated = OBDPanel.setting(newValue, at: index, in: panel)
+                            panel = updated
+                            session.updateState { $0.panelValues = updated }
+                        }
+                    )) {
+                        ForEach(OBDValue.allCases) { option in
+                            Label(option.displayName, systemImage: option.symbol).tag(option)
+                        }
+                    } label: {
+                        Text(index < 2 ? "Big value \(index + 1)" : "Value \(index + 1)")
+                    }
+                }
+            } header: {
+                Text("Drive panel in the car")
+            } footer: {
+                Text("The four values on the Drive session panel (CarPlay and Lock Screen). Picking one that's already there swaps them. Changes show within a few seconds, also during a drive.")
+            }
+
+            Section {
+                NavigationLink {
+                    AutomationGuideView(kind: .connect)
+                } label: {
+                    Label("Start automatically in the car", systemImage: "car.side.fill")
+                }
+            } footer: {
+                Text("A Shortcuts automation can start the drive session when CarPlay connects (and stop it when it disconnects), so the panel appears without opening DashCraft.")
+            }
+
+            Section {
                 NavigationLink {
                     DongleView()
                 } label: {
@@ -78,6 +112,7 @@ struct OBDView: View {
             CardPreviewSection(card: cars.card(for: .obd))
         }
         .navigationTitle("Live OBD2")
+        .onAppear { panel = session.state.panel }
     }
 }
 

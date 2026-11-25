@@ -69,7 +69,7 @@ public enum OBDCommand: String, Sendable, CaseIterable {
 }
 
 /// One poll result.
-public struct OBDReading: Codable, Sendable, Equatable {
+public struct OBDReading: Codable, Sendable, Hashable {
     public var rpm: Int?
     public var coolantC: Int?
     /// Intake manifold pressure minus barometric pressure, in bar (negative = vacuum).
@@ -313,6 +313,10 @@ public struct OBDState: Codable, Sendable, Equatable {
     /// PIDs the car didn't answer in the last live session.
     public var unsupported: Set<OBDValue>
     public var sessionActive: Bool
+    /// The four values on the Drive session panel (spec §4 item 5); nil means the default.
+    public var panelValues: [OBDValue]?
+
+    public var panel: [OBDValue] { OBDPanel.normalized(panelValues) }
 
     public init(profile: OBDAdapterProfile = .fff0, peripheralID: UUID? = nil, peripheralName: String? = nil, pollInterval: Double = 1.5, last: OBDReading? = nil, lastWasDemo: Bool = false, unsupported: Set<OBDValue> = [], sessionActive: Bool = false) {
         self.profile = profile
@@ -326,6 +330,33 @@ public struct OBDState: Codable, Sendable, Equatable {
     }
 
     public static let empty = OBDState()
+}
+
+/// The Drive session panel: four values chosen from all nine (spec §4 item 5).
+public enum OBDPanel {
+    public static let size = 4
+    public static let defaultValues: [OBDValue] = [.boost, .rpm, .coolant, .voltage]
+
+    /// Exactly four different values: the chosen ones in order, topped up from the defaults.
+    public static func normalized(_ values: [OBDValue]?) -> [OBDValue] {
+        var result: [OBDValue] = []
+        for value in (values ?? []) + defaultValues + OBDValue.allCases where result.count < size && !result.contains(value) {
+            result.append(value)
+        }
+        return result
+    }
+
+    /// Puts `value` at `index`; if it was already elsewhere on the panel, the two swap.
+    public static func setting(_ value: OBDValue, at index: Int, in values: [OBDValue]?) -> [OBDValue] {
+        var list = normalized(values)
+        guard list.indices.contains(index) else { return list }
+        if let other = list.firstIndex(of: value) {
+            list.swapAt(index, other)
+        } else {
+            list[index] = value
+        }
+        return list
+    }
 }
 
 public enum OBDStores {

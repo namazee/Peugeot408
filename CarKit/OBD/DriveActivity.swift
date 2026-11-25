@@ -5,30 +5,20 @@ import WidgetKit
 /// The drive-session Live Activity (shown on the Lock Screen, in the Dynamic Island and in CarPlay).
 public struct DriveActivityAttributes: ActivityAttributes {
     public struct ContentState: Codable, Hashable, Sendable {
-        public var rpm: Int?
-        public var coolantC: Int?
-        public var boostBar: Double?
-        public var voltage: Double?
-        public var updatedAt: Date
+        /// Every value read so far (only the panel's four are shown).
+        public var reading: OBDReading
         /// "Connecting…", "Live", "No answer from the car", …
         public var status: String
+        /// The four values on the panel, in order (spec §4 item 5).
+        public var panel: [OBDValue]
 
-        public init(rpm: Int? = nil, coolantC: Int? = nil, boostBar: Double? = nil, voltage: Double? = nil, updatedAt: Date, status: String) {
-            self.rpm = rpm
-            self.coolantC = coolantC
-            self.boostBar = boostBar
-            self.voltage = voltage
-            self.updatedAt = updatedAt
+        public init(reading: OBDReading, status: String, panel: [OBDValue] = OBDPanel.defaultValues) {
+            self.reading = reading
             self.status = status
+            self.panel = OBDPanel.normalized(panel)
         }
 
-        public init(reading: OBDReading, status: String) {
-            self.init(rpm: reading.rpm, coolantC: reading.coolantC, boostBar: reading.boostBar, voltage: reading.voltage, updatedAt: reading.date, status: status)
-        }
-
-        public var reading: OBDReading {
-            OBDReading(rpm: rpm, coolantC: coolantC, boostBar: boostBar, voltage: voltage, date: updatedAt)
-        }
+        public var updatedAt: Date { reading.date }
     }
 
     public var startedAt: Date
@@ -142,15 +132,16 @@ public struct DriveActivityView: View {
 
     public var body: some View {
         let reading = state.reading
+        let panel = OBDPanel.normalized(state.panel)
         if family == .small {
             VStack(alignment: .leading, spacing: 4) {
                 HStack {
-                    OBDTile(value: .boost, reading: reading, big: 20)
-                    OBDTile(value: .rpm, reading: reading, big: 20)
+                    OBDTile(value: panel[0], reading: reading, big: 20)
+                    OBDTile(value: panel[1], reading: reading, big: 20)
                 }
                 HStack {
-                    OBDTile(value: .coolant, reading: reading, big: 16)
-                    OBDTile(value: .voltage, reading: reading, big: 16)
+                    OBDTile(value: panel[2], reading: reading, big: 16)
+                    OBDTile(value: panel[3], reading: reading, big: 16)
                 }
             }
             .padding(8)
@@ -166,7 +157,7 @@ public struct DriveActivityView: View {
                         .foregroundStyle(Theme.secondaryText)
                 }
                 HStack(spacing: 12) {
-                    ForEach(OBDValue.core) { value in
+                    ForEach(panel) { value in
                         OBDTile(value: value, reading: reading, big: 24)
                     }
                 }

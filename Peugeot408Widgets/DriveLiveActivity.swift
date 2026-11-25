@@ -13,27 +13,30 @@ struct DriveLiveActivity: Widget {
                 .activitySystemActionForegroundColor(Theme.primaryText)
         } dynamicIsland: { context in
             let reading = context.state.reading
+            let panel = OBDPanel.normalized(context.state.panel)
             return DynamicIsland {
                 DynamicIslandExpandedRegion(.leading) {
-                    OBDTile(value: .boost, reading: reading, big: 22)
+                    OBDTile(value: panel[0], reading: reading, big: 22)
                 }
                 DynamicIslandExpandedRegion(.trailing) {
-                    OBDTile(value: .rpm, reading: reading, big: 22)
+                    OBDTile(value: panel[1], reading: reading, big: 22)
                 }
                 DynamicIslandExpandedRegion(.bottom) {
                     HStack {
-                        OBDTile(value: .coolant, reading: reading, big: 18)
-                        OBDTile(value: .voltage, reading: reading, big: 18)
+                        OBDTile(value: panel[2], reading: reading, big: 18)
+                        OBDTile(value: panel[3], reading: reading, big: 18)
                         Text(context.state.status)
                             .font(Theme.label(11))
                             .foregroundStyle(Theme.secondaryText)
                     }
                 }
             } compactLeading: {
-                Image(systemName: "gauge.with.dots.needle.67percent").foregroundStyle(Theme.accent)
+                Image(systemName: panel[0].symbol).foregroundStyle(Theme.accent)
             } compactTrailing: {
-                Text(reading.boostBar.map { String(format: "%+.1f", $0) } ?? "--")
+                Text(reading.text(panel[0]))
                     .font(Theme.number(14))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.6)
             } minimal: {
                 Image(systemName: "gauge.with.dots.needle.67percent").foregroundStyle(Theme.accent)
             }

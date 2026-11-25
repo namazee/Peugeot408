@@ -108,6 +108,18 @@ struct Peugeot408Shortcuts: AppShortcutsProvider {
             shortTitle: "Play Connect Sound",
             systemImageName: "speaker.wave.2.fill"
         )
+        AppShortcut(
+            intent: StartDriveSessionIntent(),
+            phrases: ["Start drive session in \(.applicationName)"],
+            shortTitle: "Start Drive Session",
+            systemImageName: "car.side.fill"
+        )
+        AppShortcut(
+            intent: StopDriveSessionIntent(),
+            phrases: ["Stop drive session in \(.applicationName)"],
+            shortTitle: "Stop Drive Session",
+            systemImageName: "stop.circle.fill"
+        )
         #if !STORE_BUILD
         AppShortcut(
             intent: SyncLyricsIntent(),

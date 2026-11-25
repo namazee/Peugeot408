@@ -30,6 +30,11 @@ final class DriveSession {
     /// Barometric pressure is read once per session (it barely changes); sea level until then.
     @ObservationIgnored private var barometricKPa = OBDParser.standardBarometricKPa
     @ObservationIgnored private var misses: [OBDValue: Int] = [:]
+    /// The Drive session panel's four values, re-read from the App Group every poll.
+    @ObservationIgnored private var panel = OBDPanel.defaultValues
+
+    /// One session for the app and the Start/Stop Drive Session shortcuts.
+    static let shared = DriveSession()
 
     /// Live Activity updates are rate-limited by iOS; every 2 s is plenty for glancing.
     static let activityInterval: TimeInterval = 2
@@ -94,6 +99,18 @@ final class DriveSession {
         }
     }
 
+    /// Start Drive Session shortcut (spec §4 item 5): the saved dongle, one more try after 5 s.
+    /// Returns a message when it couldn't start.
+    func startFromShortcut() async -> String? {
+        guard !isRunning else { return nil }
+        await start(demo: false)
+        if !isRunning, state.peripheralID != nil {
+            try? await Task.sleep(for: .seconds(5))
+            await start(demo: false)
+        }
+        return isRunning ? nil : (lastError ?? "Couldn't connect to the OBD2 dongle.")
+    }
+
     func stop() async {
         task?.cancel()
         task = nil
@@ -101,7 +118,7 @@ final class DriveSession {
         isRunning = false
         status = "Stopped"
         save(force: true, sessionActive: false)
-        let final = DriveActivityAttributes.ContentState(reading: reading ?? OBDReading(date: .now), status: "Ended")
+        let final = DriveActivityAttributes.ContentState(reading: reading ?? OBDReading(date: .now), status: "Ended", panel: state.panel)
         await endActivity(final)
         reloadWidgets()
     }
@@ -111,7 +128,9 @@ final class DriveSession {
     private func loop(started: Date) async {
         var cycle = 0
         while !Task.isCancelled {
-            let interval = max(state.pollInterval, 0.5)
+            let saved = state
+            let interval = max(saved.pollInterval, 0.5)
+            panel = saved.panel
             let next: OBDReading
             if isDemo {
                 next = OBDDemo.reading(at: .now, sessionStart: started)
@@ -132,6 +151,15 @@ final class DriveSession {
         }
     }
 
+    /// Whether `value` is read this cycle: its normal schedule (spec §4 item 5), or at least every
+    /// 2nd poll while it's on the Drive session panel (fuel level every 5th).
+    private func due(_ value: OBDValue, every normal: Int, cycle: Int) -> Bool {
+        guard !unsupported.contains(value) else { return false }
+        var every = normal
+        if panel.contains(value) { every = min(normal, value == .fuelLevel ? 5 : 2) }
+        return cycle % every == 0
+    }
+
     /// One poll of every supported PID (barometric once at the start, voltage every 5th cycle).
     private func pollOnce(cycle: Int) async -> OBDReading {
         var result = reading ?? OBDReading(date: .now)
@@ -139,7 +167,7 @@ final class DriveSession {
         if !unsupported.contains(.rpm), let bytes = await ask(.rpm, for: .rpm) {
             result.rpm = try? OBDParser.rpm(bytes)
         }
-        if cycle % 3 == 0, !unsupported.contains(.coolant), let bytes = await ask(.coolant, for: .coolant) {
+        if due(.coolant, every: 3, cycle: cycle), let bytes = await ask(.coolant, for: .coolant) {
             result.coolantC = try? OBDParser.coolant(bytes)
         }
         if cycle == 0, let bytes = await ask(.barometric, for: nil), let baro = try? OBDParser.kilopascals(bytes), (80...110).contains(baro) {
@@ -152,19 +180,19 @@ final class DriveSession {
         if !unsupported.contains(.speed), let bytes = await ask(.speed, for: .speed) {
             result.speedKmh = try? OBDParser.speed(bytes)
         }
-        if cycle % 2 == 0, !unsupported.contains(.throttle), let bytes = await ask(.throttle, for: .throttle) {
+        if due(.throttle, every: 2, cycle: cycle), let bytes = await ask(.throttle, for: .throttle) {
             result.throttlePercent = try? OBDParser.percent(bytes)
         }
-        if cycle % 2 == 0, !unsupported.contains(.engineLoad), let bytes = await ask(.engineLoad, for: .engineLoad) {
+        if due(.engineLoad, every: 2, cycle: cycle), let bytes = await ask(.engineLoad, for: .engineLoad) {
             result.engineLoadPercent = try? OBDParser.percent(bytes)
         }
-        if cycle % 5 == 0, !unsupported.contains(.intakeAir), let bytes = await ask(.intakeAir, for: .intakeAir) {
+        if due(.intakeAir, every: 5, cycle: cycle), let bytes = await ask(.intakeAir, for: .intakeAir) {
             result.intakeAirC = try? OBDParser.intakeAir(bytes)
         }
-        if cycle % 10 == 0, !unsupported.contains(.fuelLevel), let bytes = await ask(.fuelLevel, for: .fuelLevel) {
+        if due(.fuelLevel, every: 10, cycle: cycle), let bytes = await ask(.fuelLevel, for: .fuelLevel) {
             result.fuelLevelPercent = try? OBDParser.percent(bytes)
         }
-        if cycle % 5 == 0, !unsupported.contains(.voltage) {
+        if due(.voltage, every: 5, cycle: cycle) {
             if let reply = try? await link.send(OBDCommand.voltage.rawValue), let volts = try? OBDParser.voltage(reply) {
                 result.voltage = volts
                 misses[.voltage] = 0
@@ -206,7 +234,7 @@ final class DriveSession {
             lastError = "Live Activities are off for DashCraft (Settings → DashCraft → Live Activities)."
             return
         }
-        let initial = DriveActivityAttributes.ContentState(reading: reading ?? OBDReading(date: .now), status: demo ? "Demo" : "Live")
+        let initial = DriveActivityAttributes.ContentState(reading: reading ?? OBDReading(date: .now), status: demo ? "Demo" : "Live", panel: state.panel)
         do {
             activity = try Activity.request(
                 attributes: DriveActivityAttributes(startedAt: startedAt, isDemo: demo),
@@ -221,7 +249,7 @@ final class DriveSession {
     private func pushActivity() async {
         guard activity != nil, let reading, Date().timeIntervalSince(lastActivityUpdate) >= Self.activityInterval else { return }
         lastActivityUpdate = .now
-        let content = DriveActivityAttributes.ContentState(reading: reading, status: status)
+        let content = DriveActivityAttributes.ContentState(reading: reading, status: status, panel: panel)
         await updateActivity(content)
     }
 

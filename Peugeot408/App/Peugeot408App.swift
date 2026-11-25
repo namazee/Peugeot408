@@ -6,7 +6,7 @@ struct Peugeot408App: App {
     @State private var slots = SlotsModel()
     @State private var cars = CarDataModel()
     @State private var studio = StudioModel()
-    @State private var drive = DriveSession()
+    @State private var drive = DriveSession.shared
     @State private var appearance = AppearanceModel()
 
     var body: some Scene {

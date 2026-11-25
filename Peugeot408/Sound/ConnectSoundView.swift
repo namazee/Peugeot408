@@ -324,8 +324,9 @@ struct AutomationGuideView: View {
         ]
         if kind == .connect {
             list.append(Step(text: "Search \"Play Connect Sound\" and pick it (DashCraft). Leave Sound empty to use the one chosen in the app.", screen: ["Search: Play Connect Sound", "DashCraft", "▶ Play Connect Sound"], highlight: 2))
+            list.append(Step(text: "Optional, with an OBD2 dongle: tap Add Action again and add \"Start Drive Session\" (DashCraft) below it. The live OBD2 panel then appears in the car by itself.", screen: ["▶ Play Connect Sound", "+ Add Action", "▶ Start Drive Session"], highlight: 2))
         } else {
-            list.append(Step(text: "Add \"Play Disconnect Sound\" (it plays the disconnect sound chosen in the app). Then add \"Save Parking\" (DashCraft) below it.", screen: ["▶ Play Disconnect Sound", "+ Add Action", "P Save Parking"], highlight: 2))
+            list.append(Step(text: "Add \"Play Disconnect Sound\" (it plays the disconnect sound chosen in the app). Then add \"Save Parking\" (DashCraft) below it, and \"Stop Drive Session\" if you added Start Drive Session to the connect automation.", screen: ["▶ Play Disconnect Sound", "P Save Parking", "■ Stop Drive Session"], highlight: 2))
         }
         list.append(Step(text: "Tap Done. Next time you plug in (or unplug), it runs by itself.", screen: ["When CarPlay \(trigger.lowercased())", kind == .connect ? "Play Connect Sound" : "Play Disconnect Sound, Save Parking", "Done"], highlight: 2))
         return list

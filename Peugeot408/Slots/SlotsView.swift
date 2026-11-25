@@ -14,25 +14,7 @@ struct SlotsView: View {
                         .listRowInsets(EdgeInsets())
                         .listRowBackground(Color.clear)
                 } footer: {
-                    Text("Cars with a wide screen show 3 columns: Slot 1–3. Tap any card to change it. Slots 4 and 5 sit behind the columns (Smart Rotate). CarPlay may take a moment to redraw; reconnecting the phone redraws it fastest.")
-                }
-
-                Section {
-                    ForEach(SlotsState.slotNumbers, id: \.self) { number in
-                        Button {
-                            editing = SlotRef(slot: number)
-                        } label: {
-                            SlotRow(number: number, design: slots.design(for: number), studioName: studio.design(slots.design(for: number).studioDesignID)?.name)
-                        }
-                        .buttonStyle(.plain)
-                    }
-                    .onMove { source, destination in
-                        slots.move(fromOffsets: source, toOffset: destination)
-                    }
-                } header: {
-                    Text("Order")
-                } footer: {
-                    Text("Drag to reorder. The design moves; the widget in the car stays where you put it.")
+                    Text("This is your car screen. Tap a slot (or one card in it) to change what it shows. Slots 4 and 5 sit behind the columns (Smart Rotate). CarPlay may take a moment to redraw; reconnecting the phone redraws it fastest.")
                 }
 
                 if let undo = slots.state.undoSetup {
@@ -67,11 +49,13 @@ struct SlotsView: View {
                 }
 
                 Section {
-                    FlashControls()
-                } header: {
-                    Text("Test")
+                    NavigationLink {
+                        SlotsMoreView(editing: $editing)
+                    } label: {
+                        Label("More options", systemImage: "slider.horizontal.3")
+                    }
                 } footer: {
-                    Text("Shows \"Slot N ✓\" on each slot, or \"Slot N · Top ✓\" / \"Bottom ✓\" on each card, for 10 minutes so you can see which is which in the car.")
+                    Text("Change the slot order, or flash each slot's number to see which is which in the car.")
                 }
 
                 if let error = slots.lastError {
@@ -82,11 +66,49 @@ struct SlotsView: View {
                 }
             }
             .navigationTitle("Slots")
-            .toolbar { EditButton() }
             .sheet(item: $editing) { ref in
                 SlotEditorView(slot: ref.slot, initial: slots.design(for: ref.slot), focusCard: ref.card)
             }
         }
+    }
+}
+
+/// Slots → More options (spec §4b, Phase 20): slot order and the flash test.
+struct SlotsMoreView: View {
+    @Environment(SlotsModel.self) private var slots
+    @Environment(StudioModel.self) private var studio
+    @Binding var editing: SlotRef?
+
+    var body: some View {
+        List {
+            Section {
+                ForEach(SlotsState.slotNumbers, id: \.self) { number in
+                    Button {
+                        editing = SlotRef(slot: number)
+                    } label: {
+                        SlotRow(number: number, design: slots.design(for: number), studioName: studio.design(slots.design(for: number).studioDesignID)?.name)
+                    }
+                    .buttonStyle(.plain)
+                }
+                .onMove { source, destination in
+                    slots.move(fromOffsets: source, toOffset: destination)
+                }
+            } header: {
+                Text("Order")
+            } footer: {
+                Text("Drag to reorder. The design moves; the widget in the car stays where you put it.")
+            }
+
+            Section {
+                FlashControls()
+            } header: {
+                Text("Test")
+            } footer: {
+                Text("Shows \"Slot N ✓\" on each slot, or \"Slot N · Top ✓\" / \"Bottom ✓\" on each card, for 10 minutes so you can see which is which in the car.")
+            }
+        }
+        .navigationTitle("More options")
+        .toolbar { EditButton() }
     }
 }
 
