@@ -71,7 +71,7 @@ public enum SlotTimeline {
                 items.append(SlotTimelineItem(date: now, content: .flash))
             }
             for date in DesignResolver.dates(for: hero, data: data, from: start, calendar: calendar) {
-                items.append(SlotTimelineItem(date: date, content: .panorama(DesignResolver.card(for: hero, data: data, studio: studio, at: date, calendar: calendar), slot - 1)))
+                items.append(SlotTimelineItem(date: date, content: .panorama(DesignResolver.card(for: hero, data: data, studio: studio, at: date, calendar: calendar), slot - 1, blend: state.panorama?.blends ?? true)))
             }
             return items
         }
@@ -191,7 +191,7 @@ public enum SlotTimeline {
     public static func currentContent(slot: Int, state: SlotsState, data: CarData, studio: StudioState, at date: Date, calendar: Calendar = .current) -> SlotContent {
         if state.isFlashing(at: date) { return flashContent(for: state.design(for: slot)) }
         if isPanoramaActive(slot: slot, state: state, studio: studio), let hero = studio.design(state.activePanoramaID) {
-            return .panorama(DesignResolver.card(for: hero, data: data, studio: studio, at: date, calendar: calendar), slot - 1)
+            return .panorama(DesignResolver.card(for: hero, data: data, studio: studio, at: date, calendar: calendar), slot - 1, blend: state.panorama?.blends ?? true)
         }
         let design = state.design(for: slot)
         return content(at: date, design: design, rotations: Array((design.rotations ?? []).prefix(SlotDesign.maxRotations)),

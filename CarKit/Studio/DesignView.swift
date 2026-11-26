@@ -56,10 +56,16 @@ public struct DesignView: View {
 public struct PanoramaSlice: View {
     private let card: StudioCard
     private let part: Int
+    private let blend: Bool
 
-    public init(card: StudioCard, part: Int) {
+    /// Blend edges (spec §3, Phase 21): how much of the column fades to black at each edge.
+    public static let sideFade: CGFloat = 0.10
+    public static let topBottomFade: CGFloat = 0.08
+
+    public init(card: StudioCard, part: Int, blend: Bool = true) {
         self.card = card
         self.part = min(max(part, 0), PanoramaGeometry.columns - 1)
+        self.blend = blend
     }
 
     public var body: some View {
@@ -70,8 +76,34 @@ public struct PanoramaSlice: View {
                 .offset(x: -full * PanoramaGeometry.partStart(part))
         }
         .clipped()
+        .overlay {
+            if blend { EdgeFade() }
+        }
         .accessibilityElement(children: .ignore)
         .accessibilityLabel("\(card.design.name), part \(part + 1) of \(PanoramaGeometry.columns)")
+    }
+}
+
+/// Soft black fades along all four edges; the corners, where two fades meet, go darkest.
+private struct EdgeFade: View {
+    var body: some View {
+        GeometryReader { geo in
+            let side = geo.size.width * PanoramaSlice.sideFade
+            let band = geo.size.height * PanoramaSlice.topBottomFade
+            ZStack {
+                fade(.leading, .trailing).frame(width: side).frame(maxWidth: .infinity, alignment: .leading)
+                fade(.trailing, .leading).frame(width: side).frame(maxWidth: .infinity, alignment: .trailing)
+                fade(.top, .bottom).frame(height: band).frame(maxHeight: .infinity, alignment: .top)
+                fade(.bottom, .top).frame(height: band).frame(maxHeight: .infinity, alignment: .bottom)
+            }
+        }
+        .allowsHitTesting(false)
+        .accessibilityHidden(true)
+    }
+
+    private func fade(_ from: UnitPoint, _ to: UnitPoint) -> some View {
+        LinearGradient(stops: [.init(color: .black, location: 0), .init(color: .black.opacity(0.55), location: 0.35), .init(color: .clear, location: 1)],
+                       startPoint: from, endPoint: to)
     }
 }
 

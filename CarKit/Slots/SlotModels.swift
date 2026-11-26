@@ -41,10 +41,15 @@ public enum SlotTextAlignment: String, Codable, Sendable, CaseIterable {
 public struct PanoramaSettings: Codable, Sendable, Equatable {
     public var enabled: Bool
     public var designID: UUID?
+    /// Blend edges (spec §3, Phase 21); nil (older files) means on.
+    public var blendEdges: Bool?
 
-    public init(enabled: Bool = false, designID: UUID? = nil) {
+    public var blends: Bool { blendEdges ?? true }
+
+    public init(enabled: Bool = false, designID: UUID? = nil, blendEdges: Bool? = nil) {
         self.enabled = enabled
         self.designID = designID
+        self.blendEdges = blendEdges
     }
 }
 
@@ -320,7 +325,7 @@ public enum SlotContent: Sendable, Equatable {
     /// A data card with a picture in the middle (Single layout, "Centre picture").
     case pictured(DataCard, String)
     /// One third (0, 1, 2) of the Panorama hero design (Slots 1–3).
-    case panorama(StudioCard, Int)
+    case panorama(StudioCard, Int, blend: Bool = true)
 
     public var cardStyle: CardStyle {
         switch self {

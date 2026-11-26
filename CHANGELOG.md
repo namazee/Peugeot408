@@ -2,7 +2,15 @@
 
 Fresh session? Read `docs/SPEC.md`, then this file, then continue from **Current phase**.
 
-## Current phase: 20 (Simpler car screen) — built, waiting for you to try it. Phase 18–19 templates, the Phase 15 store steps (SETUP.md §15) and the Phase 8 car test are still yours.
+## Current phase: 21 (Panorama blend edges) — built, waiting for you to try it. Phases 18–20, the Phase 15 store steps (SETUP.md §15) and the Phase 8 car test are still yours.
+
+## Phase 21 — Panorama blend edges
+### Done
+- Slots → Panorama hero → **Blend edges** (on by default, also for existing panoramas): each column's edges and corners fade softly into black, so CarPlay's tile borders almost disappear. Off gives the full-bleed look.
+- The Panorama preview and the Slots mock show it the same way.
+- Tests: PanoramaBlendTests.
+### Not verified yet
+- In the car: how the faded edges look against CarPlay's background and gaps.
 
 ## Phase 20 — Simpler car screen
 ### Done
