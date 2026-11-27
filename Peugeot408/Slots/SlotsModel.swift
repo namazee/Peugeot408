@@ -57,9 +57,6 @@ final class SlotsModel {
     /// Turns the Panorama hero on or off (Slots 1–3 keep their own designs underneath).
     func setPanorama(_ settings: PanoramaSettings?) {
         var next = state
-        var settings = settings
-        // Callers that only switch the panorama or its design keep the Blend edges choice.
-        if settings != nil, settings?.blendEdges == nil { settings?.blendEdges = state.panorama?.blendEdges }
         next.panorama = settings
         commit(next, reloadingSlots: Array(1...PanoramaGeometry.columns))
     }

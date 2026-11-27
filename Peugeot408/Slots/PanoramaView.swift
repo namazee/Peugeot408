@@ -35,19 +35,10 @@ struct PanoramaView: View {
                     }
                 ))
                 .disabled(chosen == nil)
-                Toggle("Blend edges", isOn: Binding(
-                    get: { settings.blends },
-                    set: { on in
-                        var next = settings
-                        next.blendEdges = on
-                        slots.setPanorama(next)
-                    }
-                ))
-                .disabled(chosen == nil)
             } footer: {
                 Text(chosen == nil
                      ? "Create a Hero design first (below)."
-                     : "Blend edges fades each column's edges softly into black, so CarPlay's tile borders almost disappear and it reads as one wide picture. Slots 1–3 keep their own designs underneath; turning the panorama off brings them back. Slots 4–5 aren't affected.")
+                     : "Slots 1–3 keep their own designs underneath; turning the panorama off brings them back. Slots 4–5 aren't affected.")
             }
 
             Section {
@@ -136,7 +127,7 @@ struct PanoramaView: View {
         let card = DesignResolver.card(for: design, data: cars.data, studio: studio.state, at: .now)
         return HStack(spacing: 8) {
             ForEach(0..<PanoramaGeometry.columns, id: \.self) { part in
-                SlotTile(slot: part + 1, content: .panorama(card, part, blend: settings.blends))
+                SlotTile(slot: part + 1, content: .panorama(card, part))
                     .aspectRatio(PanoramaGeometry.columnAspect, contentMode: .fit)
             }
         }

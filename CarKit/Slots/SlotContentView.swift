@@ -34,8 +34,8 @@ public struct SlotContentView: View {
             }
         case .studio(let card):
             DesignView(card: card)
-        case .panorama(let card, let part, let blend):
-            PanoramaSlice(card: card, part: part, blend: blend)
+        case .panorama(let card, let part):
+            PanoramaSlice(card: card, part: part)
         case .flash:
             flashView
                 .accessibilityElement(children: .ignore)
@@ -253,8 +253,8 @@ public struct SlotTile: View {
             if case .studio(let card) = content {
                 // Studio designs fill the whole tile, edge to edge, like in the car.
                 DesignView(card: card)
-            } else if case .panorama(let card, let part, let blend) = content {
-                PanoramaSlice(card: card, part: part, blend: blend)
+            } else if case .panorama(let card, let part) = content {
+                PanoramaSlice(card: card, part: part)
             } else {
                 SlotContentView(slot: slot, content: content, isMedium: isMedium)
                     .padding(content.isCards ? 7 : 14)

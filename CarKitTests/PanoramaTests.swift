@@ -28,7 +28,7 @@ struct PanoramaTests {
         state.panorama = PanoramaSettings(enabled: true, designID: hero.id)
         let now = Date()
         for slot in 1...3 {
-            guard case .panorama(let card, let part, _) = SlotTimeline.items(slot: slot, state: state, studio: studio, now: now).first?.content else {
+            guard case .panorama(let card, let part) = SlotTimeline.items(slot: slot, state: state, studio: studio, now: now).first?.content else {
                 Issue.record("slot \(slot) should show the panorama")
                 continue
             }
