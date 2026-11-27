@@ -98,7 +98,6 @@ Work in phases (below). At the end of each phase: commit, push, make sure the CI
    * **Pit Lane:** a garage with overhead strip lights, tyre stacks and a painted pit box line, the clock left and km to service right.
    * **Blueprint:** a blue technical-drawing grid with dimension lines around my car photo (drawn as white outlines where possible), the clock and date left, km to service right.
   New stickers: light trails, paddy terraces, rainforest canopy, lightning bolt, strip lights, tyre stack and dimension lines. All original artwork.
-* Blend edges (Phase 21): CarPlay draws each stack as its own rounded tile with gaps between them, and apps can't remove that. A "Blend edges" toggle on the Panorama hero screen (on by default, also for panoramas saved before) fades the outer edges and corners of each of the three columns softly into black, the colour around the tiles, so the hard tile edges almost vanish and the picture reads as one wide scene seen through three windows. Only a thin band at each edge fades (about 10% of the column width at the sides, 8% of the height at the top and bottom); the car and big lettering in the middle stay sharp. Turning it off gives the full-bleed look as before. The Panorama hero preview and the Slots mock show the same.
 * One-tap Hero (Phase 19): in the template gallery, tapping a Hero template offers **Use as Panorama** (saves it as a design, selects it on the Panorama hero screen and turns Panorama on, after the same "replaces Slots 1–3" confirmation) and **Customise** (opens the builder, as before).
 * New data fields:
    * a time-of-day greeting with my name ("Good morning, …" / "Selamat pagi, …");
@@ -400,7 +399,6 @@ Widgets themselves are static SwiftUI, so use Remotion only for the animated ass
 18. Another round of templates (§4b Templates, §3 Panorama hero): 8 more realistic templates, 6 more Hero templates, 6 templates in the other sections (Flip Clock, Word Clock, Hijri Date, Moon Phase, Vinyl, Comic Pop), their new layers, fields, textures and stickers, and render tests.
 19. One-tap templates (§4b Templates, §3 Panorama hero): Use on Slot / Use as Panorama from the gallery, the four ready-made Setups with Undo, 6 more Hero templates, 8 more templates (Tachometer, Compass, Cassette, Neon Tube, Glow Orb, Postage Stamp, Tear-off Calendar, LCD Watch), their new pieces and stickers, and render tests.
 20. Simpler car screen (§4 item 5, §4b slots): drive panel values, Start/Stop Drive Session shortcuts with the automation guide steps, the simpler Slots screen and slot editor.
-21. Panorama blend edges (§3 Panorama hero): the Blend edges toggle and the edge fade on the three columns.
 
 ## 9. Quality bar
 
